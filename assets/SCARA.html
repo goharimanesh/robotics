@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شبیه‌ساز سه‌بعدی ربات SCARA - ARCSLAB</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+        padding: 18px; display: flex; justify-content: center;
+        align-items: flex-start; min-height: 100vh;
+    }
+    .container {
+        max-width: 1280px; width: 100%; background: white;
+        border-radius: 28px; padding: 26px;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+    }
+    .header {
+        text-align: center; margin-bottom: 14px;
+        padding-bottom: 14px; border-bottom: 3px solid #1e40af;
+    }
+    .header h1 { color: #0f172a; font-size: 1.8rem; margin-bottom: 5px; }
+    .header .subtitle { color: #1e40af; font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
+    .header .course-info { color: #475569; font-size: 0.9rem; margin-bottom: 4px; }
+    .header .lab-info { color: #1e40af; font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
+    .header .instructor { color: #64748b; font-size: 0.85rem; font-style: italic; }
+
+    .badge-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 10px 0 14px; }
+    .badge {
+        background: #dbeafe; color: #1e40af; padding: 5px 14px;
+        border-radius: 20px; font-weight: 600; font-size: 0.82rem;
+        border: 1.5px dashed #3b82f6;
+    }
+
+    .info-box {
+        background: #f8fafc; border-right: 5px solid #1e40af;
+        border-radius: 14px; padding: 14px 18px; margin-bottom: 16px;
+        font-size: 0.9rem; line-height: 1.85; color: #334155;
+    }
+    .info-box h3 { color: #1e40af; font-size: 1rem; margin-bottom: 6px; }
+    .info-box strong { color: #0f172a; }
+    .info-box ul { margin: 6px 18px 0 0; padding: 0; }
+    .info-box li { margin-bottom: 4px; }
+
+    .main-grid {
+        display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+        gap: 16px; align-items: start;
+    }
+    @media (max-width: 950px) { .main-grid { grid-template-columns: 1fr; } }
+
+    .canvas-wrapper {
+        background: #0b1220; border-radius: 18px;
+        padding: 8px; position: relative; overflow: hidden;
+    }
+    #viewport3d { width: 100%; height: 500px; border-radius: 14px; display: block; }
+    .view-hint {
+        position: absolute; bottom: 12px; left: 12px;
+        background: rgba(0,0,0,0.55); color: #cbd5e1;
+        font-size: 0.72rem; padding: 4px 10px; border-radius: 8px;
+        pointer-events: none;
+    }
+    .view-hint.top { bottom: auto; top: 12px; left: 12px; }
+    .side-panel { display: flex; flex-direction: column; gap: 12px; }
+    .panel {
+        background: #f8fafc; border-radius: 16px;
+        padding: 12px 14px; border: 2px solid #e2e8f0;
+    }
+    .panel h4 {
+        font-size: 0.88rem; color: #0f172a; margin-bottom: 8px;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .eq-panel {
+        background: #0f172a; color: #e2e8f0; border-radius: 14px;
+        padding: 12px 14px; font-family: 'Consolas', 'Menlo', monospace;
+        font-size: 0.78rem; line-height: 1.8; direction: ltr;
+        text-align: left; overflow-x: auto;
+    }
+    .eq-panel .eq-title {
+        color: #93c5fd; font-weight: 700; font-size: 0.8rem;
+        direction: rtl; text-align: right; margin-bottom: 6px;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    .eq-panel .val { color: #fbbf24; font-weight: 700; }
+    .eq-panel .res { color: #34d399; font-weight: 700; }
+    .eq-panel .dim { color: #94a3b8; }
+
+    .coord-row {
+        display: flex; justify-content: space-between;
+        font-family: 'Consolas', monospace; font-size: 0.78rem;
+        padding: 3px 0; border-bottom: 1px dashed #cbd5e1; direction: ltr;
+    }
+    .coord-row:last-child { border-bottom: none; }
+    .coord-row .lbl { color: #475569; font-family: 'Segoe UI', sans-serif; direction: rtl; }
+    .coord-row .v { font-weight: 700; color: #1e40af; }
+    .coord-row .v.red { color: #dc2626; }
+    .coord-row .v.green { color: #16a34a; }
+
+    .controls {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 10px; margin: 14px 0 8px; background: #f8fafc;
+        padding: 12px; border-radius: 16px;
+    }
+    .cg {
+        background: white; padding: 8px 12px; border-radius: 12px;
+        border-right: 4px solid #3b82f6; box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+    }
+    .cg label {
+        display: flex; justify-content: space-between; align-items: center;
+        font-weight: 600; color: #0f172a; margin-bottom: 4px;
+        font-size: 0.82rem; gap: 6px;
+    }
+    .cg input[type="number"] {
+        width: 62px; padding: 2px 5px; border: 1.5px solid #cbd5e1;
+        border-radius: 6px; font-size: 0.78rem; font-weight: 700;
+        color: #1e40af; text-align: center; font-family: 'Consolas', monospace;
+    }
+    .cg input[type="range"] { width: 100%; accent-color: #1e40af; height: 5px; border-radius: 8px; }
+    .cg input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none; appearance: none; width: 15px; height: 15px;
+        border-radius: 50%; background: #1e40af; cursor: pointer;
+        border: 2px solid white; box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+
+    .toggle-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 8px 0; }
+    .tbtn {
+        background: #f1f5f9; border: 2px solid #cbd5e1; padding: 6px 14px;
+        border-radius: 24px; cursor: pointer; font-weight: 600;
+        color: #475569; transition: all 0.2s; font-size: 0.82rem;
+    }
+    .tbtn.active { background: #1e40af; color: white; border-color: #1e40af; }
+    .tbtn:hover { transform: scale(1.03); }
+
+    .action-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+    .abtn {
+        background: #1e40af; color: white; border: none; padding: 8px 20px;
+        border-radius: 24px; cursor: pointer; font-weight: 700;
+        font-size: 0.85rem; transition: all 0.2s;
+        box-shadow: 0 3px 8px rgba(30,64,175,0.3);
+    }
+    .abtn.reset { background: #dc2626; box-shadow: 0 3px 8px rgba(220,38,38,0.3); }
+    .abtn.auto { background: #7c3aed; box-shadow: 0 3px 8px rgba(124,58,237,0.3); }
+    .abtn:hover { transform: translateY(-2px); }
+
+    .footer {
+        text-align: center; margin-top: 16px; padding-top: 12px;
+        border-top: 2px solid #e2e8f0; color: #64748b; font-size: 0.82rem;
+    }
+    .footer strong { color: #1e40af; }
+
+    @media (max-width: 600px) {
+        .container { padding: 14px; }
+        .header h1 { font-size: 1.25rem; }
+        #viewport3d { height: 360px; }
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🤖 شبیه‌ساز سه‌بعدی ربات SCARA</h1>
+        <div class="subtitle">3D SCARA Robot — Forward & Inverse Kinematics Simulator</div>
+        <div class="course-info">🎓 دوره‌ی آموزشی رباتیک - دکتر مسعود گوهری منش</div>
+        <div class="lab-info">🧪 ARCSLAB · آزمایشگاه رباتیک پیشرفته و سیستم‌های کنترل</div>
+        <div class="instructor">📚 Advanced Robotics & Control Systems Laboratory</div>
+    </div>
+
+    <div class="badge-row">
+        <span class="badge">⚙️ ساختار RRPR (۳R + ۱P)</span>
+        <span class="badge">📐 سینماتیک مستقیم</span>
+        <span class="badge">🔄 سینماتیک معکوس</span>
+        <span class="badge">🌐 نمایش سه‌بعدی</span>
+        <span class="badge">🏭 هندسه‌ی صنعتی</span>
+    </div>
+
+    <div class="info-box">
+        <h3>📖 ربات SCARA چیست؟</h3>
+        <strong>SCARA</strong> مخفف <strong>Selective Compliance Assembly Robot Arm</strong> (بازوی ربات مونتاژ با انطباق انتخابی) است. این ربات یکی از رایج‌ترین ربات‌های صنعتی برای عملیات <strong>مونتاژ، جابه‌جایی سریع قطعات (Pick and Place) و درج قطعات</strong> است.
+        <ul>
+            <li><strong>ساختار مفاصل:</strong> سه مفصل دورانی (R) موازی با محور Z برای موقعیت‌دهی در صفحه‌ی افقی + یک مفصل کشویی (P) برای حرکت عمودی.</li>
+            <li><strong>انطباق انتخابی:</strong> در راستای محور Z <strong>سخت و صلب</strong> است (برای فشار در مونتاژ)، اما در صفحه‌ی XY <strong>انعطاف‌پذیر</strong> است (برای جبران خطاهای جزئی).</li>
+            <li><strong>مزایا:</strong> سرعت بسیار بالا، دقت تکرارپذیری عالی، اشغال فضای کم، ساختار سبک و پاسخ سریع.</li>
+            <li><strong>کاربرد صنعتی:</strong> مونتاژ قطعات الکترونیکی، بسته‌بندی، جابه‌جایی قطعات کوچک، عملیات درج پیچ و مهره.</li>
+        </ul>
+    </div>
+
+    <div class="toggle-row">
+        <button class="tbtn active" id="showWorkspace">📍 فضای کاری</button>
+        <button class="tbtn active" id="showTrajectory">📈 مسیر حرکت</button>
+        <button class="tbtn active" id="showAxes">📐 محورهای مختصات</button>
+        <button class="tbtn" id="clearTrajectory">🗑️ پاک کردن مسیر</button>
+    </div>
+
+    <div class="main-grid">
+        <div class="canvas-wrapper">
+            <canvas id="viewport3d"></canvas>
+            <div class="view-hint">🖱️ Drag = چرخش &nbsp;|&nbsp; Scroll = بزرگ‌نمایی</div>
+            <div class="view-hint top" id="fpsHint">—</div>
+        </div>
+
+        <div class="side-panel">
+            <div class="eq-panel">
+                <div class="eq-title">⚙️ سینماتیک مستقیم (FK) — زنده</div>
+                <div>Px = L₁·cos(θ₁) + L₂·cos(θ₁+θ₂)</div>
+                <div class="dim">   = <span class="val" id="fk-l1">200</span>·cos(<span class="val" id="fk-t1">45</span>°) + <span class="val" id="fk-l2">180</span>·cos(<span class="val" id="fk-t12">75</span>°)</div>
+                <div>   = <span class="res" id="fk-px">187.99</span> mm</div>
+                <div style="height:4px"></div>
+                <div>Py = L₁·sin(θ₁) + L₂·sin(θ₁+θ₂)</div>
+                <div class="dim">   = <span class="val" id="fk-l1b">200</span>·sin(<span class="val" id="fk-t1b">45</span>°) + <span class="val" id="fk-l2b">180</span>·sin(<span class="val" id="fk-t12b">75</span>°)</div>
+                <div>   = <span class="res" id="fk-py">315.29</span> mm</div>
+                <div style="height:4px"></div>
+                <div>Pz = d₁ − d₃ <span class="dim">(ارتفاع)</span></div>
+                <div>   = <span class="res" id="fk-pz">50.00</span> mm</div>
+            </div>
+
+            <div class="panel">
+                <h4>📌 مختصات نقاط کلیدی</h4>
+                <div class="coord-row"><span class="lbl">Joint 1 (پایه):</span><span class="v">(0.0, 0.0, 0.0)</span></div>
+                <div class="coord-row"><span class="lbl">Joint 2 (آرنج):</span><span class="v" id="cj2">(141.4, 141.4, 0.0)</span></div>
+                <div class="coord-row"><span class="lbl">End-Effector:</span><span class="v red" id="cee">(187.99, 315.29, 50.0)</span></div>
+                <div class="coord-row"><span class="lbl">فاصله افقی (r):</span><span class="v" id="cr">366.0 mm</span></div>
+                <div class="coord-row"><span class="lbl">وضعیت:</span><span class="v green" id="cstatus">✓ در فضای کاری</span></div>
+            </div>
+
+            <div class="eq-panel" style="background:#1e293b;">
+                <div class="eq-title">🔄 سینماتیک معکوس (IK) — حل هندسی</div>
+                <div class="dim">ورودی: نقطه هدف (Px, Py, Pz)</div>
+                <div style="height:3px"></div>
+                <div>r² = Px² + Py²</div>
+                <div>cos(θ₂) = (r² − L₁² − L₂²) / (2·L₁·L₂)</div>
+                <div>θ₂ = ± acos( <span class="val" id="ik-cos2">0.258</span> ) = <span class="res" id="ik-t2">±30.0</span>°</div>
+                <div>θ₁ = atan2(Py,Px) − atan2(L₂·sin(θ₂), L₁+L₂·cos(θ₂))</div>
+                <div>θ₁ = <span class="res" id="ik-t1">45.0</span>°</div>
+                <div>d₃ = d₁ − Pz  <span class="dim">(جابه‌جایی عمودی)</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="cg" style="border-right-color:#ef4444;">
+            <label><span>📏 طول لینک ۱ (L₁)</span><input type="number" id="l1n" min="50" max="350" step="1" value="200"></label>
+            <input type="range" id="l1s" min="50" max="350" step="1" value="200">
+        </div>
+        <div class="cg" style="border-right-color:#10b981;">
+            <label><span>📏 طول لینک ۲ (L₂)</span><input type="number" id="l2n" min="50" max="350" step="1" value="180"></label>
+            <input type="range" id="l2s" min="50" max="350" step="1" value="180">
+        </div>
+        <div class="cg" style="border-right-color:#eab308;">
+            <label><span>🔄 زاویه θ₁</span><input type="number" id="t1n" min="-180" max="180" step="1" value="45"></label>
+            <input type="range" id="t1s" min="-180" max="180" step="1" value="45">
+        </div>
+        <div class="cg" style="border-right-color:#8b5cf6;">
+            <label><span>🔄 زاویه θ₂</span><input type="number" id="t2n" min="-180" max="180" step="1" value="30"></label>
+            <input type="range" id="t2s" min="-180" max="180" step="1" value="30">
+        </div>
+        <div class="cg" style="border-right-color:#06b6d4;">
+            <label><span>⬆️ ارتفاع d₃ (کشویی)</span><input type="number" id="d3n" min="-120" max="120" step="1" value="50"></label>
+            <input type="range" id="d3s" min="-120" max="120" step="1" value="50">
+        </div>
+    </div>
+
+    <div class="action-row">
+        <button class="abtn" id="resetBtn">🔄 بازنشانی</button>
+        <button class="abtn" id="ikBtn" style="background:#7c3aed;">🎯 حل سینماتیک معکوس (IK)</button>
+        <button class="abtn auto" id="autoBtn">▶️ انیمیشن خودکار</button>
+    </div>
+
+    <div class="footer">
+        🧪 <strong>ARCSLAB</strong> · Advanced Robotics & Control Systems Laboratory ·
+        دکتر مسعود گوهری منش · تمامی حقوق محفوظ است © ۲۰۲۶
+    </div>
+</div>
+
+<script>
+(function() {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+    script.onload = init;
+    document.head.appendChild(script);
+
+    function init() {
+        const canvas = document.getElementById('viewport3d');
+        const container = canvas.parentElement;
+
+        // ---------- صحنه ----------
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0b1220);
+        scene.fog = new THREE.Fog(0x0b1220, 900, 1800);
+
+        const camera = new THREE.PerspectiveCamera(42, 1, 1, 3000);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.outputEncoding = THREE.sRGBEncoding;
+
+        function resize() {
+            const w = container.clientWidth - 16;
+            const h = container.clientHeight - 16;
+            renderer.setSize(w, h, false);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        window.addEventListener('resize', resize);
+
+        // ---------- نورپردازی ----------
+        const hemi = new THREE.HemisphereLight(0xaaccff, 0x1a1a2e, 0.7);
+        scene.add(hemi);
+        const sun = new THREE.DirectionalLight(0xffffff, 1.0);
+        sun.position.set(300, 600, 400);
+        sun.castShadow = true;
+        sun.shadow.mapSize.width = 1024;
+        sun.shadow.mapSize.height = 1024;
+        sun.shadow.camera.near = 10;
+        sun.shadow.camera.far = 1500;
+        sun.shadow.camera.left = -500;
+        sun.shadow.camera.right = 500;
+        sun.shadow.camera.top = 500;
+        sun.shadow.camera.bottom = -500;
+        scene.add(sun);
+        const fill = new THREE.DirectionalLight(0x6688cc, 0.4);
+        fill.position.set(-200, 200, -300);
+        scene.add(fill);
+
+        // ---------- کف ----------
+        const floorGeo = new THREE.PlaneGeometry(2000, 2000);
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.95, metalness: 0.05 });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.y = -0.5;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        const gridHelper = new THREE.GridHelper(1600, 32, 0x334155, 0x1e293b);
+        gridHelper.position.y = 0;
+        scene.add(gridHelper);
+
+        // ---------- محورها ----------
+        const axesGroup = new THREE.Group();
+        const axX = new THREE.ArrowHelper(new THREE.Vector3(1,0,0), new THREE.Vector3(0,0,0), 140, 0xef4444, 22, 10);
+        const axY = new THREE.ArrowHelper(new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), 140, 0x10b981, 22, 10);
+        const axZ = new THREE.ArrowHelper(new THREE.Vector3(0,0,1), new THREE.Vector3(0,0,0), 140, 0x3b82f6, 22, 10);
+        axesGroup.add(axX, axY, axZ);
+        scene.add(axesGroup);
+
+        function makeLabel(text, color, pos, size) {
+            const cv = document.createElement('canvas');
+            cv.width = 96; cv.height = 48;
+            const c = cv.getContext('2d');
+            c.clearRect(0,0,96,48);
+            c.font = 'bold 32px Arial'; c.fillStyle = color;
+            c.textAlign = 'center'; c.textBaseline = 'middle';
+            c.fillText(text, 48, 24);
+            const tex = new THREE.CanvasTexture(cv);
+            tex.minFilter = THREE.LinearFilter;
+            const spr = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true }));
+            spr.position.copy(pos);
+            const s = size || 50;
+            spr.scale.set(s, s/2, 1);
+            return spr;
+        }
+        scene.add(makeLabel('X', '#ef4444', new THREE.Vector3(160,0,0), 44));
+        scene.add(makeLabel('Y', '#10b981', new THREE.Vector3(0,160,0), 44));
+        scene.add(makeLabel('Z', '#3b82f6', new THREE.Vector3(0,0,160), 44));
+
+        // ---------- متریال‌ها ----------
+        const matBase = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.55, metalness: 0.65 });
+        const matBaseTop = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.4, metalness: 0.5 });
+        const matJoint = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.4, metalness: 0.85 });
+        const matJointRing = new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.3, metalness: 0.8 });
+        const matLink1 = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.35, metalness: 0.55 });
+        const matLink1Side = new THREE.MeshStandardMaterial({ color: 0x1e40af, roughness: 0.5, metalness: 0.4 });
+        const matLink2 = new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.35, metalness: 0.55 });
+        const matLink2Side = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.5, metalness: 0.4 });
+        const matPrism = new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.25, metalness: 0.9 });
+        const matPrismGuide = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.4, metalness: 0.8 });
+        const matEE = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.3, metalness: 0.6, emissive: 0x330000 });
+        const matGripper = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4, metalness: 0.7 });
+
+        // ---------- گروه ربات ----------
+        const robotGroup = new THREE.Group();
+        scene.add(robotGroup);
+
+        // ==================== پایه (Base) ====================
+        const baseGroup = new THREE.Group();
+        robotGroup.add(baseGroup);
+
+        // صفحه‌ی نصب (Mounting plate)
+        const plateGeo = new THREE.CylinderGeometry(72, 75, 8, 40);
+        const plate = new THREE.Mesh(plateGeo, matBase);
+        plate.position.y = 4;
+        plate.castShadow = true; plate.receiveShadow = true;
+        baseGroup.add(plate);
+
+        // بدنه‌ی استوانه‌ای اصلی
+        const bodyGeo = new THREE.CylinderGeometry(58, 65, 55, 40);
+        const body = new THREE.Mesh(bodyGeo, matBase);
+        body.position.y = 35;
+        body.castShadow = true; body.receiveShadow = true;
+        baseGroup.add(body);
+
+        // نوار زرد بالای بدنه
+        const bandGeo = new THREE.CylinderGeometry(59, 59, 4, 40);
+        const band = new THREE.Mesh(bandGeo, matJointRing);
+        band.position.y = 60;
+        band.castShadow = true;
+        baseGroup.add(band);
+
+        // سر پله‌ای روی بدنه
+        const topGeo = new THREE.CylinderGeometry(45, 52, 12, 40);
+        const top = new THREE.Mesh(topGeo, matBaseTop);
+        top.position.y = 68;
+        top.castShadow = true;
+        baseGroup.add(top);
+
+        // درپوش نهایی مفصل ۱
+        const capGeo = new THREE.CylinderGeometry(30, 32, 8, 32);
+        const cap = new THREE.Mesh(capGeo, matJoint);
+        cap.position.y = 76;
+        cap.castShadow = true;
+        baseGroup.add(cap);
+
+        // ==================== مفصل ۱ (Joint 1) ====================
+        const joint1Group = new THREE.Group();
+        joint1Group.position.y = 80;
+        robotGroup.add(joint1Group);
+
+        // حلقه‌ی مفصل
+        const j1RingGeo = new THREE.TorusGeometry(28, 5, 16, 48);
+        const j1Ring = new THREE.Mesh(j1RingGeo, matJointRing);
+        j1Ring.rotation.x = Math.PI / 2;
+        joint1Group.add(j1Ring);
+
+        // پوشش بالای مفصل
+        const j1CapGeo = new THREE.CylinderGeometry(28, 28, 6, 32);
+        const j1Cap = new THREE.Mesh(j1CapGeo, matJoint);
+        j1Cap.position.y = 2;
+        j1Cap.castShadow = true;
+        joint1Group.add(j1Cap);
+
+        // ==================== لینک ۱ (Link 1) ====================
+        // یک گروه که حول Joint 1 می‌چرخد
+        const link1Group = new THREE.Group();
+        link1Group.position.y = 80;
+        robotGroup.add(link1Group);
+
+        // بدنه‌ی لینک ۱ (پروفیل مستطیلی)
+        const link1BodyGeo = new THREE.BoxGeometry(1, 22, 28);
+        const link1Body = new THREE.Mesh(link1BodyGeo, matLink1);
+        link1Body.castShadow = true; link1Body.receiveShadow = true;
+        link1Group.add(link1Body);
+
+        // لبه‌های تیره‌ی لینک ۱ (احساس دو لایه)
+        const link1StripeGeo = new THREE.BoxGeometry(1, 4, 30);
+        const link1Stripe = new THREE.Mesh(link1StripeGeo, matLink1Side);
+        link1Stripe.position.y = -9;
+        link1Stripe.castShadow = true;
+        link1Group.add(link1Stripe);
+
+        // شیار بالای لینک ۱
+        const link1TopGeo = new THREE.BoxGeometry(1, 3, 24);
+        const link1Top = new THREE.Mesh(link1TopGeo, matLink1Side);
+        link1Top.position.y = 9;
+        link1Group.add(link1Top);
+
+        // ==================== مفصل ۲ (Joint 2) ====================
+        const joint2Group = new THREE.Group();
+        joint2Group.position.y = 80;
+        robotGroup.add(joint2Group);
+
+        // حلقه‌ی مفصل ۲
+        const j2RingGeo = new THREE.TorusGeometry(22, 4, 16, 40);
+        const j2Ring = new THREE.Mesh(j2RingGeo, matJointRing);
+        j2Ring.rotation.x = Math.PI / 2;
+        joint2Group.add(j2Ring);
+
+        const j2CapGeo = new THREE.CylinderGeometry(22, 22, 6, 32);
+        const j2Cap = new THREE.Mesh(j2CapGeo, matJoint);
+        j2Cap.position.y = 1;
+        j2Cap.castShadow = true;
+        joint2Group.add(j2Cap);
+
+        // ==================== لینک ۲ (Link 2) ====================
+        const link2Group = new THREE.Group();
+        link2Group.position.y = 80;
+        robotGroup.add(link2Group);
+
+        const link2BodyGeo = new THREE.BoxGeometry(1, 18, 24);
+        const link2Body = new THREE.Mesh(link2BodyGeo, matLink2);
+        link2Body.castShadow = true; link2Body.receiveShadow = true;
+        link2Group.add(link2Body);
+
+        const link2StripeGeo = new THREE.BoxGeometry(1, 3, 26);
+        const link2Stripe = new THREE.Mesh(link2StripeGeo, matLink2Side);
+        link2Stripe.position.y = -7.5;
+        link2Stripe.castShadow = true;
+        link2Group.add(link2Stripe);
+
+        // ==================== مفصل کشویی/اندافکتور ====================
+        const prismGroup = new THREE.Group();
+        robotGroup.add(prismGroup);
+
+        // ستون کشویی (Z-axis)
+        const prismGeo = new THREE.CylinderGeometry(7, 7, 1, 20);
+        const prism = new THREE.Mesh(prismGeo, matPrism);
+        prism.castShadow = true;
+        prismGroup.add(prism);
+
+        // راهنماهای کنار ستون (دو میله‌ی فلزی)
+        const guide1Geo = new THREE.CylinderGeometry(2, 2, 1, 10);
+        const guide1 = new THREE.Mesh(guide1Geo, matPrismGuide);
+        const guide2 = new THREE.Mesh(guide1Geo, matPrismGuide);
+        prismGroup.add(guide1, guide2);
+
+        // بلوک اندافکتور (بدنه‌ی گریپر)
+        const eeBlockGeo = new THREE.BoxGeometry(22, 16, 22);
+        const eeBlock = new THREE.Mesh(eeBlockGeo, matGripper);
+        eeBlock.castShadow = true;
+        prismGroup.add(eeBlock);
+
+        // دو فینگر گریپر
+        const fingerGeo = new THREE.BoxGeometry(4, 14, 6);
+        const fingerL = new THREE.Mesh(fingerGeo, matEE);
+        const fingerR = new THREE.Mesh(fingerGeo, matEE);
+        fingerL.castShadow = true; fingerR.castShadow = true;
+        prismGroup.add(fingerL, fingerR);
+
+        // حلقه‌ی LED دور اندافکتور
+        const eeRingGeo = new THREE.TorusGeometry(13, 1.5, 8, 24);
+        const eeRingMat = new THREE.MeshStandardMaterial({ color: 0xfca5a5, emissive: 0x991111, emissiveIntensity: 1 });
+        const eeRing = new THREE.Mesh(eeRingGeo, eeRingMat);
+        eeRing.rotation.x = Math.PI / 2;
+        prismGroup.add(eeRing);
+
+        // نوک اندافکتور (نقطه‌ی مرجع)
+        const tipGeo = new THREE.SphereGeometry(3, 12, 12);
+        const tipMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xff3333, emissiveIntensity: 1 });
+        const tip = new THREE.Mesh(tipGeo, tipMat);
+        prismGroup.add(tip);
+
+        // ==================== فضای کاری ====================
+        const wsGroup = new THREE.Group();
+        scene.add(wsGroup);
+        let wsMeshes = [];
+
+        function rebuildWorkspace(L1, L2) {
+            wsMeshes.forEach(m => wsGroup.remove(m));
+            wsMeshes = [];
+            const rMax = L1 + L2;
+            const rMin = Math.abs(L1 - L2);
+
+            // حلقه‌ی سطح (کف فضای کاری)
+            const ringShape = new THREE.RingGeometry(Math.max(rMin, 1), rMax, 80);
+            const ringMatWS = new THREE.MeshBasicMaterial({
+                color: 0x3b82f6, transparent: true, opacity: 0.06, side: THREE.DoubleSide, depthWrite: false
+            });
+            const ringMesh = new THREE.Mesh(ringShape, ringMatWS);
+            ringMesh.rotation.x = -Math.PI / 2;
+            ringMesh.position.y = 0.5;
+            wsGroup.add(ringMesh);
+            wsMeshes.push(ringMesh);
+
+            // حلقه‌ی مرزی بیرونی
+            const outerGeo = new THREE.RingGeometry(rMax - 1.5, rMax, 80);
+            const outerMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.35, side: THREE.DoubleSide, depthWrite: false });
+            const outerMesh = new THREE.Mesh(outerGeo, outerMat);
+            outerMesh.rotation.x = -Math.PI / 2;
+            outerMesh.position.y = 0.6;
+            wsGroup.add(outerMesh);
+            wsMeshes.push(outerMesh);
+
+            if (rMin > 5) {
+                const innerGeo = new THREE.RingGeometry(rMin, rMin + 1.5, 80);
+                const innerMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.25, side: THREE.DoubleSide, depthWrite: false });
+                const innerMesh = new THREE.Mesh(innerGeo, innerMat);
+                innerMesh.rotation.x = -Math.PI / 2;
+                innerMesh.position.y = 0.6;
+                wsGroup.add(innerMesh);
+                wsMeshes.push(innerMesh);
+            }
+        }
+
+        // ==================== نقطه‌ی هدف IK ====================
+        const targetGeo = new THREE.SphereGeometry(9, 16, 16);
+        const targetMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, emissive: 0x886600, emissiveIntensity: 0.8 });
+        const targetMesh = new THREE.Mesh(targetGeo, targetMat);
+        targetMesh.visible = false;
+        scene.add(targetMesh);
+
+        // ==================== مسیر ====================
+        const trajGroup = new THREE.Group();
+        scene.add(trajGroup);
+        let trajPoints = [];
+        const MAX_TRAJ = 3000;
+        let lastTrajPos = null;
+
+        // ==================== پارامترها ====================
+        let L1 = 200, L2 = 180, t1Deg = 45, t2Deg = 30, d3 = 50;
+        const d1Base = 80; // ارتفاع مفصل اول
+        const baseTopY = 80;
+
+        let showWS = true, showTraj = true, showAx = true;
+        let autoPlay = false;
+
+        // ==================== UI ====================
+        const l1s = document.getElementById('l1s'), l1n = document.getElementById('l1n');
+        const l2s = document.getElementById('l2s'), l2n = document.getElementById('l2n');
+        const t1s = document.getElementById('t1s'), t1n = document.getElementById('t1n');
+        const t2s = document.getElementById('t2s'), t2n = document.getElementById('t2n');
+        const d3s = document.getElementById('d3s'), d3n = document.getElementById('d3n');
+        const showWSBtn = document.getElementById('showWorkspace');
+        const showTrajBtn = document.getElementById('showTrajectory');
+        const showAxBtn = document.getElementById('showAxes');
+        const clearBtn = document.getElementById('clearTrajectory');
+        const resetBtn = document.getElementById('resetBtn');
+        const ikBtn = document.getElementById('ikBtn');
+        const autoBtn = document.getElementById('autoBtn');
+        const fpsHint = document.getElementById('fpsHint');
+
+        const fkL1 = document.getElementById('fk-l1'), fkL2 = document.getElementById('fk-l2');
+        const fkT1 = document.getElementById('fk-t1'), fkT12 = document.getElementById('fk-t12');
+        const fkL1b = document.getElementById('fk-l1b'), fkL2b = document.getElementById('fk-l2b');
+        const fkT1b = document.getElementById('fk-t1b'), fkT12b = document.getElementById('fk-t12b');
+        const fkPx = document.getElementById('fk-px'), fkPy = document.getElementById('fk-py'), fkPz = document.getElementById('fk-pz');
+        const cj2 = document.getElementById('cj2'), cee = document.getElementById('cee');
+        const cr = document.getElementById('cr'), cstatus = document.getElementById('cstatus');
+        const ikCos2 = document.getElementById('ik-cos2'), ikT2 = document.getElementById('ik-t2'), ikT1 = document.getElementById('ik-t1');
+
+        function deg2rad(d) { return d * Math.PI / 180; }
+        function rad2deg(r) { return r * 180 / Math.PI; }
+
+        function computeFK() {
+            const t1 = deg2rad(t1Deg);
+            const t2 = deg2rad(t2Deg);
+            const t12 = t1 + t2;
+            const x1 = L1 * Math.cos(t1);
+            const y1 = L1 * Math.sin(t1);
+            const px = x1 + L2 * Math.cos(t12);
+            const py = y1 + L2 * Math.sin(t12);
+            // z: d1Base (ارتفاع مفصل) - d3 (کشویی به پایین)
+            const pz = baseTopY - d3;
+            return { x1, y1, px, py, pz, t1, t12 };
+        }
+
+        function computeIK(px, py, pz) {
+            const r2 = px*px + py*py;
+            const r = Math.sqrt(r2);
+            if (r > L1 + L2 || r < Math.abs(L1 - L2)) return null;
+            let cos2 = (r2 - L1*L1 - L2*L2) / (2*L1*L2);
+            cos2 = Math.max(-1, Math.min(1, cos2));
+            const t2a = Math.acos(cos2);
+            const t2b = -t2a;
+            const t1a = Math.atan2(py, px) - Math.atan2(L2*Math.sin(t2a), L1 + L2*Math.cos(t2a));
+            const t1b = Math.atan2(py, px) - Math.atan2(L2*Math.sin(t2b), L1 + L2*Math.cos(t2b));
+            return {
+                t1a: rad2deg(t1a), t2a: rad2deg(t2a),
+                t1b: rad2deg(t1b), t2b: rad2deg(t2b),
+                d3: baseTopY - pz,
+                r: r, cos2: cos2
+            };
+        }
+
+        // ==================== به‌روزرسانی ربات ====================
+        function updateRobot() {
+            const fk = computeFK();
+
+            // لینک ۱: از مبدأ به (x1, y1)
+            const len1 = Math.sqrt(fk.x1*fk.x1 + fk.y1*fk.y1);
+            link1Group.scale.set(1, 1, len1 / 1); // طول اصلی Box = 1 در z
+            link1Group.position.set(fk.x1/2, baseTopY, fk.y1/2);
+            // چرخش: جهت لینک در جهت (x1, y1)
+            link1Group.rotation.y = Math.atan2(fk.x1, fk.y1);
+
+            // لینک ۲: از (x1, y1) به (px, py)
+            const dx2 = fk.px - fk.x1;
+            const dy2 = fk.py - fk.y1;
+            const len2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+            link2Group.scale.set(1, 1, len2 / 1);
+            link2Group.position.set(fk.x1 + dx2/2, baseTopY, fk.y1 + dy2/2);
+            link2Group.rotation.y = Math.atan2(dx2, dy2);
+
+            // مفصل ۲: بالای لینک ۱/۲
+            joint2Group.position.set(fk.x1, baseTopY, fk.y1);
+
+            // مفصل ۱: در مبدأ
+            joint1Group.position.set(0, baseTopY, 0);
+
+            // ستون کشویی: از مفصل ۲ به پایین تا اندافکتور
+            const prismTop = baseTopY;
+            const eeY = fk.pz;
+            const prismLen = Math.max(2, prismTop - eeY);
+            prism.scale.set(1, prismLen / 1, 1); // طول Box = 1
+            prism.position.set(fk.px, (prismTop + eeY) / 2, fk.py);
+
+            // راهنماها: کمی کنار محور ستون
+            const guideOffset = 0;
+            guide1.scale.set(1, prismLen / 1, 1);
+            guide2.scale.set(1, prismLen / 1, 1);
+            guide1.position.set(fk.px + 10, (prismTop + eeY) / 2, fk.py);
+            guide2.position.set(fk.px - 10, (prismTop + eeY) / 2, fk.py);
+
+            // بلوک اندافکتور (در انتهای ستون)
+            const eeBlockY = eeY + 5;
+            const eeBlockGroup = prismGroup; // گروه همه چیز
+            // باید همه اعضای EE حول (fk.px, eeY, fk.py) قرار بگیرند
+            // راه ساده‌تر: جابه‌جایی کل prismGroup
+            // اما prismGroup شامل ستون است که خودش مستقل موقعیت داده شده
+            // بنابراین اجزا را جداگانه موقعیت می‌دهیم:
+            // (برای انسجام بیشتر، اجزای زیر را نسبت به نقطه‌ی EE جابه‌جا می‌کنیم)
+            // ----- بلوک گریپر -----
+            eeBlock.position.set(fk.px, eeY + 6, fk.py);
+            // ----- فینگرها -----
+            fingerL.position.set(fk.px + 6, eeY - 2, fk.py);
+            fingerR.position.set(fk.px - 6, eeY - 2, fk.py);
+            // ----- حلقه‌ی LED -----
+            eeRing.position.set(fk.px, eeY + 13, fk.py);
+            // ----- نوک -----
+            tip.position.set(fk.px, eeY - 9, fk.py);
+
+            // فضای کاری
+            rebuildWorkspace(L1, L2);
+            wsGroup.visible = showWS;
+            axesGroup.visible = showAx;
+
+            // مسیر
+            const curPos = new THREE.Vector3(fk.px, fk.pz, fk.py);
+            if (lastTrajPos === null || curPos.distanceTo(lastTrajPos) > 1.5) {
+                trajPoints.push({ x: fk.px, y: fk.pz, z: fk.py });
+                lastTrajPos = curPos.clone();
+                if (trajPoints.length > MAX_TRAJ) trajPoints.shift();
+
+                const ptGeo = new THREE.SphereGeometry(2.5, 6, 6);
+                const ptMat = new THREE.MeshBasicMaterial({ color: 0xef4444, transparent: true, opacity: 0.75 });
+                const pt = new THREE.Mesh(ptGeo, ptMat);
+                pt.position.copy(curPos);
+                trajGroup.add(pt);
+            }
+            trajGroup.visible = showTraj;
+
+            // پنل
+            const t12deg = t1Deg + t2Deg;
+            fkL1.textContent = L1.toFixed(0); fkL2.textContent = L2.toFixed(0);
+            fkT1.textContent = t1Deg.toFixed(0); fkT12.textContent = t12deg.toFixed(0);
+            fkL1b.textContent = L1.toFixed(0); fkL2b.textContent = L2.toFixed(0);
+            fkT1b.textContent = t1Deg.toFixed(0); fkT12b.textContent = t12deg.toFixed(0);
+            fkPx.textContent = fk.px.toFixed(2);
+            fkPy.textContent = fk.py.toFixed(2);
+            fkPz.textContent = fk.pz.toFixed(2);
+
+            cj2.textContent = `(${fk.x1.toFixed(1)}, ${fk.y1.toFixed(1)}, 0.0)`;
+            cee.textContent = `(${fk.px.toFixed(1)}, ${fk.py.toFixed(1)}, ${fk.pz.toFixed(1)})`;
+            const r = Math.sqrt(fk.px*fk.px + fk.py*fk.py);
+            cr.textContent = `${r.toFixed(1)} mm`;
+            const rMax = L1 + L2, rMin = Math.abs(L1 - L2);
+            if (r > rMax + 0.5 || r < rMin - 0.5) {
+                cstatus.textContent = '✗ خارج از فضای کاری';
+                cstatus.style.color = '#dc2626';
+            } else {
+                cstatus.textContent = '✓ در فضای کاری';
+                cstatus.style.color = '#16a34a';
+            }
+
+            const ik = computeIK(fk.px, fk.py, fk.pz);
+            if (ik) {
+                ikCos2.textContent = ik.cos2.toFixed(3);
+                ikT2.textContent = `±${Math.abs(ik.t2a).toFixed(1)}`;
+                ikT1.textContent = `${ik.t1a.toFixed(1)} (یا ${ik.t1b.toFixed(1)})`;
+            }
+        }
+
+        function syncUI() {
+            l1s.value = L1; l1n.value = L1.toFixed(0);
+            l2s.value = L2; l2n.value = L2.toFixed(0);
+            t1s.value = t1Deg; t1n.value = t1Deg.toFixed(0);
+            t2s.value = t2Deg; t2n.value = t2Deg.toFixed(0);
+            d3s.value = d3; d3n.value = d3.toFixed(0);
+            updateRobot();
+        }
+
+        function onSliderChange() {
+            L1 = parseFloat(l1s.value);
+            L2 = parseFloat(l2s.value);
+            t1Deg = parseFloat(t1s.value);
+            t2Deg = parseFloat(t2s.value);
+            d3 = parseFloat(d3s.value);
+            syncUI();
+        }
+
+        function onInputChange() {
+            L1 = Math.max(50, Math.min(350, parseFloat(l1n.value) || 50));
+            L2 = Math.max(50, Math.min(350, parseFloat(l2n.value) || 50));
+            t1Deg = Math.max(-180, Math.min(180, parseFloat(t1n.value) || 0));
+            t2Deg = Math.max(-180, Math.min(180, parseFloat(t2n.value) || 0));
+            d3 = Math.max(-120, Math.min(120, parseFloat(d3n.value) || 0));
+            syncUI();
+        }
+
+        // ==================== رویدادها ====================
+        [l1s, l2s, t1s, t2s, d3s].forEach(s => s.addEventListener('input', onSliderChange));
+        [l1n, l2n, t1n, t2n, d3n].forEach(n => n.addEventListener('change', onInputChange));
+
+        showWSBtn.addEventListener('click', function() {
+            showWS = !showWS; this.classList.toggle('active');
+            wsGroup.visible = showWS;
+        });
+        showTrajBtn.addEventListener('click', function() {
+            showTraj = !showTraj; this.classList.toggle('active');
+            trajGroup.visible = showTraj;
+        });
+        showAxBtn.addEventListener('click', function() {
+            showAx = !showAx; this.classList.toggle('active');
+            axesGroup.visible = showAx;
+        });
+        clearBtn.addEventListener('click', function() {
+            while (trajGroup.children.length > 0) {
+                trajGroup.remove(trajGroup.children[0]);
+            }
+            trajPoints = [];
+            lastTrajPos = null;
+        });
+        resetBtn.addEventListener('click', function() {
+            L1 = 200; L2 = 180; t1Deg = 45; t2Deg = 30; d3 = 50;
+            syncUI(); clearBtn.click();
+            targetMesh.visible = false;
+            autoPlay = false;
+            autoBtn.classList.remove('active');
+        });
+
+        ikBtn.addEventListener('click', function() {
+            const fk = computeFK();
+            const px = fk.px + (Math.random() - 0.5) * 60;
+            const py = fk.py + (Math.random() - 0.5) * 60;
+            const pz = fk.pz;
+            const ik = computeIK(px, py, pz);
+            if (!ik) { alert('نقطه‌ی هدف خارج از فضای کاری است!'); return; }
+            targetMesh.position.set(px, pz, py);
+            targetMesh.visible = true;
+            t1Deg = Math.max(-180, Math.min(180, Math.round(ik.t1a)));
+            t2Deg = Math.max(-180, Math.min(180, Math.round(ik.t2a)));
+            d3 = Math.max(-120, Math.min(120, Math.round(d1Base - pz)));
+            syncUI();
+            setTimeout(() => { targetMesh.visible = false; }, 2500);
+        });
+
+        autoBtn.addEventListener('click', function() {
+            autoPlay = !autoPlay;
+            this.classList.toggle('active');
+        });
+
+        // ==================== دوربین مداری ====================
+        let isDown = false, prevX = 0, prevY = 0;
+        let sphPhi = 0.9, sphTheta = 0.7, sphRadius = 720;
+        const lookAt = new THREE.Vector3(60, 60, 0);
+
+        function updateCamera() {
+            camera.position.x = lookAt.x + sphRadius * Math.sin(sphPhi) * Math.cos(sphTheta);
+            camera.position.y = lookAt.y + sphRadius * Math.cos(sphPhi);
+            camera.position.z = lookAt.z + sphRadius * Math.sin(sphPhi) * Math.sin(sphTheta);
+            camera.lookAt(lookAt);
+        }
+        updateCamera();
+
+        canvas.addEventListener('mousedown', e => { isDown = true; prevX = e.clientX; prevY = e.clientY; });
+        window.addEventListener('mouseup', () => { isDown = false; });
+        window.addEventListener('mousemove', e => {
+            if (!isDown) return;
+            const dx = e.clientX - prevX, dy = e.clientY - prevY;
+            sphTheta -= dx * 0.007;
+            sphPhi -= dy * 0.007;
+            sphPhi = Math.max(0.15, Math.min(Math.PI - 0.15, sphPhi));
+            prevX = e.clientX; prevY = e.clientY;
+            updateCamera();
+        });
+        canvas.addEventListener('touchstart', e => {
+            if (e.touches.length === 1) { isDown = true; prevX = e.touches[0].clientX; prevY = e.touches[0].clientY; }
+        }, { passive: true });
+        window.addEventListener('touchend', () => { isDown = false; });
+        window.addEventListener('touchmove', e => {
+            if (!isDown || e.touches.length !== 1) return;
+            const dx = e.touches[0].clientX - prevX, dy = e.touches[0].clientY - prevY;
+            sphTheta -= dx * 0.007;
+            sphPhi -= dy * 0.007;
+            sphPhi = Math.max(0.15, Math.min(Math.PI - 0.15, sphPhi));
+            prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
+            updateCamera();
+        }, { passive: true });
+        canvas.addEventListener('wheel', e => {
+            e.preventDefault();
+            sphRadius *= (1 + Math.sign(e.deltaY) * 0.08);
+            sphRadius = Math.max(280, Math.min(1500, sphRadius));
+            updateCamera();
+        }, { passive: false });
+
+        // ==================== حلقه‌ی رندر ====================
+        let frameCount = 0, lastFpsTime = performance.now();
+        let autoPhase = 0;
+
+        function animate(now) {
+            requestAnimationFrame(animate);
+            now = now || performance.now();
+
+            if (autoPlay) {
+                autoPhase += 0.015;
+                // حرکت موجی در θ1، θ2 و d3
+                const midT1 = 0;
+                const midT2 = 30;
+                const midD3 = 0;
+                const ampT1 = 75, ampT2 = 45, ampD3 = 60;
+
+                const newT1 = Math.round(midT1 + ampT1 * Math.sin(autoPhase));
+                const newT2 = Math.round(midT2 + ampT2 * Math.sin(autoPhase * 1.4));
+                const newD3 = Math.round(midD3 + ampD3 * Math.cos(autoPhase * 0.8));
+
+                if (newT1 !== t1Deg || newT2 !== t2Deg || newD3 !== d3) {
+                    t1Deg = newT1; t2Deg = newT2; d3 = newD3;
+                    t1s.value = t1Deg; t1n.value = t1Deg;
+                    t2s.value = t2Deg; t2n.value = t2Deg;
+                    d3s.value = d3; d3n.value = d3;
+                    updateRobot();
+                }
+            }
+
+            // FPS
+            frameCount++;
+            if (now - lastFpsTime > 500) {
+                const fps = Math.round(frameCount * 1000 / (now - lastFpsTime));
+                fpsHint.textContent = `${fps} FPS`;
+                frameCount = 0;
+                lastFpsTime = now;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        resize();
+        syncUI();
+        animate();
+    }
+})();
+</script>
+</body>
+</html>

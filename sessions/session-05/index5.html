@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جلسه ۵ — سینماتیک مستقیم و روش DH | دکتر گوهری‌منش</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../shared/lecture.css">
+
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      processEscapes: true
+    },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+</head>
+<body>
+
+<!-- پس‌زمینه متحرک -->
+<div class="bg-wrap">
+  <div class="bubble b1"></div>
+  <div class="bubble b2"></div>
+  <div class="bubble b3"></div>
+</div>
+<div class="particles" id="particles"></div>
+
+<!-- نوار پیشرفت -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- امضای استاد -->
+<div class="instructor-signature">
+  <div class="sig-fallback" id="sigFallback">MG</div>
+  <img id="sigImage" src="../../assets/signature.png" alt="امضای دکتر گوهری‌منش"
+       style="display:none;"
+       onload="this.style.display='block'; document.getElementById('sigFallback').style.display='none';"
+       onerror="this.style.display='none'; document.getElementById('sigFallback').style.display='grid';">
+  <div class="sig-text">
+    <strong>دکتر مسعود گوهری‌منش</strong>
+    <span>دانشیار — دانشگاه تربت حیدریه</span>
+  </div>
+</div>
+
+<!-- هدر -->
+<header class="top-header">
+  <div class="header-brand">
+    <i class="fas fa-robot"></i>
+    <span>جلسه ۵ — سینماتیک مستقیم و روش DH</span>
+  </div>
+  <button class="ctrl-btn" id="soundBtn" title="صدا"><i class="fas fa-volume-up"></i></button>
+</header>
+
+<!-- اسلایدها -->
+<div class="slides-container" id="slidesContainer">
+
+  <!-- ═══════ اسلاید ۱: کاور ═══════ -->
+  <div class="slide cover-slide" data-slide="1">
+    <div class="cover-badge">
+      <i class="fas fa-graduation-cap"></i>
+      <span>جلسه ۵ از ۱۶ — فاز ۲</span>
+    </div>
+    <h1 class="cover-title">سینماتیک مستقیم<br>و روش دناویت-هارتنبرگ</h1>
+    <p class="cover-desc">
+      روش استاندارد DH، ستون فقرات سینماتیک رباتیک است. با ۴ پارامتر ساده
+      می‌توان ماتریس تبدیل هر لینک را ساخت و موقعیت نوک بازو را در فضای
+      کارتزین محاسبه کرد.
+    </p>
+    <div class="cover-instructor">
+      <div class="avatar">MG</div>
+      <div class="info">
+        <strong>دکتر مسعود گوهری‌منش</strong>
+        <span>دانشیار گروه مهندسی مکانیک — دانشگاه تربت حیدریه</span>
+        <a href="mailto:m.goharimanesh@gmail.com">
+          <i class="fas fa-envelope"></i> m.goharimanesh@gmail.com
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۲: سوال انگیزشی ═══════ -->
+  <div class="slide" data-slide="2">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="width:100px;height:100px;margin:0 auto 20px;border-radius:50%;
+        background:linear-gradient(135deg,var(--accent),var(--accent2));
+        display:grid;place-items:center;font-size:44px;color:#050818;
+        animation:pulse 2s infinite;box-shadow:0 0 40px rgba(255,183,0,0.5);">
+        <i class="fas fa-question"></i>
+      </div>
+    </div>
+    <h2 class="slide-title">چرا روش DH استاندارد شد؟</h2>
+    <p class="slide-sub">
+      چرا ۹۵٪ مقالات و کتاب‌های رباتیک از همین ۴ پارامتر استفاده می‌کنند؟
+    </p>
+
+    <div class="cards-grid cols-3" style="max-width:850px;">
+      <div class="content-card" onclick="showToast('📐 فقط ۴ پارامتر برای هر لینک')">
+        <div class="card-icon"><i class="fas fa-list-ol"></i></div>
+        <h3>سادگی</h3>
+        <p>فقط ۴ پارامتر برای هر لینک</p>
+      </div>
+      <div class="content-card" onclick="showToast('🔁 استانداردسازی: قابل تعمیم به هر زنجیره')">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-cubes"></i>
+        </div>
+        <h3>تعمیم‌پذیری</h3>
+        <p>برای هر ربات سری قابل استفاده است</p>
+      </div>
+      <div class="content-card" onclick="showToast('💻 پیاده‌سازی آسان در MATLAB و Python')">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+          <i class="fas fa-code"></i>
+        </div>
+        <h3>قابل پیاده‌سازی</h3>
+        <p>در MATLAB و Python به‌راحتی کدنویسی می‌شود</p>
+      </div>
+    </div>
+
+    <div style="max-width:800px;width:100%;margin-top:24px;padding:16px 22px;
+      background:rgba(255,183,0,0.08);border:1px solid rgba(255,183,0,0.25);
+      border-radius:12px;font-size:12.5px;line-height:1.8;color:#c0c8dc;">
+      <i class="fas fa-lightbulb" style="color:var(--accent);"></i>
+      <strong style="color:var(--accent);">نکته تاریخی:</strong>
+      ژاک دناویت و ریچارد هارتنبرگ در سال ۱۹۵۵ این روش را در مقاله‌ای
+      با عنوان «A Kinematic Notation for Lower-Pair Mechanisms Based on Matrices»
+      معرفی کردند.
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۳: تاریخچه DH ═══════ -->
+  <div class="slide" data-slide="3">
+    <h2 class="slide-title">تاریخچه روش DH</h2>
+    <p class="slide-sub">از یک مقاله تا استاندارد جهانی</p>
+
+    <div class="cards-grid cols-2" style="max-width:850px;">
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-user-tie"></i></div>
+        <h3>Jacques Denavit (1930-2011)</h3>
+        <p>استاد مهندسی مکانیک دانشگاه ایلینوی — پیشگام مکانیک رباتیک</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-user-tie"></i>
+        </div>
+        <h3>Richard S. Hartenberg (1907-1997)</h3>
+        <p>استاد مهندسی مکانیک دانشگاه نورث‌وسترن — نظریه‌پرداز مکانیزم‌ها</p>
+      </div>
+    </div>
+
+    <div style="max-width:850px;width:100%;margin-top:20px;padding:20px 24px;
+      background:linear-gradient(135deg,rgba(168,85,247,0.08),rgba(6,182,212,0.06));
+      border:1px solid rgba(168,85,247,0.3);border-radius:14px;
+      font-size:13px;line-height:2;color:#c0c8dc;">
+      <div style="text-align:center;color:var(--purple);font-weight:700;margin-bottom:10px;">
+        <i class="fas fa-file-alt"></i> مقاله ۱۹۵۵
+      </div>
+      <div style="text-align:center;font-style:italic;color:#fff;font-size:14px;">
+        «A Kinematic Notation for Lower-Pair Mechanisms Based on Matrices»
+      </div>
+      <div style="text-align:center;font-size:11px;color:#8892a8;margin-top:10px;">
+        Journal of Applied Mechanics, Vol. 77, pp. 215-221
+      </div>
+    </div>
+
+    <div style="max-width:850px;width:100%;margin-top:16px;padding:14px 20px;
+      background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.3);
+      border-radius:12px;font-size:12px;line-height:1.8;color:#c0c8dc;">
+      <i class="fas fa-check-circle" style="color:var(--success);"></i>
+      امروزه روش DH در تمام کتاب‌های مرجع (Spong، Craig، Siciliano) و
+      نرم‌افزارهای صنعتی (MATLAB، Peter Corke، ROS) استفاده می‌شود.
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۴: ۴ پارامتر DH ═══════ -->
+  <div class="slide" data-slide="4">
+    <h2 class="slide-title">چهار پارامتر DH</h2>
+    <p class="slide-sub">هر لینک با ۴ پارامتر توصیف می‌شود</p>
+
+    <div class="cards-grid cols-4" style="max-width:950px;">
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-arrows-alt-h"></i></div>
+        <h3>a<sub>i</sub> — طول لینک</h3>
+        <p>فاصله بین دو محور Z در امتداد X</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-undo"></i>
+        </div>
+        <h3>α<sub>i</sub> — پیچش لینک</h3>
+        <p>زاویه بین دو محور Z متوالی</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+          <i class="fas fa-arrows-alt-v"></i>
+        </div>
+        <h3>d<sub>i</sub> — جابجایی لینک</h3>
+        <p>فاصله بین دو محور X در امتداد Z</p>
+      </div>
+      <div class="content-card" style="--ci: linear-gradient(135deg, var(--danger), var(--accent2));">
+        <div class="card-icon"><i class="fas fa-sync-alt"></i></div>
+        <h3>θ<sub>i</sub> — زاویه مفصل</h3>
+        <p>زاویه چرخش حول محور Z</p>
+      </div>
+    </div>
+
+    <div class="formula-panel" style="max-width:850px;margin-top:20px;">
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-info-circle"></i>
+          کدام پارامتر متغیر است؟
+        </div>
+        <div class="formula-content" style="font-size:13px;">
+          $$ \begin{cases} \text{مفصل دورانی (R):} & \theta_i \text{ متغیر، } a_i, \alpha_i, d_i \text{ ثابت} \\[4pt] \text{مفصل کشویی (P):} & d_i \text{ متغیر، } a_i, \alpha_i, \theta_i \text{ ثابت} \end{cases} $$
+        </div>
+        <div class="formula-note">
+          در هر مفصل، فقط یکی از ۴ پارامتر متغیر است.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۵: قواعد ثبت دستگاه ═══════ -->
+  <div class="slide" data-slide="5">
+    <h2 class="slide-title">قواعد ثبت دستگاه مختصات</h2>
+    <p class="slide-sub">چهار قانون برای تعریف Z و X هر لینک</p>
+
+    <div class="exercise-wrap" style="max-height:none; overflow:visible;">
+      <div class="ex-section a">
+        <h4><i class="fas fa-hashtag"></i> قانون ۱ — محور Z</h4>
+        <div class="ex-item">
+          <div class="ex-num">Z</div>
+          <div>
+            محور <strong>Z<sub>i</sub></strong> در راستای محور حرکت مفصل i قرار می‌گیرد.
+            برای مفصل دورانی، در جهت چرخش؛ برای کشویی، در جهت حرکت خطی.
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-section b">
+        <h4><i class="fas fa-hashtag"></i> قانون ۲ — محور X</h4>
+        <div class="ex-item">
+          <div class="ex-num">X</div>
+          <div>
+            محور <strong>X<sub>i</sub></strong> بر خط مشترک عمود بین Z<sub>i-1</sub>
+            و Z<sub>i</sub> قرار می‌گیرد (از Z<sub>i-1</sub> به سمت Z<sub>i</sub>).
+            اگر دو محور Z موازی باشند، X از مرکز به سمت دلخواه عمود بر Z.
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-section c">
+        <h4><i class="fas fa-hashtag"></i> قانون ۳ — محور Y</h4>
+        <div class="ex-item">
+          <div class="ex-num">Y</div>
+          <div>
+            محور <strong>Y<sub>i</sub></strong> از قانون دست راست کامل می‌شود:
+            Y = Z × X
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-section d">
+        <h4><i class="fas fa-hashtag"></i> قانون ۴ — دستگاه پایه</h4>
+        <div class="ex-item">
+          <div class="ex-num">۰</div>
+          <div>
+            دستگاه <strong>پایه (Frame 0)</strong> با دستگاه اینرسی (زمین) منطبق است.
+            اختیاری است ولی استاندارد Z<sub>0</sub> = Z<sub>1</sub>.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۶: ماتریس تبدیل پایه ═══════ -->
+  <div class="slide" data-slide="6">
+    <h2 class="slide-title">ماتریس تبدیل پایه A<sub>i</sub></h2>
+    <p class="slide-sub">تبدیل همگن از دستگاه i-1 به i</p>
+
+    <div class="formula-panel">
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-cube"></i>
+          ماتریس کامل A<sub>i</sub>
+        </div>
+        <div class="formula-content" style="font-size:13px;overflow-x:auto;">
+          $$ A_i = \begin{bmatrix} \cos\theta_i & -\sin\theta_i\cos\alpha_i & \sin\theta_i\sin\alpha_i & a_i\cos\theta_i \\ \sin\theta_i & \cos\theta_i\cos\alpha_i & -\cos\theta_i\sin\alpha_i & a_i\sin\theta_i \\ 0 & \sin\alpha_i & \cos\alpha_i & d_i \\ 0 & 0 & 0 & 1 \end{bmatrix} $$
+        </div>
+        <div class="formula-note">
+          ۴×۴ ماتریس همگن: بلوک ۳×۳ چرخش + ستون ۳×۱ انتقال
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-list-ol"></i>
+          ۴ تبدیل متوالی
+        </div>
+        <div class="formula-content" style="font-size:14px;">
+          $$ A_i = \text{Rot}(z, \theta_i) \cdot \text{Trans}(z, d_i) \cdot \text{Trans}(x, a_i) \cdot \text{Rot}(x, \alpha_i) $$
+        </div>
+        <div class="formula-note">
+          ترتیب مهم است — نمی‌توان جابجا کرد.
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-arrow-left"></i>
+          تبدیل کل زنجیره
+        </div>
+        <div class="formula-content" style="font-size:15px;">
+          $$ T_0^N = A_1 \cdot A_2 \cdot A_3 \cdots A_N $$
+        </div>
+        <div class="formula-note">
+          ماتریس نهایی، موقعیت و جهت نوک بازو در دستگاه پایه است.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۷: شبیه‌ساز DH ═══════ -->
+  <div class="slide" data-slide="7">
+    <h2 class="slide-title">شبیه‌ساز DH تعاملی</h2>
+    <p class="slide-sub">۴ پارامتر را تغییر دهید و ماتریس تبدیل را ببینید</p>
+
+    <div class="simulator">
+      <div class="sim-layout">
+        <div class="sim-canvas-wrap" style="min-height:auto;">
+          <div id="dhMatrixDisplay" style="
+            width:100%; padding:20px;
+            background:#0a0e1a;
+            border-radius:10px;
+            font-family:'Courier New',monospace;
+            font-size:13px;
+            color:#e8ecf5;
+            direction:ltr;
+            text-align:left;
+            overflow-x:auto;
+          ">
+            <!-- ماتریس 4×4 اینجا نمایش داده می‌شود -->
+          </div>
+        </div>
+
+        <div class="sim-controls">
+          <div class="sim-control">
+            <label><span>θ (زاویه مفصل)</span><strong id="dhThetaVal">۳۰°</strong></label>
+            <input type="range" id="dhTheta" min="-180" max="180" value="30" step="1">
+          </div>
+          <div class="sim-control">
+            <label><span>d (جابجایی)</span><strong id="dhDVal">۰</strong></label>
+            <input type="range" id="dhD" min="-100" max="100" value="0" step="1">
+          </div>
+          <div class="sim-control">
+            <label><span>a (طول لینک)</span><strong id="dhAVal">۱۰۰</strong></label>
+            <input type="range" id="dhA" min="20" max="200" value="100" step="1">
+          </div>
+          <div class="sim-control">
+            <label><span>α (پیچش)</span><strong id="dhAlphaVal">۰°</strong></label>
+            <input type="range" id="dhAlpha" min="-180" max="180" value="0" step="1">
+          </div>
+
+          <div class="sim-buttons">
+            <button class="sim-btn" onclick="resetDH()">ریست</button>
+            <button class="sim-btn" onclick="randomizeDH()">تصادفی</button>
+          </div>
+
+          <div style="font-size:10.5px;color:#8892a8;text-align:center;line-height:1.6;margin-top:6px;">
+            <i class="fas fa-info-circle"></i>
+            ماتریس بالای صفحه با تغییر پارامترها به‌روز می‌شود
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۸: انتقال بین دستگاه‌ها ═══════ -->
+  <div class="slide" data-slide="8">
+    <h2 class="slide-title">مراحل انتقال بین دستگاه‌ها</h2>
+    <p class="slide-sub">از Frame i-1 به Frame i در ۴ گام</p>
+
+    <div class="cards-grid cols-4" style="max-width:1000px;">
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-rotate-right"></i></div>
+        <h3>گام ۱</h3>
+        <p>چرخش حول Z<sub>i-1</sub> به اندازه θ<sub>i</sub></p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-arrows-alt-v"></i>
+        </div>
+        <h3>گام ۲</h3>
+        <p>انتقال در راستای Z<sub>i-1</sub> به اندازه d<sub>i</sub></p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+          <i class="fas fa-arrows-alt-h"></i>
+        </div>
+        <h3>گام ۳</h3>
+        <p>انتقال در راستای X<sub>i</sub> به اندازه a<sub>i</sub></p>
+      </div>
+      <div class="content-card" style="--ci: linear-gradient(135deg, var(--danger), var(--accent2));">
+        <div class="card-icon"><i class="fas fa-rotate-left"></i></div>
+        <h3>گام ۴</h3>
+        <p>چرخش حول X<sub>i</sub> به اندازه α<sub>i</sub></p>
+      </div>
+    </div>
+
+    <div style="max-width:900px;width:100%;margin-top:24px;padding:18px 24px;
+      background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);
+      border-radius:12px;font-size:12.5px;line-height:1.9;color:#c0c8dc;">
+      <i class="fas fa-lightbulb" style="color:var(--purple);"></i>
+      <strong style="color:var(--purple);">نکته مهم:</strong>
+      این ۴ تبدیل <strong>به ترتیب</strong> اعمال می‌شوند. یعنی هر کدام در دستگاه
+      مختصات جدید (پس از تبدیل قبلی) انجام می‌شود — نه در دستگاه اصلی.
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۹: جدول DH ربات ۲R ═══════ -->
+  <div class="slide" data-slide="9">
+    <h2 class="slide-title">جدول DH ربات ۲R</h2>
+    <p class="slide-sub">دو لینک صفحه‌ای + دو مفصل دورانی</p>
+
+    <div class="data-table" style="max-width:850px;">
+      <table>
+        <thead>
+          <tr>
+            <th>i</th>
+            <th>θ<sub>i</sub></th>
+            <th>d<sub>i</sub></th>
+            <th>a<sub>i</sub></th>
+            <th>α<sub>i</sub></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>۱</td>
+            <td>θ<sub>1</sub>*</td>
+            <td>۰</td>
+            <td>L<sub>1</sub></td>
+            <td>۰</td>
+          </tr>
+          <tr>
+            <td>۲</td>
+            <td>θ<sub>2</sub>*</td>
+            <td>۰</td>
+            <td>L<sub>2</sub></td>
+            <td>۰</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="formula-panel" style="max-width:850px;margin-top:16px;">
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-arrow-left"></i>
+          ماتریس نهایی T₀²
+        </div>
+        <div class="formula-content" style="font-size:12px;overflow-x:auto;">
+          $$ T_0^2 = \begin{bmatrix} c_{12} & -s_{12} & 0 & L_1 c_1 + L_2 c_{12} \\ s_{12} & c_{12} & 0 & L_1 s_1 + L_2 s_{12} \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix} $$
+        </div>
+        <div class="formula-note">
+          دقیقاً با فرمول سینماتیک مستقیم ۲R (جلسه ۳) یکی است.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۰: جدول DH ربات ۳R ═══════ -->
+  <div class="slide" data-slide="10">
+    <h2 class="slide-title">جدول DH ربات ۳R</h2>
+    <p class="slide-sub">سه لینک صفحه‌ای + سه مفصل دورانی</p>
+
+    <div class="data-table" style="max-width:850px;">
+      <table>
+        <thead>
+          <tr>
+            <th>i</th>
+            <th>θ<sub>i</sub></th>
+            <th>d<sub>i</sub></th>
+            <th>a<sub>i</sub></th>
+            <th>α<sub>i</sub></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>۱</td>
+            <td>θ<sub>1</sub>*</td>
+            <td>۰</td>
+            <td>L<sub>1</sub></td>
+            <td>۰</td>
+          </tr>
+          <tr>
+            <td>۲</td>
+            <td>θ<sub>2</sub>*</td>
+            <td>۰</td>
+            <td>L<sub>2</sub></td>
+            <td>۰</td>
+          </tr>
+          <tr>
+            <td>۳</td>
+            <td>θ<sub>3</sub>*</td>
+            <td>۰</td>
+            <td>L<sub>3</sub></td>
+            <td>۰</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="formula-panel" style="max-width:850px;margin-top:16px;">
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-arrow-left"></i>
+          موقعیت نوک (x, y)
+        </div>
+        <div class="formula-content" style="font-size:13px;">
+          $$ \begin{cases} x = L_1 c_1 + L_2 c_{12} + L_3 c_{123} \\[4pt] y = L_1 s_1 + L_2 s_{12} + L_3 s_{123} \\[4pt] \phi = \theta_1 + \theta_2 + \theta_3 \end{cases} $$
+        </div>
+        <div class="formula-note">
+          با نماد \( c_{123} = \cos(\theta_1 + \theta_2 + \theta_3) \).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۱: شبیه‌ساز ۳R ═══════ -->
+  <div class="slide" data-slide="11">
+    <h2 class="slide-title">شبیه‌ساز تعاملی ربات ۳R</h2>
+    <p class="slide-sub">زاویه‌های سه مفصل را تغییر دهید و حرکت نوک را ببینید</p>
+
+    <div class="simulator">
+      <div class="sim-layout">
+        <div class="sim-canvas-wrap">
+          <canvas id="robot3RCanvas" width="640" height="500"></canvas>
+        </div>
+
+        <div class="sim-controls">
+          <div class="sim-control">
+            <label><span>θ₁ (مفصل ۱)</span><strong id="r3theta1Val">۳۰°</strong></label>
+            <input type="range" id="r3theta1" min="-180" max="180" value="30" step="1">
+          </div>
+          <div class="sim-control">
+            <label><span>θ₂ (مفصل ۲)</span><strong id="r3theta2Val">۳۰°</strong></label>
+            <input type="range" id="r3theta2" min="-180" max="180" value="30" step="1">
+          </div>
+          <div class="sim-control">
+            <label><span>θ₃ (مفصل ۳)</span><strong id="r3theta3Val">۳۰°</strong></label>
+            <input type="range" id="r3theta3" min="-180" max="180" value="30" step="1">
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px;">
+            <div class="sim-control">
+              <label><span>L₁</span><strong id="r3L1Val">۱۰۰</strong></label>
+              <input type="range" id="r3L1" min="40" max="160" value="100" step="1">
+            </div>
+            <div class="sim-control">
+              <label><span>L₂</span><strong id="r3L2Val">۸۰</strong></label>
+              <input type="range" id="r3L2" min="40" max="160" value="80" step="1">
+            </div>
+            <div class="sim-control">
+              <label><span>L₃</span><strong id="r3L3Val">۶۰</strong></label>
+              <input type="range" id="r3L3" min="40" max="160" value="60" step="1">
+            </div>
+          </div>
+
+          <div class="sim-readout">
+            <span><i class="fas fa-crosshairs" style="color:var(--accent);"></i> نوک (x,y):</span>
+            <strong id="r3Tip">(۰, ۰)</strong>
+          </div>
+          <div class="sim-readout" style="background:rgba(168,85,247,0.1);border-color:rgba(168,85,247,0.3);">
+            <span><i class="fas fa-compass" style="color:var(--purple);"></i> جهت φ:</span>
+            <strong id="r3Phi" style="color:var(--purple);">۰°</strong>
+          </div>
+
+          <div class="sim-buttons">
+            <button class="sim-btn" onclick="randomize3R()">حرکت تصادفی</button>
+            <button class="sim-btn" onclick="reset3R()">ریست</button>
+          </div>
+
+          <div class="sim-buttons">
+            <button class="sim-btn" onclick="toggleFrames()" id="framesBtn">نمایش دستگاه‌ها</button>
+            <button class="sim-btn" onclick="toggleTrail()" id="trailBtn">رد حرکت</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۲: ضرب ماتریس‌ها ═══════ -->
+  <div class="slide" data-slide="12">
+    <h2 class="slide-title">ضرب ماتریس‌های T</h2>
+    <p class="slide-sub">ترتیب ضرب از پایه به نوک</p>
+
+    <div class="formula-panel">
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-multiply"></i>
+          ترتیب صحیح
+        </div>
+        <div class="formula-content" style="font-size:16px;">
+          $$ T_0^N = A_1 \cdot A_2 \cdot A_3 \cdots A_N $$
+        </div>
+        <div class="formula-note">
+          از دستگاه پایه شروع، به سمت نوک بازو
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-times-circle"></i>
+          <span style="color:var(--danger);">اشتباه رایج</span>
+        </div>
+        <div class="formula-content" style="font-size:16px;color:var(--danger);">
+          $$ T \neq A_N \cdot A_{N-1} \cdots A_1 $$
+        </div>
+        <div class="formula-note">
+          ضرب ماتریس جابجایی‌پذیر نیست — ترتیب بسیار مهم است.
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-cube"></i>
+          استخراج موقعیت نوک
+        </div>
+        <div class="formula-content">
+          $$ \mathbf{p}_N = \begin{bmatrix} T_{14} \\ T_{24} \\ T_{34} \end{bmatrix} $$
+        </div>
+        <div class="formula-note">
+          ستون چهارم ماتریس نهایی، موقعیت نوک است.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۳: مثال عددی ═══════ -->
+  <div class="slide" data-slide="13">
+    <h2 class="slide-title">مثال عددی: ربات ۲R</h2>
+    <p class="slide-sub">L₁ = 1، L₂ = 0.5، θ₁ = 30°، θ₂ = 60°</p>
+
+    <div class="formula-panel" style="max-width:900px;">
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-calculator"></i>
+          محاسبه مستقیم (روش هندسی)
+        </div>
+        <div class="formula-content" style="font-size:13px;">
+          $$ \begin{aligned} x &= 1 \cdot \cos(30°) + 0.5 \cdot \cos(90°) = 0.866 + 0 = 0.866 \\[4pt] y &= 1 \cdot \sin(30°) + 0.5 \cdot \sin(90°) = 0.5 + 0.5 = 1.0 \end{aligned} $$
+        </div>
+        <div class="formula-note">
+          نتیجه: نوک در نقطه (0.866, 1.0)
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-matrix"></i>
+          محاسبه با DH
+        </div>
+        <div class="formula-content" style="font-size:11px;overflow-x:auto;">
+          $$ A_1 = \begin{bmatrix} c_1 & -s_1 & 0 & L_1 c_1 \\ s_1 & c_1 & 0 & L_1 s_1 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix} = \begin{bmatrix} 0.866 & -0.5 & 0 & 0.866 \\ 0.5 & 0.866 & 0 & 0.5 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix} $$
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-check-circle"></i>
+          تأیید
+        </div>
+        <div class="formula-content" style="font-size:13px;">
+          $$ A_1 \cdot A_2 = \begin{bmatrix} c_{12} & -s_{12} & 0 & L_1 c_1 + L_2 c_{12} \\ s_{12} & c_{12} & 0 & L_1 s_1 + L_2 s_{12} \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix} $$
+        </div>
+        <div class="formula-note">
+          ستون چهارم: (0.866, 1.0, 0) — تطابق کامل با روش هندسی.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۴: مزایای DH ═══════ -->
+  <div class="slide" data-slide="14">
+    <h2 class="slide-title">مزایای روش DH</h2>
+    <p class="slide-sub">چرا هنوز بعد از ۷۰ سال استفاده می‌شود؟</p>
+
+    <div class="cards-grid cols-2" style="max-width:900px;">
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-compress"></i>
+        </div>
+        <h3>سادگی و کمینه بودن</h3>
+        <p>فقط ۴ پارامتر برای هر لینک — نه بیشتر</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--accent), var(--accent2));">
+          <i class="fas fa-cubes"></i>
+        </div>
+        <h3>تعمیم‌پذیری کامل</h3>
+        <p>برای هر ربات سری (۳R، ۶R، SCARA) کار می‌کند</p>
+      </div>
+      <div class="content-card" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+        <div class="card-icon"><i class="fas fa-code"></i></div>
+        <h3>پیاده‌سازی آسان</h3>
+        <p>در MATLAB یک تابع ۱۰ خطی برای محاسبه A_i</p>
+      </div>
+      <div class="content-card" style="--ci: linear-gradient(135deg, var(--danger), var(--accent2));">
+        <div class="card-icon"><i class="fas fa-check-double"></i></div>
+        <h3>استاندارد صنعتی</h3>
+        <p>در ROS، MATLAB Robotics Toolbox، Peter Corke</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۵: محدودیت‌های DH ═══════ -->
+  <div class="slide" data-slide="15">
+    <h2 class="slide-title">محدودیت‌های روش DH</h2>
+    <p class="slide-sub">چه زمانی DH کافی نیست؟</p>
+
+    <div class="cards-grid cols-3" style="max-width:1000px;">
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <h3>ربات‌های موازی</h3>
+        <p>DH برای زنجیره‌های سری ساخته شده — برای موازی مناسب نیست</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-route"></i>
+        </div>
+        <h3>مسیرهای بسته</h3>
+        <p>در ربات‌های با حلقه بسته، DH نیاز به فرمولاسیون اضافی دارد</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+          <i class="fas fa-random"></i>
+        </div>
+        <h3>پیچش‌های زیاد</h3>
+        <p>در برخی پیکربندی‌ها ممکن است α و a یکتا نباشند</p>
+      </div>
+    </div>
+
+    <div style="max-width:900px;width:100%;margin-top:20px;padding:16px 22px;
+      background:rgba(255,71,87,0.08);border:1px solid rgba(255,71,87,0.3);
+      border-radius:12px;font-size:12px;line-height:1.8;color:#c0c8dc;">
+      <i class="fas fa-info-circle" style="color:var(--danger);"></i>
+      <strong style="color:var(--danger);">راه‌حل:</strong>
+      برای ربات‌های موازی از روش‌های دیگری مانند Screw Theory یا
+      Product of Exponentials (PoE) استفاده می‌شود.
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۶: DH vs Modified DH ═══════ -->
+  <div class="slide" data-slide="16">
+    <h2 class="slide-title">DH استاندارد vs DH اصلاح‌شده</h2>
+    <p class="slide-sub">دو نسخه رایج در نرم‌افزارها</p>
+
+    <div class="data-table" style="max-width:900px;">
+      <table>
+        <thead>
+          <tr>
+            <th>معیار</th>
+            <th>DH استاندارد</th>
+            <th>DH اصلاح‌شده (Craig)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ترتیب تبدیل</td>
+            <td>Rot(z, θ) → Trans(z, d) → Trans(x, a) → Rot(x, α)</td>
+            <td>Trans(x, a) → Rot(x, α) → Rot(z, θ) → Trans(z, d)</td>
+          </tr>
+          <tr>
+            <td>اندیس‌گذاری</td>
+            <td>a<sub>i</sub>، α<sub>i</sub> برای لینک i</td>
+            <td>a<sub>i-1</sub>، α<sub>i-1</sub> برای لینک i</td>
+          </tr>
+          <tr>
+            <td>کاربرد</td>
+            <td>کتاب‌های کلاسیک (Spong)</td>
+            <td>MATLAB Robotics Toolbox، ROS</td>
+          </tr>
+          <tr>
+            <td>مزیت</td>
+            <td>شهودی‌تر</td>
+            <td>کدنویسی ساده‌تر</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="max-width:900px;width:100%;margin-top:16px;padding:14px 20px;
+      background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);
+      border-radius:12px;font-size:12px;line-height:1.8;color:#c0c8dc;">
+      <i class="fas fa-info-circle" style="color:var(--purple);"></i>
+      <strong style="color:var(--purple);">توصیه:</strong>
+      در این دوره از DH استاندارد استفاده می‌کنیم (طبق Spong)، ولی
+      اگر با MATLAB Robotics Toolbox کار می‌کنید، به Modified DH نیاز دارید.
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۷: تمرین کلاسی ═══════ -->
+  <div class="slide" data-slide="17">
+    <h2 class="slide-title">تمرین‌های کلاسی</h2>
+    <p class="slide-sub">جلسه ۵ — سینماتیک مستقیم و DH</p>
+
+    <div class="exercise-wrap">
+      <div class="ex-section a">
+        <h4><i class="fas fa-brain"></i> الف) سؤالات مفهومی</h4>
+        <div class="ex-item">
+          <div class="ex-num">۱</div>
+          <div>چرا در روش DH فقط ۴ پارامتر کافی است؟ چه چیزی باعث کاهش تعداد پارامترها می‌شود؟</div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۲</div>
+          <div>در یک مفصل دورانی، کدام پارامترها ثابت و کدام متغیرند؟</div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۳</div>
+          <div>تفاوت اصلی DH استاندارد و Modified DH چیست؟</div>
+        </div>
+      </div>
+
+      <div class="ex-section b">
+        <h4><i class="fas fa-flask"></i> ب) تمرین‌های عملی</h4>
+        <div class="ex-item">
+          <div class="ex-num">۱</div>
+          <div>
+            جدول DH ربات ۲R را بنویسید و ماتریس T₀² را به‌صورت نمادین استخراج کنید.
+          </div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۲</div>
+          <div>
+            برای ربات ۳R با L₁=L₂=L₃=1، θ₁=30°، θ₂=45°، θ₃=60°،
+            موقعیت نوک را به دو روش (هندسی + DH) محاسبه و مقایسه کنید.
+          </div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۳</div>
+          <div>
+            در شبیه‌ساز اسلاید ۱۱، سه θ را طوری تنظیم کنید که نوک به نقطه (1.5, 1.5) برسد.
+            چند راه‌حل ممکن است؟
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-section c">
+        <h4><i class="fas fa-pen-fancy"></i> ج) تمرین نوشتاری</h4>
+        <div class="ex-item">
+          <div class="ex-num">۱</div>
+          <div>با استفاده از MATLAB، تابع `dhTransform(a, alpha, d, theta)` را بنویسید که ماتریس A_i را برگرداند.</div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۲</div>
+          <div>مسیر تبدیل‌های DH را برای ربات SCARA (از جلسه ۴) بنویسید.</div>
+        </div>
+      </div>
+
+      <div class="ex-section d">
+        <h4><i class="fas fa-star"></i> د) چالش خلاقانه ★</h4>
+        <div class="ex-item">
+          <div class="ex-num">★</div>
+          <div>
+            یک ربات ۴R (چهار لینک صفحه‌ای) در نظر بگیرید که بتواند یک مستطیل را در فضای کاری رسم کند.
+            <br>
+            <span style="color:#8892a8;font-size:11.5px;">
+              (جدول DH، فرمول موقعیت نوک، معادلات مسیر — ۲۵۰ کلمه)
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۸: Quiz ═══════ -->
+  <div class="slide" data-slide="18">
+    <h2 class="slide-title">سوال تعاملی</h2>
+    <p class="slide-sub">پاسخ صحیح را انتخاب کنید</p>
+
+    <div class="question-card">
+      <div class="q-icon"><i class="fas fa-question"></i></div>
+      <h3>در روش DH، ترتیب صحیح ضرب ماتریس‌ها برای محاسبه T₀ᴺ کدام است؟</h3>
+
+      <div class="quiz-options">
+        <button class="quiz-option" onclick="answerQuiz(this, false)">
+          <span class="opt-letter">الف</span>
+          <span>A<sub>N</sub> · A<sub>N-1</sub> · ... · A<sub>1</sub></span>
+        </button>
+        <button class="quiz-option" onclick="answerQuiz(this, true, 1)">
+          <span class="opt-letter">ب</span>
+          <span>A<sub>1</sub> · A<sub>2</sub> · ... · A<sub>N</sub></span>
+        </button>
+        <button class="quiz-option" onclick="answerQuiz(this, false)">
+          <span class="opt-letter">ج</span>
+          <span>A<sub>1</sub> + A<sub>2</sub> + ... + A<sub>N</sub></span>
+        </button>
+        <button class="quiz-option" onclick="answerQuiz(this, false)">
+          <span class="opt-letter">د</span>
+          <span>A<sub>1</sub> − A<sub>2</sub> − ... − A<sub>N</sub></span>
+        </button>
+      </div>
+
+      <div class="quiz-result"></div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۹: جمع‌بندی ═══════ -->
+  <div class="slide" data-slide="19">
+    <h2 class="slide-title">جمع‌بندی جلسه ۵</h2>
+    <p class="slide-sub">آنچه امروز آموختیم</p>
+
+    <div class="summary-list">
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>روش DH:</strong>
+          استاندارد سینماتیک رباتیک از سال ۱۹۵۵ — ۴ پارامتر (a, α, d, θ) برای هر لینک.
+        </div>
+      </div>
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>ماتریس A<sub>i</sub>:</strong>
+          Rot(z, θ) · Trans(z, d) · Trans(x, a) · Rot(x, α) — تبدیل همگن ۴×۴.
+        </div>
+      </div>
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>تبدیل کل:</strong>
+          T₀ᴺ = A₁ · A₂ · ... · Aₙ — از پایه به نوک بازو.
+        </div>
+      </div>
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>برای ۲R و ۳R:</strong>
+          جدول DH ساده، ماتریس نهایی همان فرمول سینماتیک مستقیم است.
+        </div>
+      </div>
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>محدودیت:</strong>
+          DH استاندارد برای ربات‌های موازی مناسب نیست — از PoE استفاده شود.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۲۰: خداحافظی ═══════ -->
+  <div class="slide goodbye-slide" data-slide="20">
+    <div class="goodbye-icon"><i class="fas fa-hand-peace"></i></div>
+    <h2 class="goodbye-title">تا جلسه بعد!</h2>
+    <p class="goodbye-text">
+      در جلسه ۶ به مدل‌سازی ربات ۲R در MATLAB، Python و SolidWorks
+      می‌پردازیم و جدول DH را در نرم‌افزارها پیاده‌سازی می‌کنیم.
+    </p>
+    <button class="goodbye-cta" onclick="window.location.href='../../index.html'">
+      <i class="fas fa-home"></i>
+      بازگشت به صفحه اصلی
+    </button>
+    <div style="margin-top:32px;display:inline-flex;align-items:center;gap:12px;
+      padding:14px 24px;background:var(--card);border:1px solid var(--border);
+      border-radius:16px;backdrop-filter:blur(12px);">
+      <div style="width:44px;height:44px;border-radius:50%;
+        background:linear-gradient(135deg,var(--accent),var(--accent2));
+        display:grid;place-items:center;font-size:16px;color:#050818;font-weight:800;">
+        MG
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:13px;font-weight:700;">دکتر مسعود گوهری‌منش</div>
+        <div style="font-size:10.5px;color:#8892a8;">دانشیار — دانشگاه تربت حیدریه</div>
+        <a href="mailto:m.goharimanesh@gmail.com" style="font-size:10px;color:var(--cyan);text-decoration:none;">
+          m.goharimanesh@gmail.com
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- نقاط ناوبری -->
+<div class="nav-dots" id="navDots"></div>
+<div class="slide-counter" id="slideCounter">۱ / ۲۰</div>
+
+<!-- کنترل‌ها -->
+<div class="controls">
+  <button class="ctrl-btn" id="prevBtn" title="قبلی (←)"><i class="fas fa-chevron-right"></i></button>
+  <button class="ctrl-btn" id="nextBtn" title="بعدی (→)"><i class="fas fa-chevron-left"></i></button>
+  <button class="ctrl-btn" id="fsBtn" title="تمام‌صفحه"><i class="fas fa-expand"></i></button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════ منطق مشترک ═══════ -->
+<script src="../../shared/lecture.js"></script>
+
+<!-- ═══════ شبیه‌سازهای جلسه ۵ ═══════ -->
+<script>
+window.addEventListener('load', function() {
+  console.log('⏳ شروع مقداردهی شبیه‌سازهای جلسه ۵...');
+
+  /* ═══════════════════════════════════════════════════
+     شبیه‌ساز ۱: DH Transform (ماتریس تعاملی)
+  ═══════════════════════════════════════════════════ */
+  (function() {
+    const display = document.getElementById('dhMatrixDisplay');
+    if (!display) {
+      console.error('❌ dhMatrixDisplay پیدا نشد');
+      return;
+    }
+    console.log('✅ dhMatrixDisplay پیدا شد');
+
+    const thetaIn = document.getElementById('dhTheta');
+    const dIn = document.getElementById('dhD');
+    const aIn = document.getElementById('dhA');
+    const alphaIn = document.getElementById('dhAlpha');
+
+    if (!thetaIn || !dIn || !aIn || !alphaIn) {
+      console.error('❌ input های DH پیدا نشد');
+      return;
+    }
+
+    function updateMatrix() {
+      const th = +thetaIn.value * Math.PI / 180;
+      const d = +dIn.value;
+      const a = +aIn.value;
+      const al = +alphaIn.value * Math.PI / 180;
+
+      const ct = Math.cos(th), st = Math.sin(th);
+      const ca = Math.cos(al), sa = Math.sin(al);
+
+      // ماتریس A_i (4×4)
+      const A = [
+        [ct,  -st*ca,  st*sa,  a*ct],
+        [st,   ct*ca, -ct*sa,  a*st],
+        [0,    sa,     ca,     d],
+        [0,    0,      0,      1]
+      ];
+
+      // رندر ماتریس با رنگ‌بندی
+      let html = '<div style="margin-bottom:10px;color:#ffb700;font-weight:700;font-size:12px;">ماتریس A<sub>i</sub> =</div>';
+      html += '<table style="border-collapse:separate;border-spacing:6px;margin:0 auto;">';
+      for (let i = 0; i < 4; i++) {
+        html += '<tr>';
+        for (let j = 0; j < 4; j++) {
+          const val = A[i][j];
+          let color = '#e8ecf5';
+          let bg = 'rgba(255,255,255,0.05)';
+          if (j === 3 && i < 3) {
+            color = '#ffb700';  // ستون انتقال
+            bg = 'rgba(255,183,0,0.15)';
+          } else if (i === 3) {
+            color = '#8892a8';
+            bg = 'rgba(136,146,168,0.1)';
+          } else {
+            color = '#00d4aa';  // بلوک چرخش
+            bg = 'rgba(0,212,170,0.1)';
+          }
+          html += `<td style="padding:6px 10px;background:${bg};border-radius:6px;color:${color};font-family:'Courier New',monospace;font-size:12px;text-align:right;min-width:60px;">${val.toFixed(3)}</td>`;
+        }
+        html += '</tr>';
+      }
+      html += '</table>';
+      html += '<div style="margin-top:12px;font-size:10px;color:#8892a8;text-align:center;direction:rtl;">ستون زرد: انتقال | بلوک فیروزه‌ای: چرخش</div>';
+
+      display.innerHTML = html;
+
+      // آپدیت label ها
+      document.getElementById('dhThetaVal').textContent = toFa(thetaIn.value) + '°';
+      document.getElementById('dhDVal').textContent = toFa(dIn.value);
+      document.getElementById('dhAVal').textContent = toFa(aIn.value);
+      document.getElementById('dhAlphaVal').textContent = toFa(alphaIn.value) + '°';
+    }
+
+    thetaIn.addEventListener('input', updateMatrix);
+    dIn.addEventListener('input', updateMatrix);
+    aIn.addEventListener('input', updateMatrix);
+    alphaIn.addEventListener('input', updateMatrix);
+
+    window.resetDH = function() {
+      thetaIn.value = 30;
+      dIn.value = 0;
+      aIn.value = 100;
+      alphaIn.value = 0;
+      updateMatrix();
+      playClick();
+    };
+
+    window.randomizeDH = function() {
+      thetaIn.value = Math.round(Math.random() * 360 - 180);
+      dIn.value = Math.round(Math.random() * 200 - 100);
+      aIn.value = Math.round(Math.random() * 180 + 20);
+      alphaIn.value = Math.round(Math.random() * 360 - 180);
+      updateMatrix();
+      playClick();
+      showToast('ماتریس تصادفی شد 🎲');
+    };
+
+    updateMatrix();
+    console.log('✅ شبیه‌ساز DH شروع شد');
+  })();
+
+  /* ═══════════════════════════════════════════════════
+     شبیه‌ساز ۲: ربات ۳R
+  ═══════════════════════════════════════════════════ */
+  (function() {
+    const canvas = document.getElementById('robot3RCanvas');
+    if (!canvas) {
+      console.error('❌ robot3RCanvas پیدا نشد');
+      return;
+    }
+    console.log('✅ robot3RCanvas پیدا شد:', canvas.width, '×', canvas.height);
+
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const ORIGIN_X = W / 2;
+    const ORIGIN_Y = H / 2 + 40;
+
+    let L1 = 100, L2 = 80, L3 = 60;
+    let t1 = 30, t2 = 30, t3 = 30;
+    let showFrames = false;
+    let showTrail = false;
+    let trail = [];
+
+    function drawFrame(x, y, angle, label) {
+      // چرخش دستگاه مختصات
+      const len = 20;
+      // محور X (فیروزه‌ای)
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + len * Math.cos(-angle), y + len * Math.sin(-angle));
+      ctx.strokeStyle = '#00d4aa';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      // محور Y (طلایی)
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x - len * Math.sin(-angle), y + len * Math.cos(-angle));
+      ctx.strokeStyle = '#ffb700';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      // برچسب
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.font = '10px Vazirmatn';
+      ctx.textAlign = 'left';
+      ctx.fillText(label, x + 6, y - 6);
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = '#0a0e1a';
+      ctx.fillRect(0, 0, W, H);
+
+      // شبکه
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < W; x += 40) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+      }
+      for (let y = 0; y < H; y += 40) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      }
+
+      // محورها
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.beginPath(); ctx.moveTo(0, ORIGIN_Y); ctx.lineTo(W, ORIGIN_Y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(ORIGIN_X, 0); ctx.lineTo(ORIGIN_X, H); ctx.stroke();
+
+      // رادیان
+      const r1 = t1 * Math.PI / 180;
+      const r2 = t2 * Math.PI / 180;
+      const r3 = t3 * Math.PI / 180;
+
+      // موقعیت مفاصل
+      const j1x = ORIGIN_X + L1 * Math.cos(r1);
+      const j1y = ORIGIN_Y - L1 * Math.sin(r1);
+      const j2x = j1x + L2 * Math.cos(r1 + r2);
+      const j2y = j1y - L2 * Math.sin(r1 + r2);
+      const tippx = j2x + L3 * Math.cos(r1 + r2 + r3);
+      const tippy = j2y - L3 * Math.sin(r1 + r2 + r3);
+
+      // trail (رد حرکت)
+      if (showTrail) {
+        trail.push({ x: tippx, y: tippy });
+        if (trail.length > 150) trail.shift();
+        ctx.beginPath();
+        trail.forEach((p, i) => {
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        });
+        ctx.strokeStyle = 'rgba(168,85,247,0.4)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      // لینک ۱
+      ctx.beginPath();
+      ctx.moveTo(ORIGIN_X, ORIGIN_Y);
+      ctx.lineTo(j1x, j1y);
+      ctx.strokeStyle = '#ffb700';
+      ctx.lineWidth = 12;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // لینک ۲
+      ctx.beginPath();
+      ctx.moveTo(j1x, j1y);
+      ctx.lineTo(j2x, j2y);
+      ctx.strokeStyle = '#ff6b35';
+      ctx.lineWidth = 10;
+      ctx.stroke();
+
+      // لینک ۳
+      ctx.beginPath();
+      ctx.moveTo(j2x, j2y);
+      ctx.lineTo(tippx, tippy);
+      ctx.strokeStyle = '#a855f7';
+      ctx.lineWidth = 8;
+      ctx.stroke();
+
+      // مفاصل
+      [ORIGIN_X, ORIGIN_Y, j1x, j1y, j2x, j2y].forEach((v, i) => {
+        if (i % 2 === 0) {
+          const cx = i === 0 ? ORIGIN_X : (i === 2 ? j1x : j2x);
+          const cy = i === 0 ? ORIGIN_Y : (i === 2 ? j1y : j2y);
+          const r = i === 0 ? 14 : (i === 2 ? 11 : 9);
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0,212,170,0.2)';
+          ctx.fill();
+          ctx.strokeStyle = '#00d4aa';
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+          ctx.fillStyle = '#00d4aa';
+          ctx.fill();
+        }
+      });
+
+      // نوک بازو
+      ctx.beginPath();
+      ctx.arc(tippx, tippy, 8, 0, Math.PI * 2);
+      ctx.fillStyle = '#ff4757';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // دستگاه‌های مختصات (در صورت فعال بودن)
+      if (showFrames) {
+        drawFrame(ORIGIN_X, ORIGIN_Y, 0, 'F₀');
+        drawFrame(j1x, j1y, r1, 'F₁');
+        drawFrame(j2x, j2y, r1 + r2, 'F₂');
+        drawFrame(tippx, tippy, r1 + r2 + r3, 'F₃');
+      }
+
+      // آپدیت readout
+      const tipX = (tippx - ORIGIN_X) / 100;
+      const tipY = -(tippy - ORIGIN_Y) / 100;
+      const phi = (t1 + t2 + t3) % 360;
+
+      const tipEl = document.getElementById('r3Tip');
+      const phiEl = document.getElementById('r3Phi');
+      if (tipEl) tipEl.textContent = '(' + toFa(tipX.toFixed(2)) + ', ' + toFa(tipY.toFixed(2)) + ')';
+      if (phiEl) phiEl.textContent = toFa(phi) + '°';
+
+      requestAnimationFrame(draw);
+    }
+
+    // کنترل‌ها
+    const inputs = {
+      theta1: document.getElementById('r3theta1'),
+      theta2: document.getElementById('r3theta2'),
+      theta3: document.getElementById('r3theta3'),
+      L1: document.getElementById('r3L1'),
+      L2: document.getElementById('r3L2'),
+      L3: document.getElementById('r3L3')
+    };
+
+    Object.keys(inputs).forEach(key => {
+      if (inputs[key]) {
+        inputs[key].addEventListener('input', () => {
+          const val = +inputs[key].value;
+          if (key === 'theta1') t1 = val;
+          else if (key === 'theta2') t2 = val;
+          else if (key === 'theta3') t3 = val;
+          else if (key === 'L1') L1 = val;
+          else if (key === 'L2') L2 = val;
+          else if (key === 'L3') L3 = val;
+
+          const valElId = {
+            theta1: 'r3theta1Val',
+            theta2: 'r3theta2Val',
+            theta3: 'r3theta3Val',
+            L1: 'r3L1Val',
+            L2: 'r3L2Val',
+            L3: 'r3L3Val'
+          }[key];
+
+          const valEl = document.getElementById(valElId);
+          if (valEl) {
+            if (key.startsWith('theta')) valEl.textContent = toFa(val) + '°';
+            else valEl.textContent = toFa(val);
+          }
+        });
+      }
+    });
+
+    window.randomize3R = function() {
+      t1 = Math.round(Math.random() * 360 - 180);
+      t2 = Math.round(Math.random() * 360 - 180);
+      t3 = Math.round(Math.random() * 360 - 180);
+      inputs.theta1.value = t1;
+      inputs.theta2.value = t2;
+      inputs.theta3.value = t3;
+      document.getElementById('r3theta1Val').textContent = toFa(t1) + '°';
+      document.getElementById('r3theta2Val').textContent = toFa(t2) + '°';
+      document.getElementById('r3theta3Val').textContent = toFa(t3) + '°';
+      trail = [];
+      playClick();
+    };
+
+    window.reset3R = function() {
+      t1 = t2 = t3 = 30;
+      L1 = 100; L2 = 80; L3 = 60;
+      inputs.theta1.value = 30;
+      inputs.theta2.value = 30;
+      inputs.theta3.value = 30;
+      inputs.L1.value = 100;
+      inputs.L2.value = 80;
+      inputs.L3.value = 60;
+      ['r3theta1Val', 'r3theta2Val', 'r3theta3Val'].forEach((id, i) => {
+        document.getElementById(id).textContent = '۳۰°';
+      });
+      ['r3L1Val', 'r3L2Val', 'r3L3Val'].forEach((id, i) => {
+        document.getElementById(id).textContent = toFa([100, 80, 60][i]);
+      });
+      trail = [];
+      playClick();
+    };
+
+    window.toggleFrames = function() {
+      showFrames = !showFrames;
+      const btn = document.getElementById('framesBtn');
+      if (btn) btn.classList.toggle('active', showFrames);
+      playClick();
+    };
+
+    window.toggleTrail = function() {
+      showTrail = !showTrail;
+      if (!showTrail) trail = [];
+      const btn = document.getElementById('trailBtn');
+      if (btn) btn.classList.toggle('active', showTrail);
+      playClick();
+    };
+
+    draw();
+    console.log('✅ شبیه‌ساز ۳R شروع شد');
+  })();
+
+  console.log('✅ همه شبیه‌سازهای جلسه ۵ آماده‌اند');
+});
+</script>
+</body>
+</html>

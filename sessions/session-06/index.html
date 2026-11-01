@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جلسه ۶ — مدل‌سازی در CAD، متلب و پایتون | دکتر مسعود گوهری‌منش</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../shared/lecture.css">
+
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']], processEscapes: true },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+
+<style>
+:root {
+  --accent: #ffb700;
+  --accent2: #ff6b35;
+  --success: #00d4aa;
+  --danger: #ff4757;
+  --purple: #a855f7;
+  --pink: #ec4899;
+  --cyan: #06b6d4;
+  --dark: #050818;
+  --card: rgba(255,255,255,0.05);
+  --border: rgba(255,255,255,0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%; overflow: hidden;
+  font-family: 'Vazirmatn', sans-serif;
+  background: var(--dark); color: #e8ecf5; user-select: none;
+}
+
+.bg-wrap { position: fixed; inset: 0; z-index: -2; background: radial-gradient(ellipse at top, #0a1030 0%, #050818 60%); overflow: hidden; }
+.bubble { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; animation: float 22s infinite ease-in-out; }
+.b1 { width: 500px; height: 500px; background: #ffb700; top: -10%; right: -8%; }
+.b2 { width: 440px; height: 440px; background: #00d4aa; bottom: -15%; left: -8%; animation-delay: -7s; }
+.b3 { width: 360px; height: 360px; background: #a855f7; top: 35%; left: 40%; animation-delay: -14s; opacity: 0.2; }
+@keyframes float { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(60px,-50px) scale(1.1); } 66% { transform: translate(-40px,40px) scale(0.95); } }
+
+.particles { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+.particle { position: absolute; width: 2px; height: 2px; border-radius: 50%; animation: rise linear infinite; opacity: 0; }
+@keyframes rise { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 10% { opacity: 0.8; } 90% { opacity: 0.6; } 100% { transform: translateY(-20vh) scale(1.2); opacity: 0; } }
+
+.top-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 20px; background: rgba(5,8,24,0.75); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);
+}
+.header-brand { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 700; color: #8892a8; }
+.header-brand i { color: var(--accent); font-size: 14px; }
+
+.instructor-signature {
+  position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 95;
+  display: flex; align-items: center; gap: 8px; padding: 6px 16px;
+  background: rgba(5,8,24,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,183,0,0.2);
+  border-radius: 100px; pointer-events: none;
+}
+.instructor-signature .sig-fallback {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: grid; place-items: center; font-size: 11px; color: #050818; font-weight: 800;
+}
+.instructor-signature .sig-text { display: flex; flex-direction: column; line-height: 1.2; text-align: right; }
+.instructor-signature .sig-text strong { font-size: 10.5px; color: var(--accent); font-weight: 700; }
+.instructor-signature .sig-text span { font-size: 8.5px; color: #8892a8; }
+
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); z-index: 110; transition: width 0.4s ease; box-shadow: 0 0 12px var(--accent); }
+
+.controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 90; display: flex; gap: 8px; padding: 8px 12px; background: rgba(5,8,24,0.75); backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: 100px; }
+.ctrl-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: rgba(255,255,255,0.06); color: #e8ecf5; cursor: pointer; display: grid; place-items: center; font-size: 13px; transition: all 0.25s; }
+.ctrl-btn:hover { background: rgba(255,183,0,0.2); color: var(--accent); }
+.ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.nav-dots { position: fixed; left: 20px; top: 50%; transform: translateY(-50%); z-index: 90; display: flex; flex-direction: column; gap: 8px; }
+.nav-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.15); cursor: pointer; transition: all 0.3s; }
+.nav-dot:hover, .nav-dot.active { background: var(--accent); box-shadow: 0 0 12px var(--accent); transform: scale(1.4); }
+.slide-counter { position: fixed; bottom: 20px; right: 20px; z-index: 90; font-size: 12px; color: #8892a8; background: rgba(5,8,24,0.7); padding: 6px 14px; border-radius: 100px; backdrop-filter: blur(12px); font-variant-numeric: tabular-nums; }
+
+.slides-container { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+.slide { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 90px 60px 80px; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s; overflow-y: auto; }
+.slide.active { opacity: 1; visibility: visible; }
+.slide.active > * { animation: slideIn 0.6s ease backwards; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+.slide-title { font-size: clamp(22px, 3vw, 32px); font-weight: 800; margin-bottom: 12px; text-align: center; background: linear-gradient(135deg, #fff, var(--accent)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.slide-sub { font-size: clamp(13px, 1.5vw, 15px); color: #8892a8; text-align: center; margin-bottom: 28px; max-width: 760px; line-height: 1.8; }
+
+.slide-img-wrap { max-width: 680px; width: 100%; border-radius: 18px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 16px 40px rgba(0,0,0,0.5); margin-bottom: 24px; position: relative; }
+.slide-img-wrap img { width: 100%; height: auto; display: block; }
+
+.cards-grid { display: grid; gap: 16px; width: 100%; max-width: 960px; }
+.cols-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.cols-3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.cols-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+.content-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 22px; backdrop-filter: blur(12px); transition: all 0.3s; }
+.content-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 10px 30px rgba(255,183,0,0.15); }
+.content-card .card-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--ci, linear-gradient(135deg, var(--accent), var(--accent2))); display: grid; place-items: center; font-size: 18px; color: #050818; margin-bottom: 12px; }
+.content-card h3 { font-size: 14.5px; font-weight: 700; margin-bottom: 6px; }
+.content-card p { font-size: 12px; color: #b0b8cc; line-height: 1.8; }
+
+.simulator { width: 100%; max-width: 1050px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px; backdrop-filter: blur(12px); }
+.sim-layout { display: grid; grid-template-columns: 1fr 1.1fr; gap: 24px; align-items: start; }
+.sim-canvas-wrap { background: rgba(0,0,0,0.4); border-radius: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--border); }
+.sim-controls { display: flex; flex-direction: column; gap: 14px; margin-top: 14px; }
+.sim-control label { display: flex; justify-content: space-between; font-size: 12px; color: #8892a8; margin-bottom: 5px; }
+.sim-control label strong { color: var(--accent); font-variant-numeric: tabular-nums; }
+.sim-control input[type=range] { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; -webkit-appearance: none; outline: none; }
+.sim-control input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--accent); border-radius: 50%; cursor: pointer; box-shadow: 0 0 12px var(--accent); }
+
+.code-box { background: #0f1322; border-radius: 12px; padding: 18px; font-family: 'Courier New', monospace; font-size: 12.5px; color: #d4d4d4; direction: ltr; text-align: left; overflow-x: auto; border: 1px solid var(--border); line-height: 1.6; }
+.code-box .keyword { color: #569cd6; font-weight: bold; }
+.code-box .string { color: #ce9178; }
+.code-box .comment { color: #6a9955; font-style: italic; }
+.code-box .func { color: #dcdcaa; }
+.code-box .var { color: #4fc1ff; }
+.code-box .num { color: #b5cea8; }
+.code-tabs { display: flex; gap: 8px; margin-bottom: 10px; }
+.code-tab { padding: 6px 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; font-size: 12px; cursor: pointer; color: #b0b8cc; transition: all 0.2s; }
+.code-tab.active { background: rgba(0,212,170,0.15); border-color: var(--success); color: var(--success); }
+
+.cad-flow { display: flex; align-items: center; justify-content: space-between; padding: 20px; background: rgba(0,0,0,0.25); border-radius: 16px; margin: 20px 0; }
+.cad-step { text-align: center; flex: 1; opacity: 0.35; transition: all 0.4s ease; transform: scale(0.95); }
+.cad-step.active { opacity: 1; transform: scale(1.05); }
+.cad-step .c-icon { width: 56px; height: 56px; margin: 0 auto 12px; border-radius: 14px; display: grid; place-items: center; font-size: 26px; color: #050818; }
+.cad-step .c-label { font-size: 13px; font-weight: 700; color: #fff; }
+.cad-step .c-sub { font-size: 11px; color: #8892a8; margin-top: 4px; }
+.cad-arrow { font-size: 20px; color: var(--accent); opacity: 0.6; }
+
+.data-table { width: 100%; border-collapse: collapse; margin: 16px 0; background: var(--card); border-radius: 14px; overflow: hidden; border: 1px solid var(--border); font-size: 13px; }
+.data-table th { background: rgba(255,183,0,0.12); color: var(--accent); padding: 12px; font-weight: 700; text-align: center; border-bottom: 1px solid var(--border); }
+.data-table td { padding: 12px; text-align: center; border-bottom: 1px solid var(--border); color: #c0c8dc; }
+.data-table tr:last-child td { border-bottom: none; }
+
+.exercise-wrap { width: 100%; max-width: 920px; max-height: 65vh; overflow-y: auto; padding: 4px; padding-left: 10px; }
+.exercise-wrap::-webkit-scrollbar { width: 6px; }
+.exercise-wrap::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+.ex-section { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; margin-bottom: 14px; backdrop-filter: blur(12px); }
+.ex-section.a { border-right: 4px solid #fbbf24; }
+.ex-section.b { border-right: 4px solid var(--success); }
+.ex-section.c { border-right: 4px solid var(--purple); }
+.ex-section.d { border-right: 4px solid var(--danger); }
+.ex-section h4 { font-size: 13.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.ex-section.a h4 { color: #fbbf24; }
+.ex-section.b h4 { color: var(--success); }
+.ex-section.c h4 { color: var(--purple); }
+.ex-section.d h4 { color: var(--danger); }
+.ex-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px dashed rgba(255,255,255,0.06); font-size: 12.5px; color: #c0c8dc; line-height: 1.8; }
+.ex-item:last-child { border-bottom: none; }
+.ex-num { width: 24px; height: 24px; flex-shrink: 0; border-radius: 50%; background: rgba(255,255,255,0.08); display: grid; place-items: center; font-size: 11px; font-weight: 800; color: var(--accent); }
+
+.summary-list { max-width: 760px; width: 100%; display: flex; flex-direction: column; gap: 12px; }
+.summary-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 18px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; backdrop-filter: blur(12px); font-size: 13px; line-height: 1.8; }
+.summary-item i { color: var(--success); font-size: 18px; margin-top: 2px; }
+.summary-item strong { color: var(--accent); }
+
+.question-card { max-width: 700px; width: 100%; background: var(--card); border: 2px solid rgba(255,183,0,0.3); border-radius: 20px; padding: 30px; backdrop-filter: blur(12px); text-align: center; }
+.quiz-options { display: flex; flex-direction: column; gap: 10px; text-align: right; margin-top: 20px; }
+.quiz-option { padding: 14px 18px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; font-family: 'Vazirmatn'; font-size: 13px; color: #e8ecf5; transition: all 0.25s; display: flex; align-items: center; gap: 12px; }
+.quiz-option:hover { background: rgba(255,183,0,0.1); border-color: var(--accent); }
+.quiz-option.correct { background: rgba(0,212,170,0.15); border-color: var(--success); }
+.quiz-option.wrong { background: rgba(255,71,87,0.15); border-color: var(--danger); }
+.quiz-result { margin-top: 16px; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 600; display: none; }
+.quiz-result.show { display: block; }
+
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(10,14,39,0.95); border: 1px solid var(--accent); color: var(--accent); padding: 10px 22px; border-radius: 100px; font-size: 12px; font-weight: 600; backdrop-filter: blur(20px); z-index: 999; transition: transform 0.4s ease; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="bg-wrap">
+  <div class="bubble b1"></div>
+  <div class="bubble b2"></div>
+  <div class="bubble b3"></div>
+</div>
+<div class="particles" id="particles"></div>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="instructor-signature">
+  <div class="sig-fallback">MG</div>
+  <div class="sig-text">
+    <strong>دکتر مسعود گوهری‌منش</strong>
+    <span>دانشیار — دانشگاه تربت حیدریه</span>
+  </div>
+</div>
+
+<header class="top-header">
+  <div class="header-brand"><i class="fas fa-robot"></i><span>جلسه ۶ — مدل‌سازی ۲R در CAD، متلب و پایتون</span></div>
+  <button class="ctrl-btn" id="soundBtn" title="صدا"><i class="fas fa-volume-up"></i></button>
+</header>
+
+<div class="slides-container" id="slidesContainer">
+
+  <!-- ═══════ اسلاید ۱: کاور ═══════ -->
+  <div class="slide" data-slide="1">
+    <div style="display:inline-flex; gap:8px; padding:8px 20px; background:rgba(255,183,0,0.1); border:1px solid rgba(255,183,0,0.3); border-radius:100px; font-size:13px; color:var(--accent); margin-bottom:20px;">
+      <i class="fas fa-graduation-cap"></i> جلسه ۶ از ۱۶ — پایان فاز ۲
+    </div>
+    <div class="slide-img-wrap" style="max-width:540px;">
+      <img src="assets/session06-hero.jpg" alt="ربات دو لینکی: متلب، سالیدورکس و پایتون">
+    </div>
+    <h1 class="slide-title">مدل‌سازی ربات دو لینکی در متلب، پایتون و سالیدورکس</h1>
+    <p class="slide-sub">
+      پیوند کامل طراحی مکانیکی (CAD)، شبیه‌سازی فیزیکی بلوکی (Simscape Multibody)،
+      جبر خطی در MATLAB و پیاده‌سازی مدرن در Python و ابزارهای آنلاین.
+    </p>
+  </div>
+
+  <!-- ═══════ اسلاید ۲: سوال انگیزشی ═══════ -->
+  <div class="slide" data-slide="2">
+    <h2 class="slide-title">چرا به سه محیط مجزا نیاز داریم؟</h2>
+    <p class="slide-sub">تلاقی هندسه، شبیه‌سازی سیستم و الگوریتم‌های حرکتی</p>
+    <div class="cards-grid cols-3">
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, #e74c3c, #c0392b); color:#fff;"><i class="fas fa-drafting-compass"></i></div>
+        <h3>۱. مدل‌سازی CAD (دقت فیزیکی)</h3>
+        <p>استخراج دقیق مرکز جرم (COM)، تنسور اینرسی و برخوردهای هندسی در SolidWorks.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, #0984e3, #74b9ff); color:#fff;"><i class="fas fa-project-diagram"></i></div>
+        <h3>۲. سیمولینک و سیم‌مکانیکس</h3>
+        <p>شبیه‌سازی دینامیک چندجسمی بدون نیاز به نوشتن دستی معادلات لاگرانژ.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, #f1c40f, #e67e22);"><i class="fab fa-python"></i></div>
+        <h3>۳. پایتون و متلب (الگوریتم‌ها)</h3>
+        <p>توسعه الگوریتم‌های بلادرنگ سینماتیک مستقیم، ژاکوبین و اتصال به ROS.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۳: دیاگرام ورک‌فلو ═══════ -->
+  <div class="slide" data-slide="3">
+    <h2 class="slide-title">چرخه کار مهندسی (Engineering Workflow)</h2>
+    <p class="slide-sub">نقشه راه انتقال داده از ایده تا شبیه‌سازی نهایی</p>
+    <div class="slide-img-wrap" style="max-width:640px;">
+      <img src="assets/session06-workflow.jpg" alt="چرخه کار انتقال مدل">
+    </div>
+    <div style="max-width:850px; background:rgba(0,212,170,0.08); border:1px solid rgba(0,212,170,0.3); border-radius:12px; padding:14px 20px; font-size:12.5px; color:#c0c8dc; line-height:1.8;">
+      <i class="fas fa-info-circle" style="color:var(--success);"></i>
+      <strong>نکته کلیدی:</strong> هرگز شبیه‌سازی را از برنامه‌نویسی خام شروع نکنید! ابتدا ابعاد و جرم را در CAD بسنجید، سپس به مدل بلوکی وارد کرده و در نهایت با کد ریاضی تایید کنید.
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۴: اصول طراحی در SolidWorks ═══════ -->
+  <div class="slide" data-slide="4">
+    <h2 class="slide-title">اصول طراحی بازوی ۲R در SolidWorks</h2>
+    <p class="slide-sub">نکات ضروری برای سازگاری اسمبلی با محیط‌های دینامیکی</p>
+    <div class="cards-grid cols-2">
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-layer-group"></i></div>
+        <h3>تنظیم تکیه‌گاه و Frame 0</h3>
+        <p>پایه ربات (Base) باید به عنوان جزء Fix در مبدأ مختصات اصلی اسمبلی قرار گیرد تا دستگاه اینرسی جهانی مخدوش نشود.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));"><i class="fas fa-link"></i></div>
+        <h3>قیدگذاری استاندارد مفاصل (Mates)</h3>
+        <p>برای هر مفصل دورانی فقط از دو قید استفاده کنید: هم‌محوری (Concentric) و انطباق سطوح (Coincident) تا ۱ درجه آزادی آزاد بماند.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));"><i class="fas fa-weight-hanging"></i></div>
+        <h3>تخصیص جنس و خواص جرمی</h3>
+        <p>تخصیص متریال واقعی (پلکسی‌گلاس یا آلومینیوم ۶۰۶۱) در تب Mass Properties جهت استخراج ماتریس اینرسی صحیح.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--danger), var(--accent2));"><i class="fas fa-crosshairs"></i></div>
+        <h3>سیستم مختصات اختصاصی (Coordinate System)</h3>
+        <p>تعریف Reference Coordinate System در محل هر مفصل بر اساس اصول DH برای سادگی ردیابی ماتریس‌های انتقال.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۵: افزونه Simscape Link و دستور smexport ═══════ -->
+  <div class="slide" data-slide="5">
+    <h2 class="slide-title">پل ارتباطی: Simscape Multibody Link</h2>
+    <p class="slide-sub">نحوه خروجی گرفتن بدون خطا از SolidWorks</p>
+    <div class="cards-grid cols-3" style="margin-bottom:18px;">
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-plug"></i></div>
+        <h3>۱. فعال‌سازی Add-in</h3>
+        <p>فعال‌سازی تیک <code>Simscape Multibody Link</code> در منوی Add-ins سالیدورکس.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));"><i class="fas fa-file-code"></i></div>
+        <h3>۲. استخراج XML</h3>
+        <p>انتخاب Export > Simscape Multibody برای تولید فایل تعریفی XML و فایل‌های فرمت STEP.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));"><i class="fas fa-terminal"></i></div>
+        <h3>۳. ایمپورت در MATLAB</h3>
+        <p>اجرای دستور <code>smimport('Robot2R.xml')</code> در کامند لاین متلب برای ساخت خودکار مدل سیمولینک.</p>
+      </div>
+    </div>
+    <div class="code-box" style="max-width:850px;">
+      <span class="comment">% دستور اجرای ایمپورت مدل مکانیکی سالیدورکس در متلب:</span><br>
+      <span class="keyword">smimport</span>(<span class="string">'TwoLinkRobot.xml'</span>);
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۶: شبیه‌ساز انیمیشنی تبدیل CAD به بلوک ═══════ -->
+  <div class="slide" data-slide="6">
+    <h2 class="slide-title">مفهوم تبدیل مفاصل: از CAD تا بلوک‌های سیم‌مکانیکس</h2>
+    <p class="slide-sub">مشاهده نحوه معادل‌سازی قیدهای فیزیکی به المان‌های تحلیلی</p>
+    <div style="width:100%; max-width:920px; background:var(--card); border:1px solid var(--border); border-radius:20px; padding:28px; text-align:center;">
+      <div class="cad-flow" id="cadFlow">
+        <div class="cad-step active" id="cStep1">
+          <div class="c-icon" style="background:#e74c3c; color:#fff;"><i class="fas fa-cog"></i></div>
+          <div class="c-label">قید هم‌محوری CAD</div>
+          <div class="c-sub">SolidWorks Mate</div>
+        </div>
+        <div class="cad-arrow"><i class="fas fa-long-arrow-alt-left"></i></div>
+        <div class="cad-step" id="cStep2">
+          <div class="c-icon" style="background:#f1c40f;"><i class="fas fa-code"></i></div>
+          <div class="c-label">فایل واسط ساختار</div>
+          <div class="c-sub">TwoLinkRobot.xml</div>
+        </div>
+        <div class="cad-arrow"><i class="fas fa-long-arrow-alt-left"></i></div>
+        <div class="cad-step" id="cStep3">
+          <div class="c-icon" style="background:#3498db; color:#fff;"><i class="fas fa-project-diagram"></i></div>
+          <div class="c-label">بلوک Revolute Joint</div>
+          <div class="c-sub">Simscape Multibody</div>
+        </div>
+      </div>
+      <button class="ctrl-btn" style="width:auto; padding:0 24px; border-radius:100px; margin:20px auto 0; background:linear-gradient(135deg, var(--accent), var(--accent2)); color:#050818; font-weight:800; font-family:'Vazirmatn';" onclick="playCadAnimation()">
+        <i class="fas fa-play" style="margin-left:6px;"></i> اجرای انیمیشن جریان تبدیل
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۷: ساختار بلوک‌های پایه Simscape ═══════ -->
+  <div class="slide" data-slide="7">
+    <h2 class="slide-title">ساختار بلوک‌های پایه در Simscape Multibody</h2>
+    <p class="slide-sub">چهار رکن اصلی برای شبیه‌سازی فیزیکی زنجیره‌های رباتیکی</p>
+    <div class="cards-grid cols-2">
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-globe"></i></div>
+        <h3>World Frame & Mechanism Config</h3>
+        <p>مبدأ مرجع اینرسی جهانی و تعریف شتاب گرانش محیطی ($\mathbf{g} = [0, 0, -9.81]\, m/s^2$).</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));"><i class="fas fa-cubes"></i></div>
+        <h3>Solid Block (لینک‌ها)</h3>
+        <p>شامل خواص هندسی (Geometry)، جرم، ماتریس ممان اینرسی و رنگ‌آمیزی ظاهری لینک‌های صلب.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));"><i class="fas fa-circle-notch"></i></div>
+        <h3>Revolute Joint (مفصل دورانی)</h3>
+        <p>ایجاد چرخش تک‌محوره بین دو دستگاه فریم (Base و Follower) همراه با پورت‌های سنسور زاویه و ورودی گشتاور.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--danger), var(--accent2));"><i class="fas fa-arrows-alt"></i></div>
+        <h3>Rigid Transform</h3>
+        <p>اعمال چرخش‌ها و جابجایی‌های ثابت میان لینک‌ها و نقاط اتصال دقیقا بر اساس پارامترهای $a, \alpha, d$.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۸: فرمولاسیون DH برای کدنویسی ۲R ═══════ -->
+  <div class="slide" data-slide="8">
+    <h2 class="slide-title">فرمولاسیون DH آماده برای پیاده‌سازی در اسکریپت</h2>
+    <p class="slide-sub">یادآوری جدول DH و ماتریس تبدیل همگن لینک‌های ۱ و ۲</p>
+    <div class="data-table" style="max-width:800px;">
+      <table>
+        <thead>
+          <tr>
+            <th>لینک ($i$)</th>
+            <th>زاویه ($\theta_i$)</th>
+            <th>جابجایی ($d_i$)</th>
+            <th>طول لینک ($a_i$)</th>
+            <th>پیچش ($\alpha_i$)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>لینک ۱</td>
+            <td>$\theta_1$ (متغیر)</td>
+            <td>۰</td>
+            <td>$L_1$</td>
+            <td>۰</td>
+          </tr>
+          <tr>
+            <td>لینک ۲</td>
+            <td>$\theta_2$ (متغیر)</td>
+            <td>۰</td>
+            <td>$L_2$</td>
+            <td>۰</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="text-align:center; margin-top:12px; font-size:14px; color:#d4d4d4;">
+      $$ T_0^2 = A_1 \cdot A_2 = \begin{bmatrix} \cos(\theta_1+\theta_2) & -\sin(\theta_1+\theta_2) & 0 & L_1\cos\theta_1 + L_2\cos(\theta_1+\theta_2) \\ \sin(\theta_1+\theta_2) & \cos(\theta_1+\theta_2) & 0 & L_1\sin\theta_1 + L_2\sin(\theta_1+\theta_2) \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix} $$
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۹: کدنویسی متلب با Symbolic Toolbox ═══════ -->
+  <div class="slide" data-slide="9">
+    <h2 class="slide-title">پیاده‌سازی در MATLAB: روش نمادین (Symbolic)</h2>
+    <p class="slide-sub">استخراج ماتریس تبدیل کلی بدون نیاز به جعبه‌ابزار خارجی</p>
+    <div class="code-box" style="max-width:880px;">
+      <span class="keyword">syms</span> <span class="var">theta1 theta2 L1 L2</span> <span class="keyword">real</span><br><br>
+      <span class="comment">% تعریف تابع ماتریس تبدیل DH استاندارد</span><br>
+      dh = @(th, d, a, al) [ ...<br>
+      &nbsp;&nbsp;<span class="func">cos</span>(th), -<span class="func">sin</span>(th)*<span class="func">cos</span>(al),  <span class="func">sin</span>(th)*<span class="func">sin</span>(al), a*<span class="func">cos</span>(th);<br>
+      &nbsp;&nbsp;<span class="func">sin</span>(th),  <span class="func">cos</span>(th)*<span class="func">cos</span>(al), -<span class="func">cos</span>(th)*<span class="func">sin</span>(al), a*<span class="func">sin</span>(th);<br>
+      &nbsp;&nbsp;<span class="num">0</span>,        <span class="func">sin</span>(al),             <span class="func">cos</span>(al),            d;<br>
+      &nbsp;&nbsp;<span class="num">0</span>,        <span class="num">0</span>,                   <span class="num">0</span>,                  <span class="num">1</span>];<br><br>
+      <span class="var">A1</span> = dh(theta1, <span class="num">0</span>, L1, <span class="num">0</span>);<br>
+      <span class="var">A2</span> = dh(theta2, <span class="num">0</span>, L2, <span class="num">0</span>);<br>
+      <span class="var">T02</span> = <span class="func">simplify</span>(A1 * A2); <span class="comment">% ضرب ماتریس‌ها و ساده‌سازی</span>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۰: Robotics Toolbox در متلب (Peter Corke) ═══════ -->
+  <div class="slide" data-slide="10">
+    <h2 class="slide-title">استفاده از Robotics Toolbox در MATLAB</h2>
+    <p class="slide-sub">تعریف شیء SerialLink و ترسیم سه‌بعدی</p>
+    <div class="code-box" style="max-width:880px;">
+      <span class="comment">% تعریف دو لینک مفصل دورانی با پارامترهای DH</span><br>
+      <span class="var">L</span>(<span class="num">1</span>) = <span class="func">Link</span>(<span class="string">'d'</span>, <span class="num">0</span>, <span class="string">'a'</span>, <span class="num">1.0</span>, <span class="string">'alpha'</span>, <span class="num">0</span>);<br>
+      <span class="var">L</span>(<span class="num">2</span>) = <span class="func">Link</span>(<span class="string">'d'</span>, <span class="num">0</span>, <span class="string">'a'</span>, <span class="num">0.8</span>, <span class="string">'alpha'</span>, <span class="num">0</span>);<br><br>
+      <span class="comment">% ساخت ربات و نام‌گذاری</span><br>
+      <span class="var">robot</span> = <span class="func">SerialLink</span>(L, <span class="string">'name'</span>, <span class="string">'TwoLink_2R'</span>);<br><br>
+      <span class="comment">% محاسبه سینماتیک مستقیم برای زوایای ۳۰ و ۴۵ درجه</span><br>
+      <span class="var">q</span> = [<span class="func">deg2rad</span>(<span class="num">30</span>), <span class="func">deg2rad</span>(<span class="num">45</span>)];<br>
+      <span class="var">T</span> = robot.<span class="func">fkine</span>(q);<br>
+      robot.<span class="func">plot</span>(q); <span class="comment">% نمایش گرافیکی بازو</span>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۱: کتابخانه‌های پایتون (Robotics Toolbox & SymPy) ═══════ -->
+  <div class="slide" data-slide="11">
+    <h2 class="slide-title">کتابخانه‌های مدرن رباتیک در Python</h2>
+    <p class="slide-sub">معرفی اکوسیستم متن‌باز برای تحلیل‌های سینماتیکی</p>
+    <div class="cards-grid cols-3">
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, #f1c40f, #e67e22);"><i class="fab fa-python"></i></div>
+        <h3>roboticstoolbox-python</h3>
+        <p>کتابخانه رسمی پیتر کورک در پایتون با قابلیت‌های بصری و سینماتیکی بی‌نظیر.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, #00d4aa, #06b6d4);"><i class="fas fa-square-root-alt"></i></div>
+        <h3>SymPy & NumPy</h3>
+        <p>انجام محاسبات ماتریسی نمادین و عددی با سرعت بالا و قابلیت ادغام با SciPy.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, #a855f7, #ec4899);"><i class="fas fa-chart-line"></i></div>
+        <h3>Matplotlib 3D</h3>
+        <p>رسم ساختار بازو، فریم‌های مختصات و ابر نقاط فضای کاری در فضای تعاملی.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۲: کد کامل پایتون ۲R ═══════ -->
+  <div class="slide" data-slide="12">
+    <h2 class="slide-title">کد کامل سینماتیک مستقیم ۲R در Python</h2>
+    <p class="slide-sub">استفاده از <code>roboticstoolbox-python</code> و NumPy</p>
+    <div class="code-box" style="max-width:880px;">
+      <span class="keyword">import</span> numpy <span class="keyword">as</span> np<br>
+      <span class="keyword">import</span> roboticstoolbox <span class="keyword">as</span> rtb<br><br>
+      <span class="comment"># تعریف بازوی صفحه‌ای ۲ لینکی با DH استاندارد</span><br>
+      robot = rtb.DHRobot([<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;rtb.RevoluteDH(a=<span class="num">1.0</span>, d=<span class="num">0</span>, alpha=<span class="num">0</span>),<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;rtb.RevoluteDH(a=<span class="num">0.8</span>, d=<span class="num">0</span>, alpha=<span class="num">0</span>)<br>
+      ], name=<span class="string">"2R_Arm"</span>)<br><br>
+      <span class="comment"># زوایای مفاصل بر حسب رادیان</span><br>
+      q = np.deg2rad([<span class="num">30</span>, <span class="num">45</span>])<br>
+      T = robot.fkine(q) <span class="comment"># ماتریس همگن نهایی</span><br>
+      <span class="func">print</span>(<span class="string">"موقعیت نوک بازو:\n"</span>, T.t)
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۳: شبیه‌ساز تعاملی زنده کد و گرافیک ═══════ -->
+  <div class="slide" data-slide="13">
+    <h2 class="slide-title">شبیه‌ساز اختصاصی: همگام‌ساز زنده ربات و کد</h2>
+    <p class="slide-sub">اسلایدرها را تغییر دهید تا حرکت بازو و تغییر کدها را همزمان ببینید</p>
+    <div class="simulator">
+      <div class="sim-layout">
+        <div>
+          <div class="sim-canvas-wrap" style="height:260px;">
+            <canvas id="liveSimCanvas" width="460" height="260"></canvas>
+          </div>
+          <div class="sim-controls">
+            <div class="sim-control">
+              <label><span>مفصل ۱ ($\theta_1$)</span><strong id="liveTh1Val">۳۰°</strong></label>
+              <input type="range" id="liveTh1" min="-180" max="180" value="30">
+            </div>
+            <div class="sim-control">
+              <label><span>مفصل ۲ ($\theta_2$)</span><strong id="liveTh2Val">۴۵°</strong></label>
+              <input type="range" id="liveTh2" min="-180" max="180" value="45">
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="code-tabs">
+            <div class="code-tab active" id="tabPy" onclick="switchCodeLang('python')"><i class="fab fa-python"></i> Python Code</div>
+            <div class="code-tab" id="tabM" onclick="switchCodeLang('matlab')"><i class="fas fa-cube"></i> MATLAB Code</div>
+          </div>
+          <div class="code-box" id="codeBox" style="height:310px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۴: شبیه‌سازهای آنلاین و ابری ═══════ -->
+  <div class="slide" data-slide="14">
+    <h2 class="slide-title">شبیه‌سازهای آنلاین و ابری (Cloud Robotics)</h2>
+    <p class="slide-sub">اجرای شبیه‌سازی در مرورگر بدون نیاز به نصب نرم‌افزار سنگین</p>
+    <div class="slide-img-wrap" style="max-width:540px;">
+      <img src="assets/session06-cloud.jpg" alt="رباتیک ابری و شبیه سازهای وب">
+    </div>
+    <div class="cards-grid cols-3">
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, #1abc9c, #16a085); color:#fff;"><i class="fas fa-globe"></i></div>
+        <h3>RoboDK Web Viewer</h3>
+        <p>نمایشگر ابری فایل‌های رباتیک برای تست ایستگاه‌های صنعتی.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, #e67e22, #d35400); color:#fff;"><i class="fab fa-google"></i></div>
+        <h3>Google Colab</h3>
+        <p>اجرای اسکریپت‌های پایتون و محاسبه سریع DH با پردازش ابری رایگان.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, #8e44ad, #2c3e50); color:#fff;"><i class="fas fa-laptop-code"></i></div>
+        <h3>Webots Online</h3>
+        <p>محیط شبیه‌سازی فیزیکی سه‌بعدی سبک تحت استاندارد WebGL.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۵: جدول مقایسه نتایج سه محیط ═══════ -->
+  <div class="slide" data-slide="15">
+    <h2 class="slide-title">اعتبارسنجی و مقایسه نتایج سه محیط</h2>
+    <p class="slide-sub">بررسی تطابق مقادیر موقعیت نوک بازو در زاویه $\theta_1=30^\circ, \theta_2=60^\circ$</p>
+    <div class="data-table" style="max-width:880px;">
+      <table>
+        <thead>
+          <tr>
+            <th>روش / محیط</th>
+            <th>مختصات $X$ (متر)</th>
+            <th>مختصات $Y$ (متر)</th>
+            <th>زاویه جهت $\phi$</th>
+            <th>مزیت اختصاصی</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>تئوری تحلیلی DH</td>
+            <td>۰.۸۶۶</td>
+            <td>۱.۰۰۰</td>
+            <td>۹۰°</td>
+            <td>محاسبه دقیق ریاضی و روابط بسته</td>
+          </tr>
+          <tr>
+            <td>مدل Simscape</td>
+            <td>۰.۸۶۶</td>
+            <td>۱.۰۰۰</td>
+            <td>۹۰°</td>
+            <td>لحاظ دینامیک، جرم و برخوردها</td>
+          </tr>
+          <tr>
+            <td>اسکریپت Python</td>
+            <td>۰.۸۶۶</td>
+            <td>۱.۰۰۰</td>
+            <td>۹۰°</td>
+            <td>سرعت اجرا و انعطاف توسعه الگوریتم</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۶: تمرین‌های کلاسی ═══════ -->
+  <div class="slide" data-slide="16">
+    <h2 class="slide-title">تمرین‌های کلاسی جلسه ششم</h2>
+    <p class="slide-sub">پروژه‌های عملی شبیه‌سازی برای تثبیت مفاهیم</p>
+    <div class="exercise-wrap">
+      <div class="ex-section a">
+        <h4><i class="fas fa-drafting-compass"></i> الف) تمرین سالیدورکس و سیم‌مکانیکس</h4>
+        <div class="ex-item">
+          <div class="ex-num">۱</div>
+          <div>یک بازوی ۲R با طول لینک‌های $L_1=250\,mm$ و $L_2=180\,mm$ در SolidWorks بسازید و با Simscape Link وارد متلب کنید.</div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۲</div>
+          <div>در سیمولینک، با اعمال ورودی پله به مفاصل، موقعیت نوک را با بلوک Transform Sensor استخراج و در Scope رسم کنید.</div>
+        </div>
+      </div>
+      <div class="ex-section b">
+        <h4><i class="fab fa-python"></i> ب) تمرین برنامه‌نویسی پایتون</h4>
+        <div class="ex-item">
+          <div class="ex-num">۱</div>
+          <div>اسکریپتی بنویسید که فضای کاری بازوی ۲R را با تولید ۱۰۰۰ زاویه تصادفی برای مفاصل رسم کند.</div>
+        </div>
+      </div>
+      <div class="ex-section d">
+        <h4><i class="fas fa-star"></i> ج) چالش پژوهشی ★</h4>
+        <div class="ex-item">
+          <div class="ex-num">★</div>
+          <div>مدل استخراج‌شده را در پلتفرم آنلاین RoboDK یا Google Colab لود کنید و زمان اجرای ۱۰۰۰ بار محاسبه سینماتیک را بنچمارک نمایید.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۷: کوئیز تعاملی ═══════ -->
+  <div class="slide" data-slide="17">
+    <h2 class="slide-title">پرسش تعاملی جلسه ۶</h2>
+    <p class="slide-sub">سنجش درک روند انتقال CAD به سیمولینک</p>
+    <div class="question-card">
+      <h3 style="font-size:16px; margin-bottom:14px; line-height:1.8;">
+        در انتقال مدل از SolidWorks به Simscape، برای اینکه یک مفصل به درستی به عنوان Revolute Joint شناخته شود، چه شرایطی در اسمبلی الزامی است؟
+      </h3>
+      <div class="quiz-options">
+        <button class="quiz-option" onclick="answerQuiz(this, false)">
+          <span>الف) تعریف قید Fix برای هر دو لینک متوالی</span>
+        </button>
+        <button class="quiz-option" onclick="answerQuiz(this, true)">
+          <span>ب) استفاده از قیود هم‌محوری (Concentric) و انطباق سطوح به طوری که دقیقاً ۱ درجه آزادی چرخشی باقی بماند</span>
+        </button>
+        <button class="quiz-option" onclick="answerQuiz(this, false)">
+          <span>ج) تبدیل قطعات به فرمت STL قبل از انتقال</span>
+        </button>
+      </div>
+      <div class="quiz-result" id="quizResult"></div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۸: جمع‌بندی و پیش‌نمایش جلسه بعد ═══════ -->
+  <div class="slide" data-slide="18">
+    <div class="goodbye-icon" style="width:70px; height:70px; margin:0 auto 16px; border-radius:50%; background:linear-gradient(135deg, var(--accent), var(--accent2)); display:grid; place-items:center; font-size:32px; color:#050818;"><i class="fas fa-check-double"></i></div>
+    <h2 class="slide-title">پایان فاز ۲: تسلط بر سینماتیک مستقیم و CAD</h2>
+    <p class="slide-sub">
+      اکنون قادر هستید هر ساختار مکانیکی را در سالیدورکس بسازید، به سیم‌مکانیکس منتقل کنید
+      و معادلات ریاضی آن را با پایتون و متلب اعتبارسنجی نمایید.
+    </p>
+    <div style="margin-top:20px; display:inline-flex; gap:16px;">
+      <button class="ctrl-btn" style="width:auto; padding:0 24px; border-radius:100px; background:linear-gradient(135deg, var(--accent), var(--accent2)); color:#050818; font-weight:800; font-family:'Vazirmatn';" onclick="window.location.href='../../index.html'">
+        <i class="fas fa-home" style="margin-left:6px;"></i> صفحه اصلی دوره
+      </button>
+    </div>
+    <div style="margin-top:24px; font-size:12px; color:#8892a8;">
+      <strong>جلسه آینده (فاز ۳):</strong> سینماتیک معکوس جبری و حل ابهام پیکربندی‌های Elbow-Up / Elbow-Down
+    </div>
+  </div>
+
+</div>
+
+<div class="nav-dots" id="navDots"></div>
+<div class="slide-counter" id="slideCounter">۱ / ۱۸</div>
+<div class="controls">
+  <button class="ctrl-btn" id="prevBtn" title="قبلی"><i class="fas fa-chevron-right"></i></button>
+  <button class="ctrl-btn" id="nextBtn" title="بعدی"><i class="fas fa-chevron-left"></i></button>
+  <button class="ctrl-btn" id="fsBtn" title="تمام‌صفحه"><i class="fas fa-expand"></i></button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+let currentSlide = 0;
+const totalSlides = slides.length;
+const navDots = document.getElementById('navDots');
+
+slides.forEach((_, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+  dot.onclick = () => goToSlide(i);
+  navDots.appendChild(dot);
+});
+
+function goToSlide(idx) {
+  if (idx < 0 || idx >= totalSlides) return;
+  slides[currentSlide].classList.remove('active');
+  currentSlide = idx;
+  slides[currentSlide].classList.add('active');
+  
+  document.querySelectorAll('.nav-dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+  document.getElementById('progressBar').style.width = ((currentSlide + 1) / totalSlides * 100) + '%';
+  const toFa = n => String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  document.getElementById('slideCounter').textContent = `${toFa(currentSlide + 1)} / ${toFa(totalSlides)}`;
+  
+  document.getElementById('prevBtn').disabled = currentSlide === 0;
+  document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+}
+
+document.getElementById('nextBtn').onclick = () => goToSlide(currentSlide + 1);
+document.getElementById('prevBtn').onclick = () => goToSlide(currentSlide - 1);
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft' || e.key === ' ') goToSlide(currentSlide + 1);
+  if (e.key === 'ArrowRight') goToSlide(currentSlide - 1);
+});
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// تمام‌صفحه
+document.getElementById('fsBtn').onclick = () => {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+};
+
+// شبیه‌ساز ۱: ربات زنده و کد همگام
+let currentLang = 'python';
+const cvs = document.getElementById('liveSimCanvas');
+const ctx = cvs.getContext('2d');
+const th1El = document.getElementById('liveTh1');
+const th2El = document.getElementById('liveTh2');
+const L1 = 90, L2 = 75;
+
+function drawLiveRobot() {
+  const th1 = +th1El.value, th2 = +th2El.value;
+  const r1 = th1 * Math.PI / 180, r2 = th2 * Math.PI / 180;
+  
+  ctx.clearRect(0, 0, cvs.width, cvs.height);
+  const ox = cvs.width / 2, oy = cvs.height - 35;
+  
+  const j1x = ox + L1 * Math.cos(r1);
+  const j1y = oy - L1 * Math.sin(r1);
+  const j2x = j1x + L2 * Math.cos(r1 + r2);
+  const j2y = j1y - L2 * Math.sin(r1 + r2);
+  
+  ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(j1x, j1y);
+  ctx.strokeStyle = '#ffb700'; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.stroke();
+  
+  ctx.beginPath(); ctx.moveTo(j1x, j1y); ctx.lineTo(j2x, j2y);
+  ctx.strokeStyle = '#00d4aa'; ctx.lineWidth = 6; ctx.stroke();
+  
+  ctx.fillStyle = '#050818'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+  [[ox, oy, 10], [j1x, j1y, 7], [j2x, j2y, 5]].forEach(p => {
+    ctx.beginPath(); ctx.arc(p[0], p[1], p[2], 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  });
+  
+  updateLiveCode();
+}
+
+function updateLiveCode() {
+  const t1 = th1El.value, t2 = th2El.value;
+  const cb = document.getElementById('codeBox');
+  if (currentLang === 'python') {
+    cb.innerHTML = `
+<span class="keyword">import</span> numpy <span class="keyword">as</span> np
+<span class="keyword">import</span> roboticstoolbox <span class="keyword">as</span> rtb
+
+robot = rtb.models.DH.Planar2()
+q = np.deg2rad([<span class="num">${t1}</span>, <span class="num">${t2}</span>])
+T = robot.fkine(q)
+
+<span class="comment"># خروجی موقعیت کارتزین نوک:</span>
+<span class="func">print</span>(<span class="string">"End-Effector (X, Y):"</span>, T.t[:<span class="num">2</span>])
+robot.plot(q, block=<span class="keyword">False</span>)`;
+  } else {
+    cb.innerHTML = `
+<span class="comment">% تعریف بازو در MATLAB</span>
+L1 = Link(<span class="string">'a'</span>, 1.0, <span class="string">'alpha'</span>, 0);
+L2 = Link(<span class="string">'a'</span>, 0.8, <span class="string">'alpha'</span>, 0);
+rob = SerialLink([L1 L2]);
+
+q = [<span class="num">${t1}</span>, <span class="num">${t2}</span>] * pi/180;
+T = rob.fkine(q);
+rob.plot(q);`;
+  }
+}
+
+function switchCodeLang(lang) {
+  currentLang = lang;
+  document.getElementById('tabPy').classList.toggle('active', lang === 'python');
+  document.getElementById('tabM').classList.toggle('active', lang === 'matlab');
+  updateLiveCode();
+}
+
+[th1El, th2El].forEach(el => el.addEventListener('input', () => {
+  const toFa = n => String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  document.getElementById('liveTh1Val').textContent = toFa(th1El.value) + '°';
+  document.getElementById('liveTh2Val').textContent = toFa(th2El.value) + '°';
+  drawLiveRobot();
+}));
+
+// انیمیشن جریان تبدیل CAD
+function playCadAnimation() {
+  const s1 = document.getElementById('cStep1');
+  const s2 = document.getElementById('cStep2');
+  const s3 = document.getElementById('cStep3');
+  s1.classList.remove('active'); s2.classList.remove('active'); s3.classList.remove('active');
+  
+  s1.classList.add('active');
+  showToast('تحلیل قید هم‌محوری در SolidWorks...');
+  setTimeout(() => {
+    s1.classList.remove('active'); s2.classList.add('active');
+    showToast('ساخت تعاریف ماتریسی در فایل واسط XML...');
+  }, 1400);
+  setTimeout(() => {
+    s2.classList.remove('active'); s3.classList.add('active');
+    showToast('ایجاد خودکار بلوک Revolute Joint در Simscape Multibody!');
+  }, 2800);
+}
+
+// کوییز
+function answerQuiz(btn, isCorrect) {
+  const res = document.getElementById('quizResult');
+  document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
+  if (isCorrect) {
+    btn.classList.add('correct');
+    res.className = 'quiz-result show';
+    res.style.background = 'rgba(0,212,170,0.15)';
+    res.style.color = '#00d4aa';
+    res.innerHTML = '<i class="fas fa-check-circle"></i> کاملاً درست است! نرم‌افزار سالیدورکس با تشخیص دقیق یک درجه آزادی آزاد، آن را به عنوان یک مفصل دورانی به سیم‌مکانیکس صادر می‌کند.';
+  } else {
+    btn.classList.add('wrong');
+    res.className = 'quiz-result show';
+    res.style.background = 'rgba(255,71,87,0.15)';
+    res.style.color = '#ff4757';
+    res.innerHTML = '<i class="fas fa-times-circle"></i> نادرست! گزینه ب صحیح است.';
+  }
+}
+
+goToSlide(0);
+drawLiveRobot();
+</script>
+</body>
+</html>

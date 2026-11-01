@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شبیه‌ساز سینماتیک مستقیم بازوی دو لینکی - ARCSLAB</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            padding: 35px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #1e40af;
+        }
+        .header h1 {
+            color: #0f172a;
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+        }
+        .header .subtitle {
+            color: #1e40af;
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .header .course-info {
+            color: #475569;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        .header .lab-info {
+            color: #1e40af;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        .header .instructor {
+            color: #64748b;
+            font-size: 0.95rem;
+            font-style: italic;
+        }
+        .kinematics-badge {
+            text-align: center;
+            background: #dbeafe;
+            padding: 10px;
+            border-radius: 16px;
+            margin: 10px 0 20px 0;
+            color: #1e40af;
+            font-weight: 600;
+            font-size: 1.05rem;
+            border: 2px dashed #3b82f6;
+        }
+        .canvas-wrapper {
+            display: flex;
+            justify-content: center;
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            max-width: 650px;
+            height: auto;
+            background: white;
+            border-radius: 16px;
+            cursor: grab;
+            touch-action: none;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px 30px;
+            margin: 20px 0;
+            justify-content: center;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 20px;
+        }
+        .control-group {
+            flex: 1 1 180px;
+            background: white;
+            padding: 14px 18px;
+            border-radius: 16px;
+            border-right: 5px solid #3b82f6;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+        .control-group label span {
+            color: #1e40af;
+            background: #dbeafe;
+            padding: 0 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+        input[type="range"] {
+            width: 100%;
+            accent-color: #1e40af;
+            height: 6px;
+            border-radius: 10px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #1e40af;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .toggle-section {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        .toggle-btn {
+            background: #f1f5f9;
+            border: 2px solid #cbd5e1;
+            padding: 8px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #475569;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+        .toggle-btn.active {
+            background: #1e40af;
+            color: white;
+            border-color: #1e40af;
+        }
+        .toggle-btn:hover {
+            transform: scale(1.05);
+        }
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        .footer strong {
+            color: #1e40af;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            .header h1 { font-size: 1.5rem; }
+            .controls { padding: 12px; gap: 12px; }
+            .control-group { flex: 1 1 140px; padding: 10px 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- هدر با اطلاعات کامل - همه زیر هم -->
+    <div class="header">
+        <h1> شبیه‌ساز سینماتیک مستقیم بازوی دو لینکی</h1>
+        <div class="subtitle">Two-DOF Robot Arm Forward Kinematics Simulator</div>
+        <div class="course-info">🎓 دوره‌ی آموزشی رباتیک - دکتر مسعود گوهری منش</div>
+        <div class="lab-info">🧪 ARCSLAB · آزمایشگاه رباتیک پیشرفته و سیستم‌های کنترل</div>
+        <div class="instructor">📚 Advanced Robotics & Control Systems Laboratory</div>
+    </div>
+
+    <!-- برچسب سینماتیک مستقیم -->
+    <div class="kinematics-badge">
+        ⚙️ این شبیه‌ساز، <strong>سینماتیک مستقیم (Forward Kinematics)</strong> بازوی رباتیک دو لینکی را محاسبه و نمایش می‌دهد
+    </div>
+
+    <!-- دکمه‌های تنظیمات نمایش -->
+    <div class="toggle-section">
+        <button class="toggle-btn active" id="showWorkspace">📍 نمایش فضای کاری</button>
+        <button class="toggle-btn active" id="showTrajectory">📈 نمایش مسیر حرکت</button>
+        <button class="toggle-btn" id="clearTrajectory">🗑️ پاک کردن مسیر</button>
+    </div>
+
+    <!-- بوم نقاشی -->
+    <div class="canvas-wrapper">
+        <canvas id="robotCanvas" width="650" height="500"></canvas>
+    </div>
+
+    <!-- کنترل‌ها -->
+    <div class="controls">
+        <div class="control-group" style="border-right-color:#ef4444;">
+            <label>📏 طول لینک ۱ (L₁) <span id="l1-value">200</span></label>
+            <input type="range" id="l1-slider" min="50" max="400" step="1" value="200">
+        </div>
+        <div class="control-group" style="border-right-color:#10b981;">
+            <label>📏 طول لینک ۲ (L₂) <span id="l2-value">180</span></label>
+            <input type="range" id="l2-slider" min="50" max="400" step="1" value="180">
+        </div>
+        <div class="control-group" style="border-right-color:#eab308;">
+            <label>🔄 زاویه θ₁ <span id="theta1-value">45°</span></label>
+            <input type="range" id="theta1-slider" min="-180" max="180" value="45">
+        </div>
+        <div class="control-group" style="border-right-color:#8b5cf6;">
+            <label>🔄 زاویه θ₂ <span id="theta2-value">30°</span></label>
+            <input type="range" id="theta2-slider" min="-180" max="180" value="30">
+        </div>
+    </div>
+
+    <div class="footer">
+        🧪 <strong>ARCSLAB</strong> · Advanced Robotics & Control Systems Laboratory · 
+        دکتر مسعود گوهری منش · تمامی حقوق محفوظ است © ۲۰۲۶
+    </div>
+</div>
+
+<script>
+    (function() {
+        const canvas = document.getElementById('robotCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // عناصر رابط
+        const l1Slider = document.getElementById('l1-slider');
+        const l2Slider = document.getElementById('l2-slider');
+        const theta1Slider = document.getElementById('theta1-slider');
+        const theta2Slider = document.getElementById('theta2-slider');
+        const l1Value = document.getElementById('l1-value');
+        const l2Value = document.getElementById('l2-value');
+        const theta1Value = document.getElementById('theta1-value');
+        const theta2Value = document.getElementById('theta2-value');
+
+        // دکمه‌ها
+        const showWorkspaceBtn = document.getElementById('showWorkspace');
+        const showTrajectoryBtn = document.getElementById('showTrajectory');
+        const clearTrajectoryBtn = document.getElementById('clearTrajectory');
+
+        // پارامترها (مقدار اولیه بر حسب میلی‌متر و درجه)
+        let L1 = 200;    // mm
+        let L2 = 180;    // mm
+        let theta1Deg = 45;
+        let theta2Deg = 30;
+
+        // تنظیمات نمایش
+        let showWorkspace = true;
+        let showTrajectory = true;
+
+        // ذخیره‌سازی مسیر حرکت اندافکتور
+        let trajectoryPoints = [];
+        const MAX_TRAJECTORY_POINTS = 1000;
+        let lastRecordedX = null;
+        let lastRecordedY = null;
+
+        // مرکز رسم
+        const originX = 200;
+        const originY = 420;
+        const scale = 0.8;
+
+        // ---------- توابع تبدیل و محاسبه ----------
+        function degToRad(deg) {
+            return deg * Math.PI / 180;
+        }
+
+        function computeEndEffector(l1, l2, t1deg, t2deg) {
+            const t1 = degToRad(t1deg);
+            const t2 = degToRad(t2deg);
+            const t2_abs = t1 + t2;
+            const x1 = l1 * Math.cos(t1);
+            const y1 = l1 * Math.sin(t1);
+            const x2 = x1 + l2 * Math.cos(t2_abs);
+            const y2 = y1 + l2 * Math.sin(t2_abs);
+            return { x1, y1, x2, y2, t1, t2_abs };
+        }
+
+        // محاسبه فضای کاری (منحنی مرزی)
+        function computeWorkspace(l1, l2) {
+            const points = [];
+            const steps = 360;
+            for (let i = 0; i <= steps; i++) {
+                const angle = (i / steps) * 2 * Math.PI;
+                const r = l1 + l2;
+                points.push({
+                    x: r * Math.cos(angle),
+                    y: r * Math.sin(angle)
+                });
+            }
+            return points;
+        }
+
+        // ---------- رسم بازو ----------
+        function drawRobot() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // محاسبه موقعیت‌ها
+            const result = computeEndEffector(L1, L2, theta1Deg, theta2Deg);
+            const { x1, y1, x2, y2, t1, t2_abs } = result;
+
+            // تبدیل به پیکسل
+            const px = (x) => originX + x * scale;
+            const py = (y) => originY - y * scale;
+
+            const p0 = { x: originX, y: originY };
+            const p1 = { x: px(x1), y: py(y1) };
+            const p2 = { x: px(x2), y: py(y2) };
+
+            // ---------- رسم گرید و محورها ----------
+            ctx.save();
+            ctx.strokeStyle = "#e2e8f0";
+            ctx.lineWidth = 1;
+            const gridSpacing = 50 * scale;
+            for (let i = -8; i <= 8; i++) {
+                if (i === 0) continue;
+                const posX = originX + i * gridSpacing;
+                const posY = originY - i * gridSpacing;
+                if (posX > 0 && posX < canvas.width) {
+                    ctx.beginPath();
+                    ctx.moveTo(posX, 0);
+                    ctx.lineTo(posX, canvas.height);
+                    ctx.stroke();
+                }
+                if (posY > 0 && posY < canvas.height) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, posY);
+                    ctx.lineTo(canvas.width, posY);
+                    ctx.stroke();
+                }
+            }
+            ctx.strokeStyle = "#94a3b8";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, originY);
+            ctx.lineTo(canvas.width, originY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(originX, 0);
+            ctx.lineTo(originX, canvas.height);
+            ctx.stroke();
+            
+            ctx.font = "14px 'Segoe UI', sans-serif";
+            ctx.fillStyle = "#64748b";
+            ctx.fillText("X (mm)", canvas.width - 50, originY - 10);
+            ctx.fillText("Y (mm)", originX + 10, 25);
+            
+            // برچسب‌های روی محورها
+            ctx.font = "11px 'Segoe UI', sans-serif";
+            ctx.fillStyle = "#94a3b8";
+            for (let i = -6; i <= 6; i++) {
+                if (i === 0) continue;
+                const posX = originX + i * gridSpacing;
+                const posY = originY - i * gridSpacing;
+                if (posX > 20 && posX < canvas.width - 20) {
+                    ctx.fillText((i*50).toString(), posX - 10, originY + 20);
+                }
+                if (posY > 20 && posY < canvas.height - 20) {
+                    ctx.fillText((i*50).toString(), originX + 10, posY + 4);
+                }
+            }
+            ctx.restore();
+
+            // ---------- رسم فضای کاری (هاله کم‌رنگ) ----------
+            if (showWorkspace) {
+                const wsPoints = computeWorkspace(L1, L2);
+                ctx.save();
+                ctx.beginPath();
+                for (let i = 0; i < wsPoints.length; i++) {
+                    const x = px(wsPoints[i].x);
+                    const y = py(wsPoints[i].y);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fillStyle = "rgba(59, 130, 246, 0.08)";
+                ctx.fill();
+                ctx.strokeStyle = "rgba(59, 130, 246, 0.3)";
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // حلقه داخلی (حداقل دسترسی)
+                const minR = Math.abs(L1 - L2);
+                if (minR > 5) {
+                    ctx.beginPath();
+                    for (let i = 0; i <= 360; i++) {
+                        const angle = (i / 360) * 2 * Math.PI;
+                        const x = px(minR * Math.cos(angle));
+                        const y = py(minR * Math.sin(angle));
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.closePath();
+                    ctx.strokeStyle = "rgba(59, 130, 246, 0.15)";
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([3, 5]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+                ctx.restore();
+            }
+
+            // ---------- رسم مسیر حرکت اندافکتور (خط چین) ----------
+            if (showTrajectory && trajectoryPoints.length > 1) {
+                ctx.save();
+                ctx.beginPath();
+                let started = false;
+                for (let i = 0; i < trajectoryPoints.length; i++) {
+                    const x = px(trajectoryPoints[i].x);
+                    const y = py(trajectoryPoints[i].y);
+                    if (!started) {
+                        ctx.moveTo(x, y);
+                        started = true;
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.strokeStyle = "rgba(220, 38, 38, 0.7)";
+                ctx.lineWidth = 3;
+                ctx.setLineDash([8, 6]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.restore();
+            }
+
+            // ---------- رسم لینک‌ها ----------
+            ctx.beginPath();
+            ctx.moveTo(p0.x, p0.y);
+            ctx.lineTo(p1.x, p1.y);
+            ctx.strokeStyle = "#2563eb";
+            ctx.lineWidth = 10;
+            ctx.lineCap = "round";
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = "#16a34a";
+            ctx.lineWidth = 9;
+            ctx.lineCap = "round";
+            ctx.stroke();
+
+            // ---------- رسم مفاصل ----------
+            ctx.beginPath();
+            ctx.arc(p0.x, p0.y, 14, 0, 2 * Math.PI);
+            ctx.fillStyle = "#1e40af";
+            ctx.fill();
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(p1.x, p1.y, 12, 0, 2 * Math.PI);
+            ctx.fillStyle = "#7c3aed";
+            ctx.fill();
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(p2.x, p2.y, 14, 0, 2 * Math.PI);
+            ctx.fillStyle = "#dc2626";
+            ctx.fill();
+            ctx.strokeStyle = "#fca5a5";
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // ---------- برچسب‌ها و مختصات روی صفحه ----------
+            ctx.font = "bold 16px 'Segoe UI', sans-serif";
+            ctx.fillStyle = "#0f172a";
+            ctx.fillText("Joint 1", p0.x - 40, p0.y + 35);
+            ctx.fillText("Joint 2", p1.x - 40, p1.y - 25);
+            ctx.fillStyle = "#b91c1c";
+            ctx.font = "bold 15px 'Segoe UI', sans-serif";
+            ctx.fillText("End-Effector", p2.x + 20, p2.y - 20);
+
+            // نمایش مختصات نقاط روی صفحه
+            ctx.font = "13px 'Segoe UI', monospace";
+            ctx.fillStyle = "#1e293b";
+            ctx.fillText(`(${x1.toFixed(1)}, ${y1.toFixed(1)})`, p1.x - 50, p1.y - 40);
+            ctx.fillStyle = "#dc2626";
+            ctx.font = "bold 14px 'Segoe UI', monospace";
+            ctx.fillText(`(${x2.toFixed(1)}, ${y2.toFixed(1)})`, p2.x - 55, p2.y - 45);
+
+            // ---------- ذخیره مسیر حرکت (با فاصله مناسب) ----------
+            const distanceThreshold = 1.0; // میلی‌متر
+            if (lastRecordedX === null || 
+                Math.abs(x2 - lastRecordedX) > distanceThreshold || 
+                Math.abs(y2 - lastRecordedY) > distanceThreshold) {
+                
+                trajectoryPoints.push({ x: x2, y: y2 });
+                lastRecordedX = x2;
+                lastRecordedY = y2;
+                
+                if (trajectoryPoints.length > MAX_TRAJECTORY_POINTS) {
+                    trajectoryPoints.shift();
+                }
+            }
+        }
+
+        // ---------- به‌روزرسانی از اسلایدرها ----------
+        function updateFromSliders() {
+            L1 = parseFloat(l1Slider.value);
+            L2 = parseFloat(l2Slider.value);
+            theta1Deg = parseFloat(theta1Slider.value);
+            theta2Deg = parseFloat(theta2Slider.value);
+
+            l1Value.textContent = L1.toFixed(0);
+            l2Value.textContent = L2.toFixed(0);
+            theta1Value.textContent = theta1Deg.toFixed(0) + "°";
+            theta2Value.textContent = theta2Deg.toFixed(0) + "°";
+
+            drawRobot();
+        }
+
+        // اتصال رویدادها
+        l1Slider.addEventListener('input', updateFromSliders);
+        l2Slider.addEventListener('input', updateFromSliders);
+        theta1Slider.addEventListener('input', updateFromSliders);
+        theta2Slider.addEventListener('input', updateFromSliders);
+
+        // ---------- دکمه‌های تنظیمات ----------
+        showWorkspaceBtn.addEventListener('click', function() {
+            showWorkspace = !showWorkspace;
+            this.classList.toggle('active');
+            drawRobot();
+        });
+
+        showTrajectoryBtn.addEventListener('click', function() {
+            showTrajectory = !showTrajectory;
+            this.classList.toggle('active');
+            drawRobot();
+        });
+
+        clearTrajectoryBtn.addEventListener('click', function() {
+            trajectoryPoints = [];
+            lastRecordedX = null;
+            lastRecordedY = null;
+            drawRobot();
+        });
+
+        // ---------- قابلیت کشیدن روی کانواس ----------
+        let isDragging = false;
+        let dragType = null;
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+                e.preventDefault();
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function getJointPixelPos(joint) {
+            const result = computeEndEffector(L1, L2, theta1Deg, theta2Deg);
+            const px = (x) => originX + x * scale;
+            const py = (y) => originY - y * scale;
+            if (joint === 1) {
+                return { x: originX, y: originY };
+            } else {
+                const { x1, y1 } = result;
+                return { x: px(x1), y: py(y1) };
+            }
+        }
+
+        function distBetween(p1, p2) {
+            return Math.hypot(p1.x - p2.x, p1.y - p2.y);
+        }
+
+        function onPointerDown(e) {
+            e.preventDefault();
+            const pos = getMousePos(e);
+            const j1 = getJointPixelPos(1);
+            const j2 = getJointPixelPos(2);
+            const d1 = distBetween(pos, j1);
+            const d2 = distBetween(pos, j2);
+            if (d1 < 25) {
+                isDragging = true;
+                dragType = 1;
+            } else if (d2 < 25) {
+                isDragging = true;
+                dragType = 2;
+            }
+        }
+
+        function onPointerMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const pos = getMousePos(e);
+            if (dragType === 1) {
+                const dx = pos.x - originX;
+                const dy = -(pos.y - originY);
+                let angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                theta1Deg = Math.round(angle);
+                theta1Slider.value = theta1Deg;
+                theta1Value.textContent = theta1Deg + "°";
+                updateFromSliders();
+            } else if (dragType === 2) {
+                const result = computeEndEffector(L1, L2, theta1Deg, 0);
+                const { x1, y1 } = result;
+                const px1 = originX + x1 * scale;
+                const py1 = originY - y1 * scale;
+                const dx = pos.x - px1;
+                const dy = -(pos.y - py1);
+                let angleAbs = Math.atan2(dy, dx) * 180 / Math.PI;
+                let theta2New = angleAbs - theta1Deg;
+                theta2New = ((theta2New % 360) + 540) % 360 - 180;
+                theta2Deg = Math.round(theta2New);
+                theta2Slider.value = theta2Deg;
+                theta2Value.textContent = theta2Deg + "°";
+                updateFromSliders();
+            }
+        }
+
+        function onPointerUp(e) {
+            isDragging = false;
+            dragType = null;
+        }
+
+        canvas.addEventListener('mousedown', onPointerDown);
+        window.addEventListener('mousemove', onPointerMove);
+        window.addEventListener('mouseup', onPointerUp);
+        canvas.addEventListener('touchstart', onPointerDown);
+        window.addEventListener('touchmove', onPointerMove, { passive: false });
+        window.addEventListener('touchend', onPointerUp);
+
+        // مقداردهی اولیه
+        updateFromSliders();
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جلسه ۱ — مقدمات رباتیک | دکتر گوهری‌منش</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+/* ═══════════════════════════════════════════════
+   متغیرها
+═══════════════════════════════════════════════ */
+:root {
+  --accent: #ffb700;
+  --accent2: #ff6b35;
+  --success: #00d4aa;
+  --danger: #ff4757;
+  --purple: #a855f7;
+  --pink: #ec4899;
+  --cyan: #06b6d4;
+  --dark: #050818;
+  --card: rgba(255,255,255,0.05);
+  --border: rgba(255,255,255,0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Vazirmatn', sans-serif;
+  background: var(--dark);
+  color: #e8ecf5;
+  user-select: none;
+}
+
+/* ═══════════════════════════════════════════════
+   پس‌زمینه
+═══════════════════════════════════════════════ */
+.bg-wrap {
+  position: fixed; inset: 0; z-index: -2;
+  background: radial-gradient(ellipse at top, #0a1030 0%, #050818 60%);
+  overflow: hidden;
+}
+.bubble {
+  position: absolute; border-radius: 50%;
+  filter: blur(80px); opacity: 0.3;
+  animation: float 22s infinite ease-in-out;
+}
+.b1 { width: 500px; height: 500px; background: #ffb700; top: -10%; right: -8%; }
+.b2 { width: 440px; height: 440px; background: #00d4aa; bottom: -15%; left: -8%; animation-delay: -7s; }
+.b3 { width: 360px; height: 360px; background: #a855f7; top: 35%; left: 40%; animation-delay: -14s; opacity: 0.2; }
+@keyframes float {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(60px,-50px) scale(1.1); }
+  66% { transform: translate(-40px,40px) scale(0.95); }
+}
+.particles { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+.particle {
+  position: absolute; width: 2px; height: 2px;
+  border-radius: 50%; animation: rise linear infinite; opacity: 0;
+}
+@keyframes rise {
+  0% { transform: translateY(100vh) scale(0); opacity: 0; }
+  10% { opacity: 0.8; }
+  90% { opacity: 0.6; }
+  100% { transform: translateY(-20vh) scale(1.2); opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════
+   هدر بالا (ثابت)
+═══════════════════════════════════════════════ */
+.top-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 20px;
+  background: rgba(5,8,24,0.75);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.header-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; font-weight: 700; color: #8892a8;
+}
+.header-brand i { color: var(--accent); font-size: 14px; }
+
+/* امضای ثابت استاد — بالای صفحه */
+.instructor-signature {
+  position: fixed; top: 10px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 95;
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 16px;
+  background: rgba(5,8,24,0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,183,0,0.2);
+  border-radius: 100px;
+  pointer-events: none;
+}
+.instructor-signature img {
+  height: 28px; width: auto;
+  filter: drop-shadow(0 0 4px rgba(255,183,0,0.3));
+}
+.instructor-signature .sig-fallback {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: grid; place-items: center;
+  font-size: 11px; color: #050818; font-weight: 800;
+}
+.instructor-signature .sig-text {
+  display: flex; flex-direction: column; line-height: 1.2;
+}
+.instructor-signature .sig-text strong {
+  font-size: 10.5px; color: var(--accent); font-weight: 700;
+}
+.instructor-signature .sig-text span {
+  font-size: 8.5px; color: #8892a8;
+}
+
+/* نوار پیشرفت */
+.progress-bar {
+  position: fixed; top: 0; left: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  z-index: 110;
+  transition: width 0.4s ease;
+  box-shadow: 0 0 12px var(--accent);
+}
+
+/* کنترل‌ها */
+.controls {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  display: flex; gap: 8px;
+  padding: 8px 12px;
+  background: rgba(5,8,24,0.75);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+}
+.ctrl-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: none; background: rgba(255,255,255,0.06);
+  color: #e8ecf5; cursor: pointer;
+  display: grid; place-items: center;
+  font-size: 13px;
+  transition: all 0.25s;
+}
+.ctrl-btn:hover { background: rgba(255,183,0,0.2); color: var(--accent); }
+.ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* نقاط ناوبری */
+.nav-dots {
+  position: fixed; left: 20px; top: 50%;
+  transform: translateY(-50%);
+  z-index: 90;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.nav-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.nav-dot:hover { background: rgba(255,183,0,0.5); transform: scale(1.2); }
+.nav-dot.active {
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+  transform: scale(1.4);
+}
+
+/* شمارنده اسلاید */
+.slide-counter {
+  position: fixed; bottom: 20px; right: 20px;
+  z-index: 90;
+  font-size: 12px; color: #8892a8;
+  background: rgba(5,8,24,0.7);
+  padding: 6px 14px;
+  border-radius: 100px;
+  backdrop-filter: blur(12px);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ═══════════════════════════════════════════════
+   اسلایدها
+═══════════════════════════════════════════════ */
+.slides-container {
+  position: relative;
+  width: 100vw; height: 100vh;
+  overflow: hidden;
+}
+.slide {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 90px 60px 80px;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0.5s;
+  overflow-y: auto;
+}
+.slide.active { opacity: 1; visibility: visible; }
+.slide.active > * { animation: slideIn 0.6s ease backwards; }
+.slide.active > *:nth-child(1) { animation-delay: 0.05s; }
+.slide.active > *:nth-child(2) { animation-delay: 0.15s; }
+.slide.active > *:nth-child(3) { animation-delay: 0.25s; }
+.slide.active > *:nth-child(4) { animation-delay: 0.35s; }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-title {
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 800;
+  margin-bottom: 12px;
+  text-align: center;
+  background: linear-gradient(135deg, #fff, var(--accent));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.slide-sub {
+  font-size: clamp(13px, 1.5vw, 15px);
+  color: #8892a8;
+  text-align: center;
+  margin-bottom: 32px;
+  max-width: 700px;
+}
+
+/* ═══════════════════════════════════════════════
+   اسلاید ۱: کاور
+═══════════════════════════════════════════════ */
+.cover-slide { text-align: center; }
+.cover-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 20px;
+  background: rgba(255,183,0,0.1);
+  border: 1px solid rgba(255,183,0,0.3);
+  border-radius: 100px;
+  font-size: 13px; color: var(--accent);
+  margin-bottom: 30px;
+}
+.cover-badge i { animation: rotate 4s linear infinite; }
+@keyframes rotate { to { transform: rotate(360deg); } }
+
+.cover-title {
+  font-size: clamp(34px, 5.5vw, 64px);
+  font-weight: 900;
+  line-height: 1.25;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--accent2) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: coverPop 1s ease backwards;
+}
+@keyframes coverPop {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+.cover-desc {
+  font-size: clamp(14px, 1.8vw, 18px);
+  color: #b0b8cc;
+  max-width: 780px;
+  margin: 0 auto 40px;
+  line-height: 1.9;
+}
+.cover-instructor {
+  display: inline-flex; align-items: center; gap: 16px;
+  padding: 16px 28px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  backdrop-filter: blur(16px);
+}
+.cover-instructor .avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: grid; place-items: center;
+  font-size: 20px; color: #050818; font-weight: 800;
+}
+.cover-instructor .info { text-align: right; }
+.cover-instructor .info strong { display: block; font-size: 16px; margin-bottom: 3px; }
+.cover-instructor .info span { font-size: 12px; color: #8892a8; display: block; }
+.cover-instructor .info a {
+  font-size: 11px; color: var(--cyan);
+  text-decoration: none; margin-top: 4px;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+
+/* ═══════════════════════════════════════════════
+   کارت‌های محتوا
+═══════════════════════════════════════════════ */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  width: 100%; max-width: 900px;
+}
+.content-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px;
+  backdrop-filter: blur(12px);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.content-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(255,183,0,0.15);
+}
+.content-card .card-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: var(--ci, linear-gradient(135deg, var(--accent), var(--accent2)));
+  display: grid; place-items: center;
+  font-size: 18px; color: #050818;
+  margin-bottom: 12px;
+}
+.content-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.content-card p { font-size: 12px; color: #b0b8cc; line-height: 1.8; }
+
+/* ═══════════════════════════════════════════════
+   تایم‌لاین
+═══════════════════════════════════════════════ */
+.timeline {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; max-width: 950px;
+  position: relative;
+  padding: 20px 0;
+  direction: ltr;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 5%; right: 5%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--purple));
+  transform: translateY(-50%);
+}
+.timeline-item {
+  position: relative;
+  display: flex; flex-direction: column;
+  align-items: center;
+  z-index: 1;
+  cursor: pointer;
+}
+.timeline-item .dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--dark);
+  box-shadow: 0 0 12px var(--accent);
+  transition: all 0.3s;
+}
+.timeline-item:hover .dot { transform: scale(1.4); }
+.timeline-item .year {
+  font-size: 12px; font-weight: 700;
+  color: var(--accent);
+  margin-top: 8px;
+  direction: ltr;
+}
+.timeline-item .event {
+  font-size: 10.5px; color: #8892a8;
+  text-align: center;
+  max-width: 100px;
+  margin-top: 4px;
+  direction: rtl;
+}
+
+/* ═══════════════════════════════════════════════
+   شبیه‌ساز مفاصل
+═══════════════════════════════════════════════ */
+.simulator {
+  width: 100%; max-width: 900px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px;
+  backdrop-filter: blur(12px);
+}
+.sim-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: center;
+}
+.sim-svg-wrap {
+  background: rgba(0,0,0,0.3);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+.sim-svg-wrap svg { max-width: 100%; height: auto; }
+
+.sim-controls { display: flex; flex-direction: column; gap: 16px; }
+.sim-control label {
+  display: block; font-size: 12px; color: #8892a8;
+  margin-bottom: 6px;
+}
+.sim-control label strong { color: var(--accent); }
+.sim-control input[type=range] {
+  width: 100%; height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+.sim-control input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 12px var(--accent);
+}
+.sim-control input[type=range]::-moz-range-thumb {
+  width: 18px; height: 18px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 12px var(--accent);
+}
+.sim-readout {
+  display: flex; justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(0,212,170,0.1);
+  border: 1px solid rgba(0,212,170,0.3);
+  border-radius: 10px;
+  font-size: 12px;
+}
+.sim-readout strong { color: var(--success); font-variant-numeric: tabular-nums; }
+
+.sim-tabs {
+  display: flex; gap: 8px;
+  margin-bottom: 16px;
+}
+.sim-tab {
+  flex: 1;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: #b0b8cc;
+  cursor: pointer;
+  font-family: 'Vazirmatn', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.25s;
+}
+.sim-tab.active {
+  background: rgba(255,183,0,0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════
+   DOF Calculator
+═══════════════════════════════════════════════ */
+.dof-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  width: 100%; max-width: 900px;
+  margin-bottom: 24px;
+}
+.dof-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  backdrop-filter: blur(12px);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.dof-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+.dof-card.active { border-color: var(--accent); background: rgba(255,183,0,0.1); }
+.dof-card .mech-icon {
+  font-size: 26px; color: var(--accent);
+  margin-bottom: 10px;
+}
+.dof-card h4 { font-size: 13px; margin-bottom: 6px; }
+.dof-card p { font-size: 11px; color: #8892a8; }
+.dof-card .result {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: rgba(0,212,170,0.1);
+  border-radius: 8px;
+  font-size: 11px;
+  color: var(--success);
+  display: none;
+}
+.dof-card.active .result { display: block; }
+.dof-card .result strong {
+  color: var(--success);
+  font-size: 16px;
+  display: block;
+  margin-top: 2px;
+}
+
+/* ═══════════════════════════════════════════════
+   فرمول
+═══════════════════════════════════════════════ */
+.formula-box {
+  background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(6,182,212,0.08));
+  border: 1px solid rgba(168,85,247,0.3);
+  border-radius: 16px;
+  padding: 24px 32px;
+  margin: 20px 0;
+  text-align: center;
+  direction: ltr;
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  font-size: clamp(18px, 2.5vw, 26px);
+  color: #fff;
+}
+.formula-box .formula-main {
+  font-style: italic;
+  letter-spacing: 1px;
+}
+.formula-box .formula-note {
+  font-family: 'Vazirmatn', sans-serif;
+  font-size: 12px;
+  color: #8892a8;
+  margin-top: 12px;
+  direction: rtl;
+}
+
+/* ═══════════════════════════════════════════════
+   کارت‌های سوال / Quiz
+═══════════════════════════════════════════════ */
+.question-card {
+  max-width: 700px;
+  width: 100%;
+  background: var(--card);
+  border: 2px solid rgba(255,183,0,0.3);
+  border-radius: 20px;
+  padding: 32px;
+  backdrop-filter: blur(12px);
+  text-align: center;
+}
+.question-card .q-icon {
+  width: 60px; height: 60px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: grid; place-items: center;
+  font-size: 28px; color: #050818;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 20px rgba(255,183,0,0.4); }
+  50% { box-shadow: 0 0 40px rgba(255,183,0,0.7); }
+}
+.question-card h3 {
+  font-size: 18px; margin-bottom: 20px;
+  line-height: 1.6;
+}
+.quiz-options {
+  display: flex; flex-direction: column; gap: 10px;
+  text-align: right;
+}
+.quiz-option {
+  padding: 14px 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: 'Vazirmatn', sans-serif;
+  font-size: 13px;
+  color: #e8ecf5;
+  transition: all 0.25s;
+  display: flex; align-items: center; gap: 12px;
+  text-align: right;
+}
+.quiz-option:hover { background: rgba(255,183,0,0.1); border-color: var(--accent); }
+.quiz-option .opt-letter {
+  width: 28px; height: 28px; flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  display: grid; place-items: center;
+  font-weight: 800; font-size: 12px;
+  color: var(--accent);
+}
+.quiz-option.correct {
+  background: rgba(0,212,170,0.15);
+  border-color: var(--success);
+}
+.quiz-option.correct .opt-letter {
+  background: var(--success); color: #050818;
+}
+.quiz-option.wrong {
+  background: rgba(255,71,87,0.15);
+  border-color: var(--danger);
+}
+.quiz-option.wrong .opt-letter {
+  background: var(--danger); color: #fff;
+}
+.quiz-option:disabled { cursor: not-allowed; }
+.quiz-result {
+  margin-top: 20px;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  display: none;
+}
+.quiz-result.show { display: block; }
+.quiz-result.ok {
+  background: rgba(0,212,170,0.15);
+  color: var(--success);
+}
+.quiz-result.no {
+  background: rgba(255,71,87,0.15);
+  color: var(--danger);
+}
+
+/* ═══════════════════════════════════════════════
+   تمرین کلاسی
+═══════════════════════════════════════════════ */
+.exercise-wrap {
+  width: 100%; max-width: 900px;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 4px;
+  padding-left: 12px;
+}
+.exercise-wrap::-webkit-scrollbar { width: 6px; }
+.exercise-wrap::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 3px; }
+.exercise-wrap::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+.ex-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 14px;
+  backdrop-filter: blur(12px);
+}
+.ex-section.a { border-right: 4px solid #fbbf24; }
+.ex-section.b { border-right: 4px solid var(--success); }
+.ex-section.c { border-right: 4px solid var(--purple); }
+.ex-section.d { border-right: 4px solid var(--danger); }
+.ex-section h4 {
+  font-size: 14px; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.ex-section.a h4 { color: #fbbf24; }
+.ex-section.b h4 { color: var(--success); }
+.ex-section.c h4 { color: var(--purple); }
+.ex-section.d h4 { color: var(--danger); }
+
+.ex-item {
+  display: flex; gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px dashed rgba(255,255,255,0.06);
+  font-size: 12.5px;
+  color: #c0c8dc;
+  line-height: 1.8;
+}
+.ex-item:last-child { border-bottom: none; }
+.ex-item .ex-num {
+  width: 24px; height: 24px; flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  display: grid; place-items: center;
+  font-size: 11px; font-weight: 800;
+  color: var(--accent);
+}
+.ex-section.a .ex-num { background: rgba(251,191,36,0.2); color: #fbbf24; }
+.ex-section.b .ex-num { background: rgba(0,212,170,0.2); color: var(--success); }
+.ex-section.c .ex-num { background: rgba(168,85,247,0.2); color: var(--purple); }
+.ex-section.d .ex-num { background: rgba(255,71,87,0.2); color: var(--danger); }
+
+.ex-section.d .ex-item .ex-num { font-size: 13px; }
+
+/* ═══════════════════════════════════════════════
+   جمع‌بندی
+═══════════════════════════════════════════════ */
+.summary-list {
+  max-width: 700px; width: 100%;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.summary-item {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 16px 20px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.summary-item i {
+  color: var(--success);
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.summary-item strong { color: var(--accent); }
+
+/* ═══════════════════════════════════════════════
+   منابع
+═══════════════════════════════════════════════ */
+.resources-list {
+  max-width: 750px; width: 100%;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.resource-item {
+  display: flex; align-items: center; gap: 16px;
+  padding: 18px 22px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+  transition: all 0.3s;
+}
+.resource-item:hover { border-color: var(--accent); transform: translateX(-4px); }
+.resource-item .res-cover {
+  width: 50px; height: 60px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: grid; place-items: center;
+  font-size: 22px; color: #050818;
+  flex-shrink: 0;
+}
+.resource-item .res-info h4 {
+  font-size: 13px; margin-bottom: 4px;
+  color: #fff;
+}
+.resource-item .res-info p {
+  font-size: 11px; color: #8892a8;
+  font-style: italic;
+}
+
+/* ═══════════════════════════════════════════════
+   اسلاید خداحافظی
+═══════════════════════════════════════════════ */
+.goodbye-slide { text-align: center; }
+.goodbye-icon {
+  width: 100px; height: 100px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: grid; place-items: center;
+  font-size: 44px; color: #050818;
+  animation: goodbyeWave 2s infinite;
+  box-shadow: 0 0 50px rgba(255,183,0,0.5);
+}
+@keyframes goodbyeWave {
+  0%,100% { transform: rotate(-8deg) scale(1); }
+  50% { transform: rotate(8deg) scale(1.05); }
+}
+.goodbye-title {
+  font-size: clamp(26px, 4vw, 42px);
+  font-weight: 900;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.goodbye-text {
+  font-size: clamp(14px, 1.6vw, 16px);
+  color: #b0b8cc;
+  max-width: 600px;
+  margin: 0 auto 32px;
+  line-height: 1.9;
+}
+.goodbye-cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #050818;
+  border: none; border-radius: 100px;
+  font-family: 'Vazirmatn', sans-serif;
+  font-size: 14px; font-weight: 800;
+  cursor: pointer; text-decoration: none;
+  transition: all 0.3s;
+  box-shadow: 0 8px 30px rgba(255,183,0,0.4);
+}
+.goodbye-cta:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 14px 40px rgba(255,183,0,0.6);
+}
+
+/* ═══════════════════════════════════════════════
+   کانفتی
+═══════════════════════════════════════════════ */
+.confetti-piece {
+  position: fixed;
+  width: 10px; height: 10px;
+  z-index: 999;
+  pointer-events: none;
+  animation: confettiFall 3s linear forwards;
+}
+@keyframes confettiFall {
+  0% { transform: translateY(-20vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════
+   Toast
+═══════════════════════════════════════════════ */
+.toast {
+  position: fixed;
+  bottom: 80px; left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: rgba(10,14,39,0.95);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 10px 22px;
+  border-radius: 100px;
+  font-size: 12px; font-weight: 600;
+  backdrop-filter: blur(20px);
+  z-index: 999;
+  transition: transform 0.4s ease;
+  box-shadow: 0 8px 30px rgba(255,183,0,0.3);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ═══════════════════════════════════════════════
+   ریسپانسیو
+═══════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .sim-layout { grid-template-columns: 1fr; }
+  .timeline { flex-wrap: wrap; gap: 16px; }
+  .timeline::before { display: none; }
+  .nav-dots { display: none; }
+}
+@media (max-width: 600px) {
+  .slide { padding: 80px 20px 70px; }
+  .controls { bottom: 12px; padding: 6px 10px; gap: 5px; }
+  .ctrl-btn { width: 32px; height: 32px; font-size: 11px; }
+  .slide-counter { bottom: 12px; right: 12px; padding: 4px 10px; font-size: 10.5px; }
+  .instructor-signature {
+    top: 6px; padding: 4px 10px;
+  }
+  .instructor-signature img { height: 22px; }
+  .instructor-signature .sig-text span { display: none; }
+  .instructor-signature .sig-text strong { font-size: 9px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════ پس‌زمینه ═══════ -->
+<div class="bg-wrap">
+  <div class="bubble b1"></div>
+  <div class="bubble b2"></div>
+  <div class="bubble b3"></div>
+</div>
+<div class="particles" id="particles"></div>
+
+<!-- ═══════ نوار پیشرفت ═══════ -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- ═══════ امضای ثابت استاد ═══════ -->
+<div class="instructor-signature">
+  <img src="../../assets/signature.png" alt="امضای دکتر گوهری‌منش"
+       onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+  <div class="sig-fallback" style="display:none">MG</div>
+  <div class="sig-text">
+    <strong>دکتر مسعود گوهری‌منش</strong>
+    <span>دانشیار — دانشگاه تربت حیدریه</span>
+  </div>
+</div>
+
+<!-- ═══════ هدر بالا ═══════ -->
+<header class="top-header">
+  <div class="header-brand">
+    <i class="fas fa-robot"></i>
+    <span>جلسه ۱ — مقدمات رباتیک</span>
+  </div>
+  <button class="ctrl-btn" id="soundBtn" title="صدا"><i class="fas fa-volume-up"></i></button>
+</header>
+
+<!-- ═══════ اسلایدها ═══════ -->
+<div class="slides-container" id="slidesContainer">
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱: کاور
+  ═══════════════════════════════════════════ -->
+  <div class="slide cover-slide" data-slide="1">
+    <div class="cover-badge">
+      <i class="fas fa-graduation-cap"></i>
+      <span>جلسه ۱ از ۱۶ — فاز ۱</span>
+    </div>
+    <h1 class="cover-title">مقدمات، تعاریف پایه<br>و تاریخچه علم رباتیک</h1>
+    <p class="cover-desc">
+      در این جلسه با مفاهیم بنیادی رباتیک، اجزای اصلی سیستم رباتیکی،
+      انواع مفاصل و محاسبه درجات آزادی آشنا می‌شویم.
+    </p>
+    <div class="cover-instructor">
+      <div class="avatar">MG</div>
+      <div class="info">
+        <strong>دکتر مسعود گوهری‌منش</strong>
+        <span>دانشیار گروه مهندسی مکانیک — دانشگاه تربت حیدریه</span>
+        <a href="mailto:m.goharimanesh@gmail.com">
+          <i class="fas fa-envelope"></i> m.goharimanesh@gmail.com
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۲: سوال انگیزشی
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="2">
+    <div style="text-align:center; margin-bottom:20px;">
+      <div style="width:100px;height:100px;margin:0 auto 20px;border-radius:50%;
+        background:linear-gradient(135deg,var(--accent),var(--accent2));
+        display:grid;place-items:center;font-size:44px;color:#050818;
+        animation:pulse 2s infinite;box-shadow:0 0 40px rgba(255,183,0,0.5);">
+        <i class="fas fa-question"></i>
+      </div>
+    </div>
+    <h2 class="slide-title">ربات چیست؟</h2>
+    <p class="slide-sub">
+      قبل از هر تعریف علمی، به این سوال فکر کنید...
+    </p>
+
+    <div class="cards-grid" style="max-width:820px;">
+      <div class="content-card" onclick="showToast('آیا ماشین لباسشویی ربات است؟ 🤔')">
+        <div class="card-icon"><i class="fas fa-blender"></i></div>
+        <h3>ماشین لباسشویی</h3>
+        <p>آیا یک دستگاه اتوماتیک که برنامه دارد، ربات است؟</p>
+      </div>
+      <div class="content-card" onclick="showToast('آیا بازوی صنعتی ربات است؟ 🤖')">
+        <div class="card-icon"><i class="fas fa-industry"></i></div>
+        <h3>بازوی صنعتی</h3>
+        <p>بازوی جوشکاری خط مونتاژ که برنامه‌ریزی می‌شود؟</p>
+      </div>
+      <div class="content-card" onclick="showToast('آیا روباتیک فضایی ربات است؟ 🚀')">
+        <div class="card-icon"><i class="fas fa-rocket"></i></div>
+        <h3>مریخ‌نورد</h3>
+        <p>کاوشگری که روی مریخ حرکت می‌کند و تصمیم می‌گیرد؟</p>
+      </div>
+      <div class="content-card" onclick="showToast('آیا ربات انسان‌نما ربات است؟ 🦾')">
+        <div class="card-icon"><i class="fas fa-user-astronaut"></i></div>
+        <h3>ربات انسان‌نما</h3>
+        <p>رباتی با ظاهر انسان که با محیط تعامل می‌کند؟</p>
+      </div>
+    </div>
+
+    <p style="margin-top:30px; font-size:13px; color:var(--accent); text-align:center;">
+      <i class="fas fa-lightbulb"></i>
+      تعریف استاندارد در اسلاید بعدی
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۳: تعریف ISO
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="3">
+    <h2 class="slide-title">تعریف استاندارد ربات</h2>
+    <p class="slide-sub">بر اساس استاندارد ISO 8373 — سازمان بین‌المللی استاندارد</p>
+
+    <div style="max-width:800px;padding:30px;background:var(--card);
+      border:2px solid rgba(255,183,0,0.3);border-radius:20px;backdrop-filter:blur(12px);
+      position:relative;margin-bottom:24px;">
+      <div style="position:absolute;top:-14px;right:24px;padding:4px 14px;
+        background:linear-gradient(135deg,var(--accent),var(--accent2));
+        border-radius:100px;font-size:11px;font-weight:800;color:#050818;">
+        ISO 8373
+      </div>
+      <p style="font-size:15px;line-height:2;text-align:center;color:#d0d8e8;">
+        «ربات صنعتی، یک <strong style="color:var(--accent);">بازوی ماهر مکانیکی چندمنظوره</strong>
+        است که <strong style="color:var(--accent);">قابل برنامه‌ریزی مجدد</strong> بوده و
+        می‌تواند در <strong style="color:var(--accent);">سه یا چند محور</strong> حرکت کند.
+        این سیستم ممکن است ثابت یا متحرک باشد و در کاربردهای اتوماسیون صنعتی
+        استفاده شود.»
+      </p>
+    </div>
+
+    <div class="cards-grid" style="max-width:820px;">
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-redo"></i></div>
+        <h3>قابل برنامه‌ریزی مجدد</h3>
+        <p>می‌توان رفتار و وظیفه را بدون تغییر سخت‌افزار تغییر داد</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-cube"></i>
+        </div>
+        <h3>چندمنظوره</h3>
+        <p>قابلیت انجام کارهای متفاوت با ابزارهای مختلف</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+          <i class="fas fa-arrows-alt"></i>
+        </div>
+        <h3>چند محوره</h3>
+        <p>حرکت در ۳ محور یا بیشتر با درجات آزادی متفاوت</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--danger), var(--accent2));">
+          <i class="fas fa-robot"></i>
+        </div>
+        <h3>بازوی مکانیکی</h3>
+        <p>ساختار زنجیره‌ای متشکل از لینک‌ها و مفاصل</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۴: تاریخچه
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="4">
+    <h2 class="slide-title">تاریخچه علم رباتیک</h2>
+    <p class="slide-sub">از رویای باستانی تا واقعیت صنعتی</p>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="dot" style="background:#a855f7;box-shadow:0 0 12px #a855f7;"></div>
+        <div class="year">۱۹۲۱</div>
+        <div class="event">واژه «Robot» توسط کارل چاپک</div>
+      </div>
+      <div class="timeline-item">
+        <div class="dot" style="background:#06b6d4;box-shadow:0 0 12px #06b6d4;"></div>
+        <div class="year">۱۹۵۴</div>
+        <div class="event">اولین ربات صنعتی — جورج دوول</div>
+      </div>
+      <div class="timeline-item">
+        <div class="dot" style="background:#00d4aa;box-shadow:0 0 12px #00d4aa;"></div>
+        <div class="year">۱۹۶۱</div>
+        <div class="event">Unimate در جنرال موتورز</div>
+      </div>
+      <div class="timeline-item">
+        <div class="dot" style="background:#ffb700;box-shadow:0 0 12px #ffb700;"></div>
+        <div class="year">۱۹۷۳</div>
+        <div class="event">ربات WAVE — اولین ربات شش‌محوره</div>
+      </div>
+      <div class="timeline-item">
+        <div class="dot" style="background:#ff6b35;box-shadow:0 0 12px #ff6b35;"></div>
+        <div class="year">۱۹۹۷</div>
+        <div class="event">آسیمو (Honda) — انسان‌نما</div>
+      </div>
+      <div class="timeline-item">
+        <div class="dot" style="background:#ec4899;box-shadow:0 0 12px #ec4899;"></div>
+        <div class="year">۲۰۰۰+</div>
+        <div class="event">ربات‌های جراحی، فضایی و هوشمند</div>
+      </div>
+    </div>
+
+    <div style="max-width:800px;margin-top:32px;padding:20px 24px;
+      background:rgba(255,183,0,0.08);border:1px solid rgba(255,183,0,0.25);
+      border-radius:14px;font-size:13px;line-height:1.9;color:#c0c8dc;">
+      <i class="fas fa-info-circle" style="color:var(--accent);"></i>
+      <strong style="color:var(--accent);">نکته:</strong>
+      واژه «Robot» از کلمه چکی «Robota» به معنای «کار اجباری» گرفته شده و
+      اولین‌بار در نمایشنامه R.U.R کارل چاپک (۱۹۲۱) به‌کار رفت.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۵: اجزای چهارگانه
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="5">
+    <h2 class="slide-title">اجزای اصلی سیستم رباتیکی</h2>
+    <p class="slide-sub">هر ربات از ۴ رکن اساسی تشکیل شده است</p>
+
+    <div class="cards-grid" style="max-width:900px;">
+      <div class="content-card" onclick="showToast('📐 ساختار مکانیکی: لینک‌ها، مفاصل، بدنه')">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--accent), var(--accent2));">
+          <i class="fas fa-project-diagram"></i>
+        </div>
+        <h3>۱. ساختار مکانیکی</h3>
+        <p>زنجیره سینماتیکی متشکل از لینک‌های صلب و مفاصل — اسکلت ربات</p>
+      </div>
+      <div class="content-card" onclick="showToast('⚙️ عملگرها: موتورهای DC، سروو، استپر، هیدرولیک')">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-cog"></i>
+        </div>
+        <h3>۲. عملگرها</h3>
+        <p>موتورهای DC، سروو، استپر، هیدرولیک و پنوماتیک — عضلات ربات</p>
+      </div>
+      <div class="content-card" onclick="showToast('📡 حسگرها: انکودر، خط‌کش نوری، نیرو/گشتاور')">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+          <i class="fas fa-satellite-dish"></i>
+        </div>
+        <h3>۳. حسگرها</h3>
+        <p>انکودر، خط‌کش نوری، حسگر نیرو/گشتاور — حواس ربات</p>
+      </div>
+      <div class="content-card" onclick="showToast('🧠 واحد کنترل: میکروکنترلر، کامپیوتر، PLC')">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--cyan), var(--accent));">
+          <i class="fas fa-microchip"></i>
+        </div>
+        <h3>۴. واحد کنترل</h3>
+        <p>میکروکنترلر، کامپیوتر یا PLC — مغز ربات</p>
+      </div>
+    </div>
+
+    <div style="max-width:900px;margin-top:24px;display:flex;justify-content:center;
+      gap:16px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;
+        background:rgba(255,255,255,0.04);border-radius:100px;font-size:11.5px;color:#8892a8;">
+        <i class="fas fa-circle" style="color:var(--accent);font-size:6px;"></i>
+        ساختار = اسکلت
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;
+        background:rgba(255,255,255,0.04);border-radius:100px;font-size:11.5px;color:#8892a8;">
+        <i class="fas fa-circle" style="color:var(--success);font-size:6px;"></i>
+        عملگر = عضله
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;
+        background:rgba(255,255,255,0.04);border-radius:100px;font-size:11.5px;color:#8892a8;">
+        <i class="fas fa-circle" style="color:var(--purple);font-size:6px;"></i>
+        حسگر = حس
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;
+        background:rgba(255,255,255,0.04);border-radius:100px;font-size:11.5px;color:#8892a8;">
+        <i class="fas fa-circle" style="color:var(--cyan);font-size:6px;"></i>
+        کنترل = مغز
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۶: مفاصل R و P
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="6">
+    <h2 class="slide-title">مفاصل پایه در رباتیک</h2>
+    <p class="slide-sub">دو نوع مفصل اصلی: دورانی (R) و کشویی (P)</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:900px;width:100%;">
+      <!-- مفصل R -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;
+        padding:24px;text-align:center;backdrop-filter:blur(12px);">
+        <div style="width:60px;height:60px;margin:0 auto 12px;border-radius:50%;
+          background:linear-gradient(135deg,var(--accent),var(--accent2));
+          display:grid;place-items:center;font-size:24px;color:#050818;">
+          <i class="fas fa-sync-alt"></i>
+        </div>
+        <h3 style="font-size:16px;margin-bottom:6px;">مفصل دورانی (Revolute)</h3>
+        <p style="font-size:12px;color:#8892a8;margin-bottom:16px;">
+          چرخش حول یک محور ثابت — نماد: <strong style="color:var(--accent);">R</strong>
+        </p>
+        <svg viewBox="0 0 200 120" style="max-width:100%;height:auto;">
+          <!-- زمین -->
+          <line x1="10" y1="100" x2="190" y2="100" stroke="#444" stroke-width="2"/>
+          <rect x="90" y="90" width="20" height="15" fill="#666" rx="2"/>
+          <!-- بازوی چرخان -->
+          <g style="transform-origin:100px 90px; animation:revArm 3s infinite ease-in-out;">
+            <rect x="98" y="20" width="4" height="70" fill="#ffb700" rx="2"/>
+            <circle cx="100" cy="20" r="8" fill="#ff6b35"/>
+          </g>
+          <!-- نقطه مفصل -->
+          <circle cx="100" cy="90" r="10" fill="none" stroke="#00d4aa" stroke-width="3"/>
+          <circle cx="100" cy="90" r="3" fill="#00d4aa"/>
+          <!-- قوس چرخش -->
+          <path d="M 130 60 A 50 50 0 0 1 130 120" fill="none"
+            stroke="#ffb700" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.6"/>
+          <text x="150" y="95" fill="#ffb700" font-size="11" font-family="Vazirmatn">θ</text>
+        </svg>
+        <style>
+          @keyframes revArm {
+            0%,100% { transform: rotate(-30deg); }
+            50% { transform: rotate(30deg); }
+          }
+        </style>
+      </div>
+
+      <!-- مفصل P -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;
+        padding:24px;text-align:center;backdrop-filter:blur(12px);">
+        <div style="width:60px;height:60px;margin:0 auto 12px;border-radius:50%;
+          background:linear-gradient(135deg,var(--success),var(--cyan));
+          display:grid;place-items:center;font-size:24px;color:#050818;">
+          <i class="fas fa-arrows-alt-v"></i>
+        </div>
+        <h3 style="font-size:16px;margin-bottom:6px;">مفصل کشویی (Prismatic)</h3>
+        <p style="font-size:12px;color:#8892a8;margin-bottom:16px;">
+          حرکت خطی در امتداد یک محور — نماد: <strong style="color:var(--success);">P</strong>
+        </p>
+        <svg viewBox="0 0 200 120" style="max-width:100%;height:auto;">
+          <!-- زمین -->
+          <line x1="10" y1="100" x2="190" y2="100" stroke="#444" stroke-width="2"/>
+          <!-- ریل -->
+          <rect x="60" y="94" width="80" height="12" fill="#333" rx="2"/>
+          <line x1="60" y1="100" x2="140" y2="100" stroke="#00d4aa" stroke-width="1.5" stroke-dasharray="4,2"/>
+          <!-- بلوک متحرک -->
+          <g style="animation:prismMove 3s infinite ease-in-out;">
+            <rect x="85" y="70" width="30" height="30" fill="#00d4aa" rx="4"/>
+            <rect x="95" y="20" width="10" height="50" fill="#06b6d4" rx="2"/>
+            <circle cx="100" cy="20" r="8" fill="#ffb700"/>
+          </g>
+          <!-- فلش حرکت -->
+          <path d="M 100 105 L 100 115 M 96 111 L 100 115 L 104 111" stroke="#00d4aa"
+            stroke-width="1.5" fill="none"/>
+          <text x="150" y="75" fill="#00d4aa" font-size="11" font-family="Vazirmatn">d</text>
+        </svg>
+        <style>
+          @keyframes prismMove {
+            0%,100% { transform: translateY(-15px); }
+            50% { transform: translateY(0px); }
+          }
+        </style>
+      </div>
+    </div>
+
+    <div style="max-width:900px;margin-top:24px;padding:16px 20px;
+      background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);
+      border-radius:12px;font-size:12.5px;line-height:1.8;color:#c0c8dc;">
+      <i class="fas fa-lightbulb" style="color:var(--purple);"></i>
+      <strong style="color:var(--purple);">نکته:</strong>
+      در رباتیک، هر مفصل دورانی یک درجه آزادی چرخشی و هر مفصل کشویی یک درجه آزادی خطی
+      به ربات اضافه می‌کند.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۷: شبیه‌ساز مفاصل (تعاملی)
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="7">
+    <h2 class="slide-title">شبیه‌ساز تعاملی مفاصل</h2>
+    <p class="slide-sub">اسلایدر را حرکت دهید و حرکت مفصل را ببینید</p>
+
+    <div class="simulator">
+      <div class="sim-tabs">
+        <button class="sim-tab active" data-joint="R" onclick="switchJoint('R')">
+          <i class="fas fa-sync-alt"></i> مفصل دورانی (R)
+        </button>
+        <button class="sim-tab" data-joint="P" onclick="switchJoint('P')">
+          <i class="fas fa-arrows-alt-v"></i> مفصل کشویی (P)
+        </button>
+      </div>
+
+      <div class="sim-layout">
+        <div class="sim-svg-wrap">
+          <svg id="jointSVG" viewBox="0 0 300 300" style="width:100%;height:auto;">
+            <!-- زمین -->
+            <line x1="20" y1="250" x2="280" y2="250" stroke="#444" stroke-width="3"/>
+            <g id="jointBase" transform="translate(150,250)">
+              <!-- پایه -->
+              <rect x="-20" y="-20" width="40" height="20" fill="#666" rx="3"/>
+              <circle cx="0" cy="0" r="14" fill="none" stroke="#00d4aa" stroke-width="3"/>
+              <circle cx="0" cy="0" r="4" fill="#00d4aa"/>
+            </g>
+            <g id="jointArm" transform="translate(150,250) rotate(-30)">
+              <rect x="-4" y="-180" width="8" height="180" fill="#ffb700" rx="3"/>
+              <circle cx="0" cy="-180" r="12" fill="#ff6b35"/>
+              <text x="20" y="-175" fill="#ff6b35" font-size="14" font-family="Vazirmatn" font-weight="bold">L</text>
+            </g>
+            <g id="jointPRail" style="display:none;">
+              <rect x="120" y="230" width="60" height="20" fill="#333" rx="3"/>
+              <line x1="120" y1="240" x2="180" y2="240" stroke="#00d4aa" stroke-width="1" stroke-dasharray="3,2"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="sim-controls">
+          <div class="sim-control">
+            <label>
+              <span id="jointParamLabel">زاویه چرخش θ:</span>
+              <strong id="jointParamValue">-30°</strong>
+            </label>
+            <input type="range" id="jointSlider" min="-90" max="90" value="-30" step="1">
+          </div>
+
+          <div class="sim-readout">
+            <span><i class="fas fa-crosshairs" style="color:var(--accent);"></i> موقعیت نوک:</span>
+            <span>(<strong id="tipX">0</strong>, <strong id="tipY">0</strong>)</span>
+          </div>
+
+          <div class="sim-readout">
+            <span><i class="fas fa-ruler-combined" style="color:var(--success);"></i> طول بازو:</span>
+            <span><strong>L = 180 px</strong></span>
+          </div>
+
+          <div class="sim-readout" style="background:rgba(168,85,247,0.1);border-color:rgba(168,85,247,0.3);">
+            <span><i class="fas fa-cube" style="color:var(--purple);"></i> درجات آزادی:</span>
+            <span><strong style="color:var(--purple);">1 DOF</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۸: درجه آزادی
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="8">
+    <h2 class="slide-title">درجه آزادی (DOF)</h2>
+    <p class="slide-sub">معیار اصلی برای توصیف قابلیت حرکتی یک مکانیزم</p>
+
+    <div style="max-width:820px;width:100%;">
+      <div class="formula-box">
+        <div class="formula-main">
+          M = 3(N − 1 − j) + <span style="color:#00d4aa;">Σ f<sub>i</sub></span>
+        </div>
+        <div class="formula-note">
+          فرمول <strong style="color:var(--accent);">گروبلر-کوتزباخ</strong> برای مکانیزم‌های صفحه‌ای
+        </div>
+      </div>
+
+      <div class="cards-grid" style="max-width:100%;">
+        <div class="content-card">
+          <div class="card-icon" style="--ci: linear-gradient(135deg, var(--accent), var(--accent2));">
+            <i class="fas fa-cubes"></i>
+          </div>
+          <h3>N — تعداد لینک‌ها</h3>
+          <p>شامل زمین (بدنه ثابت) که به‌عنوان لینک ۰ حساب می‌شود</p>
+        </div>
+        <div class="content-card">
+          <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+            <i class="fas fa-link"></i>
+          </div>
+          <h3>j — تعداد مفاصل</h3>
+          <p>تعداد اتصالات بین لینک‌ها</p>
+        </div>
+        <div class="content-card">
+          <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+            <i class="fas fa-circle-notch"></i>
+          </div>
+          <h3>f<sub>i</sub> — درجه آزادی مفصل</h3>
+          <p>R = 1، P = 1، کروی = 3 و ...</p>
+        </div>
+        <div class="content-card">
+          <div class="card-icon" style="--ci: linear-gradient(135deg, var(--danger), var(--accent2));">
+            <i class="fas fa-calculator"></i>
+          </div>
+          <h3>M — درجه آزادی کل</h3>
+          <p>تعداد حرکات مستقل مکانیزم</p>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;padding:18px 22px;
+        background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.3);
+        border-radius:14px;font-size:13px;line-height:1.9;color:#c0c8dc;">
+        <i class="fas fa-graduation-cap" style="color:var(--success);"></i>
+        <strong style="color:var(--success);">مثال ساده — بازوی ۲R صفحه‌ای:</strong><br>
+        N = 3 (زمین + ۲ لینک متحرک)، j = 2 (مفصل R)، f₁ = f₂ = 1<br>
+        M = 3(3 − 1 − 2) + (1 + 1) = <strong style="color:var(--accent);">2 DOF</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۹: شبیه‌ساز DOF
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="9">
+    <h2 class="slide-title">ماشین‌حساب DOF تعاملی</h2>
+    <p class="slide-sub">روی هر مکانیزم کلیک کنید تا DOF آن را ببینید</p>
+
+    <div class="dof-grid" id="dofGrid">
+      <div class="dof-card" data-mech="2R" onclick="selectMech(this)">
+        <div class="mech-icon"><i class="fas fa-angles-up"></i></div>
+        <h4>بازوی ۲R صفحه‌ای</h4>
+        <p>دو مفصل دورانی سری</p>
+        <div class="result">
+          N=3, j=2, Σf=2<br>
+          <strong>M = 2</strong>
+        </div>
+      </div>
+      <div class="dof-card" data-mech="3R" onclick="selectMech(this)">
+        <div class="mech-icon"><i class="fas fa-project-diagram"></i></div>
+        <h4>بازوی ۳R صفحه‌ای</h4>
+        <p>سه مفصل دورانی سری</p>
+        <div class="result">
+          N=4, j=3, Σf=3<br>
+          <strong>M = 3</strong>
+        </div>
+      </div>
+      <div class="dof-card" data-mech="RRPR" onclick="selectMech(this)">
+        <div class="mech-icon"><i class="fas fa-robot"></i></div>
+        <h4>ربات اسکارا (RRPR)</h4>
+        <p>سه R + یک P</p>
+        <div class="result">
+          N=5, j=4, Σf=4<br>
+          <strong>M = 4</strong>
+        </div>
+      </div>
+      <div class="dof-card" data-mech="5R" onclick="selectMech(this)">
+        <div class="mech-icon"><i class="fas fa-industry"></i></div>
+        <h4>بازوی صنعتی ۵R</h4>
+        <p>پنج مفصل دورانی</p>
+        <div class="result">
+          N=6, j=5, Σf=5<br>
+          <strong>M = 5</strong>
+        </div>
+      </div>
+    </div>
+
+    <div style="max-width:900px;width:100%;margin-top:24px;padding:20px 24px;
+      background:linear-gradient(135deg,rgba(168,85,247,0.1),rgba(6,182,212,0.08));
+      border:1px solid rgba(168,85,247,0.3);border-radius:14px;
+      font-size:12.5px;line-height:1.9;color:#c0c8dc;">
+      <i class="fas fa-lightbulb" style="color:var(--purple);"></i>
+      <strong style="color:var(--purple);">نکته:</strong>
+      در عمل، برخی مکانیزم‌ها ممکن است DOF مؤثر کمتری داشته باشند
+      (به دلیل قیود خاص). همیشه فرمول گروبلر را با بررسی فیزیکی تأیید کنید.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۰: زنجیره سینماتیکی
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="10">
+    <h2 class="slide-title">زنجیره سینماتیکی</h2>
+    <p class="slide-sub">ساختار اتصال لینک‌ها و مفاصل</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:900px;width:100%;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;
+        padding:24px;backdrop-filter:blur(12px);">
+        <h3 style="font-size:15px;margin-bottom:12px;color:var(--accent);">
+          <i class="fas fa-arrow-left"></i> زنجیره باز (سری)
+        </h3>
+        <p style="font-size:12px;color:#b0b8cc;line-height:1.8;margin-bottom:16px;">
+          هر لینک فقط به یک لینک قبل و بعد متصل است. مانند بازوهای صنعتی.
+        </p>
+        <svg viewBox="0 0 280 100" style="width:100%;height:auto;">
+          <circle cx="30" cy="70" r="10" fill="#00d4aa"/>
+          <line x1="30" y1="70" x2="110" y2="40" stroke="#ffb700" stroke-width="8" stroke-linecap="round"/>
+          <circle cx="110" cy="40" r="10" fill="#00d4aa"/>
+          <line x1="110" y1="40" x2="190" y2="70" stroke="#ffb700" stroke-width="8" stroke-linecap="round"/>
+          <circle cx="190" cy="70" r="10" fill="#00d4aa"/>
+          <line x1="190" y1="70" x2="250" y2="30" stroke="#ffb700" stroke-width="8" stroke-linecap="round"/>
+          <circle cx="250" cy="30" r="8" fill="#ff6b35"/>
+          <text x="30" y="95" fill="#8892a8" font-size="10" font-family="Vazirmatn">پایه</text>
+          <text x="240" y="25" fill="#ff6b35" font-size="10" font-family="Vazirmatn">عملگر</text>
+        </svg>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;
+        padding:24px;backdrop-filter:blur(12px);">
+        <h3 style="font-size:15px;margin-bottom:12px;color:var(--success);">
+          <i class="fas fa-circle-nodes"></i> زنجیره بسته (موازی)
+        </h3>
+        <p style="font-size:12px;color:#b0b8cc;line-height:1.8;margin-bottom:16px;">
+          چند مسیر مستقل بین پایه و عملگر وجود دارد. مانند ربات استوارت.
+        </p>
+        <svg viewBox="0 0 280 100" style="width:100%;height:auto;">
+          <line x1="70" y1="75" x2="210" y2="75" stroke="#444" stroke-width="2"/>
+          <circle cx="70" cy="75" r="8" fill="#00d4aa"/>
+          <circle cx="140" cy="75" r="8" fill="#00d4aa"/>
+          <circle cx="210" cy="75" r="8" fill="#00d4aa"/>
+          <rect x="115" y="20" width="50" height="15" fill="#ff6b35" rx="3"/>
+          <line x1="70" y1="75" x2="120" y2="35" stroke="#ffb700" stroke-width="4"/>
+          <line x1="210" y1="75" x2="160" y2="35" stroke="#ffb700" stroke-width="4"/>
+          <line x1="140" y1="75" x2="140" y2="35" stroke="#ffb700" stroke-width="4"/>
+        </svg>
+      </div>
+    </div>
+
+    <div style="max-width:900px;width:100%;margin-top:20px;padding:16px 22px;
+      background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.3);
+      border-radius:12px;font-size:12.5px;line-height:1.8;color:#c0c8dc;">
+      <i class="fas fa-check-circle" style="color:var(--success);"></i>
+      <strong style="color:var(--success);">مقایسه:</strong>
+      ربات‌های سری فضای کاری بزرگ‌تر، ربات‌های موازی صلبیت و دقت بالاتری دارند.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۱: فضای کاری
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="11">
+    <h2 class="slide-title">فضای کاری ربات</h2>
+    <p class="slide-sub">مجموعه نقاطی که عملگر نهایی می‌تواند به آن برسد</p>
+
+    <div style="max-width:820px;width:100%;background:var(--card);border:1px solid var(--border);
+      border-radius:18px;padding:24px;backdrop-filter:blur(12px);">
+      <div class="sim-layout">
+        <div class="sim-svg-wrap">
+          <svg viewBox="0 0 300 300" style="width:100%;height:auto;">
+            <!-- فضای کاری (دایره) -->
+            <circle cx="150" cy="150" r="120" fill="rgba(255,183,0,0.08)"
+              stroke="#ffb700" stroke-width="2" stroke-dasharray="5,4"/>
+            <circle cx="150" cy="150" r="60" fill="rgba(255,71,87,0.06)"
+              stroke="#ff4757" stroke-width="1.5" stroke-dasharray="3,3"/>
+            <!-- پایه -->
+            <circle cx="150" cy="150" r="8" fill="#00d4aa"/>
+            <circle cx="150" cy="150" r="14" fill="none" stroke="#00d4aa" stroke-width="2"/>
+            <!-- بازوی ۲R -->
+            <g id="wsArm">
+              <line x1="150" y1="150" x2="220" y2="100" stroke="#ffb700" stroke-width="6" stroke-linecap="round"/>
+              <line x1="220" y1="100" x2="270" y2="150" stroke="#ff6b35" stroke-width="6" stroke-linecap="round"/>
+              <circle cx="220" cy="100" r="5" fill="#00d4aa"/>
+              <circle cx="270" cy="150" r="6" fill="#ff4757"/>
+            </g>
+            <!-- برچسب‌ها -->
+            <text x="150" y="290" fill="#ffb700" font-size="11" font-family="Vazirmatn" text-anchor="middle">
+              فضای کاری قابل دسترس
+            </text>
+            <text x="150" y="30" fill="#ff4757" font-size="10" font-family="Vazirmatn" text-anchor="middle">
+              ناحیه ماهرانه
+            </text>
+          </svg>
+        </div>
+        <div>
+          <div style="margin-bottom:16px;">
+            <h4 style="font-size:13px;color:var(--accent);margin-bottom:6px;">
+              <i class="fas fa-circle"></i> فضای کاری قابل دسترس
+            </h4>
+            <p style="font-size:12px;color:#b0b8cc;line-height:1.7;">
+              همه نقاطی که نوک بازو می‌تواند به آن برسد.
+            </p>
+          </div>
+          <div style="margin-bottom:16px;">
+            <h4 style="font-size:13px;color:var(--danger);margin-bottom:6px;">
+              <i class="fas fa-circle"></i> فضای کاری ماهرانه
+            </h4>
+            <p style="font-size:12px;color:#b0b8cc;line-height:1.7;">
+              نقاطی که نوک بازو می‌تواند با هر جهت‌گیری دلخواه به آن برسد.
+            </p>
+          </div>
+          <div style="padding:12px 16px;background:rgba(168,85,247,0.1);
+            border:1px solid rgba(168,85,247,0.3);border-radius:10px;font-size:11.5px;
+            line-height:1.7;color:#c0c8dc;">
+            <i class="fas fa-lightbulb" style="color:var(--purple);"></i>
+            فضای کاری همیشه زیرمجموعه‌ای از فضای قابل دسترس است.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۲: مثال‌های صنعتی
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="12">
+    <h2 class="slide-title">مثال‌های صنعتی</h2>
+    <p class="slide-sub">ربات‌های واقعی در صنعت و زندگی روزمره</p>
+
+    <div class="cards-grid" style="max-width:1000px;">
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--accent), var(--accent2));">
+          <i class="fas fa-industry"></i>
+        </div>
+        <h3>PUMA 560</h3>
+        <p>ربات کلاسیک ۶ درجه آزادی — آموزشی و صنعتی</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-robot"></i>
+        </div>
+        <h3>ABB IRB 4600</h3>
+        <p>ربات سری ۶ محوره پرکاربرد در جوشکاری و مونتاژ</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+          <i class="fas fa-arrows-alt"></i>
+        </div>
+        <h3>Epson SCARA</h3>
+        <p>ربات مونتاژ سریع با انطباق‌پذیری انتخابی افقی</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--danger), var(--accent2));">
+          <i class="fas fa-hand-holding-medical"></i>
+        </div>
+        <h3>Da Vinci Surgery</h3>
+        <p>ربات جراحی کم‌تهاجمی با دقت بالا</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--cyan), var(--accent));">
+          <i class="fas fa-rocket"></i>
+        </div>
+        <h3>Curiosity Rover</h3>
+        <p>مریخ‌نورد ناسا با ۶ چرخ و بازوی علمی</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--accent2), var(--accent));">
+          <i class="fas fa-hdd"></i>
+        </div>
+        <h3>MeArm</h3>
+        <p>ربات آموزشی ۴ درجه آزادی با آردوینو</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۳: تمرین کلاسی
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="13">
+    <h2 class="slide-title">تمرین‌های کلاسی</h2>
+    <p class="slide-sub">جلسه ۱ — مفاهیم پایه و درجات آزادی</p>
+
+    <div class="exercise-wrap">
+      <!-- الف) سوالات مفهومی -->
+      <div class="ex-section a">
+        <h4><i class="fas fa-brain"></i> الف) سؤالات مفهومی</h4>
+        <div class="ex-item">
+          <div class="ex-num">۱</div>
+          <div>تفاوت اصلی ربات با یک دستگاه اتوماتیک ساده (مانند ماشین لباسشویی) چیست؟ حداقل دو معیار بیان کنید.</div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۲</div>
+          <div>چرا استاندارد ISO 8373 بر «قابلیت برنامه‌ریزی مجدد» تأکید دارد؟</div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۳</div>
+          <div>مفصل کروی (Ball Joint) چند درجه آزادی دارد؟ در چه ربات‌هایی استفاده می‌شود؟</div>
+        </div>
+      </div>
+
+      <!-- ب) تمرین عملی -->
+      <div class="ex-section b">
+        <h4><i class="fas fa-flask"></i> ب) تمرین‌های عملی</h4>
+        <div class="ex-item">
+          <div class="ex-num">۱</div>
+          <div>با استفاده از فرمول گروبلر، DOF یک بازوی ۴R صفحه‌ای را محاسبه کنید. مراحل را بنویسید.</div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۲</div>
+          <div>در نرم‌افزار SAM (یا هر نرم‌افزار تحلیل مکانیزم)، یک بازوی ۲R بسازید و DOF آن را تأیید کنید.</div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۳</div>
+          <div>برای یک ربات ۵R (مثل بازوی صنعتی)، جدولی از N، j و fᵢ تهیه کنید و DOF را محاسبه نمایید.</div>
+        </div>
+      </div>
+
+      <!-- ج) تمرین نوشتاری -->
+      <div class="ex-section c">
+        <h4><i class="fas fa-pen-fancy"></i> ج) تمرین نوشتاری</h4>
+        <div class="ex-item">
+          <div class="ex-num">۱</div>
+          <div>تاریخچه تحول رباتیک را در قالب یک مقاله یک‌صفحه‌ای از دهه ۱۹۲۰ تا امروز خلاصه کنید.</div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۲</div>
+          <div>چهار رکن اصلی یک سیستم رباتیکی را شرح دهید و برای هر یک، یک مثال واقعی بیاورید.</div>
+        </div>
+      </div>
+
+      <!-- د) چالش خلاقانه -->
+      <div class="ex-section d">
+        <h4><i class="fas fa-star"></i> د) چالش خلاقانه ★</h4>
+        <div class="ex-item">
+          <div class="ex-num">★</div>
+          <div>
+            یک کاربرد نوآورانه از یک ربات ۲R یا SCARA در زندگی روزمره یا صنعت طراحی کنید.
+            <br>
+            <span style="color:#8892a8;font-size:11.5px;">
+              (نوع مفاصل، تعداد DOF، مزیت اصلی و محدودیت‌ها را مشخص کنید — ۲۰۰ کلمه)
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۴: سوال تعاملی
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="14">
+    <h2 class="slide-title">سوال تعاملی</h2>
+    <p class="slide-sub">پاسخ صحیح را انتخاب کنید</p>
+
+    <div class="question-card">
+      <div class="q-icon"><i class="fas fa-question"></i></div>
+      <h3>درجه آزادی یک بازوی صفحه‌ای ۳R (سه لینک متحرک، سه مفصل R) چند است؟</h3>
+
+      <div class="quiz-options" id="quizOptions">
+        <button class="quiz-option" data-correct="false" onclick="answerQuiz(this, false)">
+          <span class="opt-letter">الف</span>
+          <span>۲ درجه آزادی</span>
+        </button>
+        <button class="quiz-option" data-correct="true" onclick="answerQuiz(this, true)">
+          <span class="opt-letter">ب</span>
+          <span>۳ درجه آزادی</span>
+        </button>
+        <button class="quiz-option" data-correct="false" onclick="answerQuiz(this, false)">
+          <span class="opt-letter">ج</span>
+          <span>۴ درجه آزادی</span>
+        </button>
+        <button class="quiz-option" data-correct="false" onclick="answerQuiz(this, false)">
+          <span class="opt-letter">د</span>
+          <span>۶ درجه آزادی</span>
+        </button>
+      </div>
+
+      <div class="quiz-result" id="quizResult"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۵: پاسخ + کانفتی
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="15">
+    <div style="text-align:center;">
+      <div style="width:120px;height:120px;margin:0 auto 24px;border-radius:50%;
+        background:linear-gradient(135deg,var(--success),var(--cyan));
+        display:grid;place-items:center;font-size:56px;color:#050818;
+        animation:correctBounce 1s infinite;box-shadow:0 0 60px rgba(0,212,170,0.6);">
+        <i class="fas fa-check"></i>
+      </div>
+    </div>
+    <h2 class="slide-title" style="background:linear-gradient(135deg,var(--success),var(--cyan));
+      -webkit-background-clip:text;background-clip:text;">
+      پاسخ صحیح: گزینه ب
+    </h2>
+    <p class="slide-sub" style="font-size:15px;">
+      ۳ درجه آزادی — با فرمول گروبلر
+    </p>
+
+    <div style="max-width:650px;width:100%;padding:28px;
+      background:var(--card);border:2px solid var(--success);
+      border-radius:20px;backdrop-filter:blur(12px);">
+      <div style="direction:ltr;text-align:center;font-family:'Cambria Math',serif;
+        font-size:20px;color:#fff;margin-bottom:20px;">
+        M = 3(N − 1 − j) + Σfᵢ
+      </div>
+      <div style="text-align:center;font-size:13px;color:#b0b8cc;line-height:2.2;">
+        N = 4 (زمین + ۳ لینک متحرک)<br>
+        j = 3 (سه مفصل R)<br>
+        Σfᵢ = 1 + 1 + 1 = 3<br>
+        <br>
+        <strong style="color:var(--success);font-size:16px;">
+          M = 3(4 − 1 − 3) + 3 = 0 + 3 = 3 DOF
+        </strong>
+      </div>
+    </div>
+    <style>
+      @keyframes correctBounce {
+        0%,100% { transform: scale(1) rotate(0); }
+        50% { transform: scale(1.1) rotate(5deg); }
+      }
+    </style>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۶: جمع‌بندی
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="16">
+    <h2 class="slide-title">جمع‌بندی جلسه ۱</h2>
+    <p class="slide-sub">آنچه امروز آموختیم</p>
+
+    <div class="summary-list">
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>تعریف استاندارد ربات (ISO 8373):</strong>
+          بازوی ماهر مکانیکی چندمنظوره، قابل برنامه‌ریزی مجدد، با حرکت در ۳ یا چند محور.
+        </div>
+      </div>
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>اجزای چهارگانه:</strong>
+          ساختار مکانیکی، عملگرها، حسگرها و واحد کنترل.
+        </div>
+      </div>
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>مفاصل پایه:</strong>
+          دورانی (R) و کشویی (P) — هر کدام یک درجه آزادی اضافه می‌کنند.
+        </div>
+      </div>
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>فرمول گروبلر-کوتزباخ:</strong>
+          M = 3(N − 1 − j) + Σfᵢ — ابزار اصلی محاسبه DOF مکانیزم‌های صفحه‌ای.
+        </div>
+      </div>
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>زنجیره‌های سینماتیکی:</strong>
+          سری (باز) و موازی (بسته) — هر کدام مزایا و معایب خاص خود را دارند.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۷: منابع
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="17">
+    <h2 class="slide-title">منابع جلسه</h2>
+    <p class="slide-sub">برای مطالعه بیشتر</p>
+
+    <div class="resources-list">
+      <div class="resource-item">
+        <div class="res-cover"><i class="fas fa-book"></i></div>
+        <div class="res-info">
+          <h4>Robot Dynamics and Control</h4>
+          <p>Mark W. Spong, Seth Hutchinson, M. Vidyasagar — فصل ۱</p>
+        </div>
+      </div>
+      <div class="resource-item">
+        <div class="res-cover" style="background:linear-gradient(135deg,var(--success),var(--cyan));">
+          <i class="fas fa-book-open"></i>
+        </div>
+        <div class="res-info">
+          <h4>Introduction to Robotics: Mechanics and Control</h4>
+          <p>John J. Craig — فصل ۱ و ۲</p>
+        </div>
+      </div>
+      <div class="resource-item">
+        <div class="res-cover" style="background:linear-gradient(135deg,var(--purple),var(--pink));">
+          <i class="fas fa-video"></i>
+        </div>
+        <div class="res-info">
+          <h4>جزوات و ویدیوهای آموزشی دکتر مسعود گوهری‌منش</h4>
+          <p>دانشگاه تربت حیدریه — آزمایشگاه ARCSLAB</p>
+        </div>
+      </div>
+      <div class="resource-item">
+        <div class="res-cover" style="background:linear-gradient(135deg,var(--cyan),var(--accent));">
+          <i class="fas fa-file-pdf"></i>
+        </div>
+        <div class="res-info">
+          <h4>ISO 8373:2012 — Robots and Robotic Devices</h4>
+          <p>سند استاندارد بین‌المللی تعاریف ربات</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۸: خداحافظی
+  ═══════════════════════════════════════════ -->
+  <div class="slide goodbye-slide" data-slide="18">
+    <div class="goodbye-icon"><i class="fas fa-hand-peace"></i></div>
+    <h2 class="goodbye-title">تا جلسه بعد!</h2>
+    <p class="goodbye-text">
+      در جلسه ۲ با انواع ربات‌ها و دسته‌بندی معماری‌های صنعتی
+      (سری، موازی، SCARA و پیوسته) آشنا می‌شویم.
+    </p>
+    <button class="goodbye-cta" onclick="window.location.href='../../index.html'">
+      <i class="fas fa-home"></i>
+      بازگشت به صفحه اصلی
+    </button>
+    <div style="margin-top:32px;display:inline-flex;align-items:center;gap:12px;
+      padding:14px 24px;background:var(--card);border:1px solid var(--border);
+      border-radius:16px;backdrop-filter:blur(12px);">
+      <div style="width:44px;height:44px;border-radius:50%;
+        background:linear-gradient(135deg,var(--accent),var(--accent2));
+        display:grid;place-items:center;font-size:16px;color:#050818;font-weight:800;">
+        MG
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:13px;font-weight:700;">دکتر مسعود گوهری‌منش</div>
+        <div style="font-size:10.5px;color:#8892a8;">دانشیار — دانشگاه تربت حیدریه</div>
+        <a href="mailto:m.goharimanesh@gmail.com" style="font-size:10px;color:var(--cyan);text-decoration:none;">
+          m.goharimanesh@gmail.com
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════ نقاط ناوبری ═══════ -->
+<div class="nav-dots" id="navDots"></div>
+
+<!-- ═══════ شمارنده ═══════ -->
+<div class="slide-counter" id="slideCounter">۱ / ۱۸</div>
+
+<!-- ═══════ کنترل‌ها ═══════ -->
+<div class="controls">
+  <button class="ctrl-btn" id="prevBtn" title="قبلی (←)"><i class="fas fa-chevron-right"></i></button>
+  <button class="ctrl-btn" id="nextBtn" title="بعدی (→)"><i class="fas fa-chevron-left"></i></button>
+  <button class="ctrl-btn" id="fsBtn" title="تمام‌صفحه"><i class="fas fa-expand"></i></button>
+</div>
+
+<!-- ═══════ Toast ═══════ -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   ناوبری اسلایدها
+═══════════════════════════════════════════════ */
+const slides = document.querySelectorAll('.slide');
+const totalSlides = slides.length;
+let currentSlide = 0;
+
+// ساخت نقاط ناوبری
+const navDots = document.getElementById('navDots');
+slides.forEach((_, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+  dot.addEventListener('click', () => goToSlide(i));
+  navDots.appendChild(dot);
+});
+
+function goToSlide(index) {
+  if (index < 0 || index >= totalSlides) return;
+  slides[currentSlide].classList.remove('active');
+  currentSlide = index;
+  slides[currentSlide].classList.add('active');
+  
+  // آپدیت نقاط
+  document.querySelectorAll('.nav-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === currentSlide);
+  });
+  
+  // آپدیت نوار پیشرفت
+  const pct = ((currentSlide + 1) / totalSlides) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  
+  // آپدیت شمارنده
+  const toFa = n => String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  document.getElementById('slideCounter').textContent = `${toFa(currentSlide + 1)} / ${toFa(totalSlides)}`;
+  
+  // غیرفعال‌سازی دکمه‌ها
+  document.getElementById('prevBtn').disabled = currentSlide === 0;
+  document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+  
+  playSlideSound();
+}
+
+function nextSlide() { goToSlide(currentSlide + 1); }
+function prevSlide() { goToSlide(currentSlide - 1); }
+
+document.getElementById('nextBtn').addEventListener('click', nextSlide);
+document.getElementById('prevBtn').addEventListener('click', prevSlide);
+
+// کیبورد
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); prevSlide(); }
+  else if (e.key === 'Home') { e.preventDefault(); goToSlide(0); }
+  else if (e.key === 'End') { e.preventDefault(); goToSlide(totalSlides - 1); }
+});
+
+// سوایپ لمسی
+let touchStartX = 0;
+let touchEndX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
+document.addEventListener('touchend', (e) => {
+  touchEndX = e.changedTouches[0].screenX;
+  const diff = touchStartX - touchEndX;
+  if (Math.abs(diff) > 60) {
+    if (diff > 0) nextSlide(); // سوایپ به چپ → بعدی
+    else prevSlide();
+  }
+});
+
+// شروع
+goToSlide(0);
+
+/* ═══════════════════════════════════════════════
+   افکت‌های صوتی
+═══════════════════════════════════════════════ */
+let audioCtx = null;
+let soundEnabled = true;
+
+function initAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+function playTone(freq, dur, type = 'sine', vol = 0.06) {
+  if (!soundEnabled) return;
+  initAudio();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type; osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, audioCtx.currentTime);
+  gain.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(); osc.stop(audioCtx.currentTime + dur);
+}
+function playClick() { playTone(880, 0.06, 'sine', 0.04); }
+function playSlideSound() {
+  if (!soundEnabled) return;
+  playTone(523, 0.1, 'sine', 0.04);
+  setTimeout(() => playTone(784, 0.12, 'sine', 0.04), 60);
+}
+function playSuccess() {
+  if (!soundEnabled) return;
+  playTone(523, 0.12, 'sine', 0.06);
+  setTimeout(() => playTone(659, 0.12, 'sine', 0.06), 80);
+  setTimeout(() => playTone(784, 0.2, 'sine', 0.06), 160);
+  setTimeout(() => playTone(1046, 0.3, 'sine', 0.06), 260);
+}
+function playError() {
+  if (!soundEnabled) return;
+  playTone(300, 0.15, 'sawtooth', 0.05);
+  setTimeout(() => playTone(200, 0.2, 'sawtooth', 0.05), 100);
+}
+
+const soundBtn = document.getElementById('soundBtn');
+soundBtn.addEventListener('click', () => {
+  soundEnabled = !soundEnabled;
+  soundBtn.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
+  if (soundEnabled) playClick();
+});
+
+/* ═══════════════════════════════════════════════
+   تمام‌صفحه
+═══════════════════════════════════════════════ */
+const fsBtn = document.getElementById('fsBtn');
+fsBtn.addEventListener('click', () => {
+  playClick();
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+    fsBtn.innerHTML = '<i class="fas fa-compress"></i>';
+  } else {
+    document.exitFullscreen();
+    fsBtn.innerHTML = '<i class="fas fa-expand"></i>';
+  }
+});
+
+/* ═══════════════════════════════════════════════
+   Toast
+═══════════════════════════════════════════════ */
+const toastEl = document.getElementById('toast');
+let toastTimer;
+function showToast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2500);
+}
+
+/* ═══════════════════════════════════════════════
+   ذرات
+═══════════════════════════════════════════════ */
+const particlesWrap = document.getElementById('particles');
+const colors = ['#ffb700', '#00d4aa', '#a855f7', '#06b6d4', '#ff6b35'];
+for (let i = 0; i < 30; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  p.style.left = Math.random() * 100 + '%';
+  p.style.animationDuration = (12 + Math.random() * 18) + 's';
+  p.style.animationDelay = (Math.random() * 20) + 's';
+  p.style.background = colors[Math.floor(Math.random() * colors.length)];
+  p.style.boxShadow = `0 0 8px ${p.style.background}`;
+  particlesWrap.appendChild(p);
+}
+
+/* ═══════════════════════════════════════════════
+   شبیه‌ساز مفاصل
+═══════════════════════════════════════════════ */
+let currentJointType = 'R';
+const jointSlider = document.getElementById('jointSlider');
+const jointArm = document.getElementById('jointArm');
+const jointBase = document.getElementById('jointBase');
+const jointPRail = document.getElementById('jointPRail');
+const tipXEl = document.getElementById('tipX');
+const tipYEl = document.getElementById('tipY');
+const jointParamValue = document.getElementById('jointParamValue');
+const jointParamLabel = document.getElementById('jointParamLabel');
+
+function switchJoint(type) {
+  playClick();
+  currentJointType = type;
+  document.querySelectorAll('.sim-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.joint === type);
+  });
+  
+  if (type === 'R') {
+    jointSlider.min = -90; jointSlider.max = 90; jointSlider.value = -30;
+    jointParamLabel.textContent = 'زاویه چرخش θ:';
+    jointArm.style.display = '';
+    jointPRail.style.display = 'none';
+    jointSlider.step = 1;
+  } else {
+    jointSlider.min = 0; jointSlider.max = 180; jointSlider.value = 0;
+    jointParamLabel.textContent = 'جابجایی خطی d:';
+    jointArm.style.display = 'none';
+    jointPRail.style.display = '';
+    jointSlider.step = 1;
+  }
+  updateJoint();
+}
+
+function updateJoint() {
+  const v = parseFloat(jointSlider.value);
+  const L = 180;
+  
+  if (currentJointType === 'R') {
+    jointParamValue.textContent = v + '°';
+    jointArm.setAttribute('transform', `translate(150,250) rotate(${v})`);
+    const rad = (v - 90) * Math.PI / 180;
+    const x = 150 + L * Math.cos(rad);
+    const y = 250 + L * Math.sin(rad);
+    tipXEl.textContent = Math.round(x - 150);
+    tipYEl.textContent = Math.round(250 - y);
+  } else {
+    jointParamValue.textContent = v + ' px';
+    const moveY = -v; // حرکت رو به بالا
+    jointPRail.setAttribute('transform', `translate(0, ${moveY})`);
+    tipXEl.textContent = '0';
+    tipYEl.textContent = (180 + Math.abs(v));
+  }
+}
+
+jointSlider.addEventListener('input', () => {
+  updateJoint();
+});
+
+updateJoint();
+
+/* ═══════════════════════════════════════════════
+   ماشین‌حساب DOF
+═══════════════════════════════════════════════ */
+function selectMech(el) {
+  playClick();
+  document.querySelectorAll('.dof-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  setTimeout(() => {
+    playSuccess();
+    showToast('DOF محاسبه شد ✓');
+  }, 300);
+}
+
+/* ═══════════════════════════════════════════════
+   Quiz
+═══════════════════════════════════════════════ */
+function answerQuiz(btn, isCorrect) {
+  const options = document.querySelectorAll('#quizOptions .quiz-option');
+  const result = document.getElementById('quizResult');
+  
+  options.forEach(o => o.disabled = true);
+  
+  if (isCorrect) {
+    btn.classList.add('correct');
+    result.className = 'quiz-result show ok';
+    result.innerHTML = '<i class="fas fa-check-circle"></i> آفرین! پاسخ صحیح است.';
+    playSuccess();
+    fireConfetti();
+    setTimeout(() => goToSlide(14), 1800);
+  } else {
+    btn.classList.add('wrong');
+    result.className = 'quiz-result show no';
+    result.innerHTML = '<i class="fas fa-times-circle"></i> پاسخ صحیح نبود — گزینه ب درست است.';
+    playError();
+    // نمایش پاسخ صحیح
+    options.forEach(o => {
+      if (o.dataset.correct === 'true') o.classList.add('correct');
+    });
+    setTimeout(() => goToSlide(14), 2200);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   کانفتی
+═══════════════════════════════════════════════ */
+function fireConfetti() {
+  const colors = ['#ffb700', '#00d4aa', '#a855f7', '#ff6b35', '#06b6d4', '#ec4899'];
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDelay = (Math.random() * 0.5) + 's';
+    c.style.animationDuration = (2 + Math.random() * 1.5) + 's';
+    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   کلیک روی کارت‌ها → صدای کلیک
+═══════════════════════════════════════════════ */
+document.querySelectorAll('.content-card').forEach(c => {
+  c.addEventListener('click', playClick);
+});
+</script>
+</body>
+</html>

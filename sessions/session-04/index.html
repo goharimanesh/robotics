@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جلسه ۴ — ربات اسکارا | دکتر گوهری‌منش</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../shared/lecture.css">
+
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      processEscapes: true
+    },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+</head>
+<body>
+
+<!-- پس‌زمینه متحرک -->
+<div class="bg-wrap">
+  <div class="bubble b1"></div>
+  <div class="bubble b2"></div>
+  <div class="bubble b3"></div>
+</div>
+<div class="particles" id="particles"></div>
+
+<!-- نوار پیشرفت -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- امضای استاد -->
+<div class="instructor-signature">
+  <div class="sig-fallback" id="sigFallback">MG</div>
+  <img id="sigImage" src="../../assets/signature.png" alt="امضای دکتر گوهری‌منش"
+       style="display:none;"
+       onload="this.style.display='block'; document.getElementById('sigFallback').style.display='none';"
+       onerror="this.style.display='none'; document.getElementById('sigFallback').style.display='grid';">
+  <div class="sig-text">
+    <strong>دکتر مسعود گوهری‌منش</strong>
+    <span>دانشیار — دانشگاه تربت حیدریه</span>
+  </div>
+</div>
+
+<!-- هدر بالا -->
+<header class="top-header">
+  <div class="header-brand">
+    <i class="fas fa-robot"></i>
+    <span>جلسه ۴ — ربات اسکارا (SCARA)</span>
+  </div>
+  <button class="ctrl-btn" id="soundBtn" title="صدا"><i class="fas fa-volume-up"></i></button>
+</header>
+
+<!-- اسلایدها -->
+<div class="slides-container" id="slidesContainer">
+
+  <!-- ═══════ اسلاید ۱: کاور ═══════ -->
+  <div class="slide cover-slide" data-slide="1">
+    <div class="cover-badge">
+      <i class="fas fa-graduation-cap"></i>
+      <span>جلسه ۴ از ۱۶ — فاز ۱</span>
+    </div>
+    <h1 class="cover-title">ربات اسکارا<br>SCARA</h1>
+    <p class="cover-desc">
+      Selective Compliance Assembly Robot Arm — ربات مونتاژ با انطباق‌پذیری انتخابی.
+      در این جلسه با پیکربندی RRPR، ویژگی منحصربه‌فرد انطباق انتخابی، فضای کاری و
+      کاربردهای صنعتی آن آشنا می‌شویم.
+    </p>
+    <div class="cover-instructor">
+      <div class="avatar">MG</div>
+      <div class="info">
+        <strong>دکتر مسعود گوهری‌منش</strong>
+        <span>دانشیار گروه مهندسی مکانیک — دانشگاه تربت حیدریه</span>
+        <a href="mailto:m.goharimanesh@gmail.com">
+          <i class="fas fa-envelope"></i> m.goharimanesh@gmail.com
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۲: سوال انگیزشی ═══════ -->
+  <div class="slide" data-slide="2">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="width:100px;height:100px;margin:0 auto 20px;border-radius:50%;
+        background:linear-gradient(135deg,var(--accent),var(--accent2));
+        display:grid;place-items:center;font-size:44px;color:#050818;
+        animation:pulse 2s infinite;box-shadow:0 0 40px rgba(255,183,0,0.5);">
+        <i class="fas fa-question"></i>
+      </div>
+    </div>
+    <h2 class="slide-title">چرا SCARA در مونتاژ سلطنت می‌کند؟</h2>
+    <p class="slide-sub">
+      چرا ۹۰٪ خطوط مونتاژ الکترونیک جهان از SCARA استفاده می‌کنند؟
+    </p>
+
+    <div class="cards-grid cols-3" style="max-width:850px;">
+      <div class="content-card" onclick="showToast('⚡ سرعت بالا: تا ۴ حرکت در ثانیه')">
+        <div class="card-icon"><i class="fas fa-bolt"></i></div>
+        <h3>سرعت بالا</h3>
+        <p>تا ۴ حرکت رفت‌وبرگشت در ثانیه</p>
+      </div>
+      <div class="content-card" onclick="showToast('🎯 دقت بالا: ±0.01 mm')">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-crosshairs"></i>
+        </div>
+        <h3>دقت بالا</h3>
+        <p>تا ±۰٫۰۱ میلی‌متر تکرارپذیری</p>
+      </div>
+      <div class="content-card" onclick="showToast('💧 انطباق انتخابی: مناسب جاگذاری قطعات')">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+          <i class="fas fa-hand-sparkles"></i>
+        </div>
+        <h3>انطباق انتخابی</h3>
+        <p>مناسب جاگذاری دقیق قطعات</p>
+      </div>
+    </div>
+
+    <div style="max-width:800px;width:100%;margin-top:24px;padding:16px 22px;
+      background:rgba(255,183,0,0.08);border:1px solid rgba(255,183,0,0.25);
+      border-radius:12px;font-size:12.5px;line-height:1.8;color:#c0c8dc;">
+      <i class="fas fa-lightbulb" style="color:var(--accent);"></i>
+      <strong style="color:var(--accent);">نکته:</strong>
+      SCARA مخفف <strong>Selective Compliance Assembly Robot Arm</strong> است.
+      انطباق انتخابی یعنی در جهت عمودی سخت، در جهت افقی نرم.
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۳: مقایسه با ۶R ═══════ -->
+  <div class="slide" data-slide="3">
+    <h2 class="slide-title">SCARA در برابر ۶R</h2>
+    <p class="slide-sub">مقایسه دو معماری محبوب صنعتی</p>
+
+    <div class="slide-image">
+      <img src="images/compare-scara-6r.jpg" alt="مقایسه SCARA و ۶R"
+           onerror="this.style.display='none'">
+    </div>
+
+    <div class="data-table" style="max-width:900px;">
+      <table>
+        <thead>
+          <tr>
+            <th>معیار</th>
+            <th>SCARA (RRPR)</th>
+            <th>۶R مفصلی</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>سرعت در صفحه افقی</td>
+            <td><strong style="color:var(--success);">بسیار بالا</strong></td>
+            <td>بالا</td>
+          </tr>
+          <tr>
+            <td>فضای کاری</td>
+            <td>استوانه کم‌ارتفاع</td>
+            <td><strong style="color:var(--success);">کروی بزرگ</strong></td>
+          </tr>
+          <tr>
+            <td>صلبیت عمودی</td>
+            <td><strong style="color:var(--success);">بسیار بالا</strong></td>
+            <td>متوسط</td>
+          </tr>
+          <tr>
+            <td>انطباق افقی</td>
+            <td><strong style="color:var(--success);">اختیاری</strong></td>
+            <td>صلب</td>
+          </tr>
+          <tr>
+            <td>کاربرد اصلی</td>
+            <td>مونتاژ الکترونیک</td>
+            <td>جوشکاری، رنگ‌پاشی</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۴: پیکربندی RRPR ═══════ -->
+  <div class="slide" data-slide="4">
+    <h2 class="slide-title">پیکربندی RRPR</h2>
+    <p class="slide-sub">چهار مفصل: دو R افقی + یک P عمودی + یک R مچ</p>
+
+    <div class="slide-image">
+      <img src="images/rrpr-config.jpg" alt="پیکربندی RRPR اسکارا"
+           onerror="this.style.display='none'">
+    </div>
+
+    <div class="cards-grid cols-4" style="max-width:900px;">
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-sync-alt"></i></div>
+        <h3>R₁ — مفصل اول</h3>
+        <p>چرخش حول محور عمودی، در پایه</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-sync"></i>
+        </div>
+        <h3>R₂ — مفصل دوم</h3>
+        <p>چرخش موازی با R₁، در آرنج</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+          <i class="fas fa-arrows-alt-v"></i>
+        </div>
+        <h3>P₃ — مفصل کشویی</h3>
+        <p>حرکت خطی عمودی (Z)</p>
+      </div>
+      <div class="content-card" style="--ci: linear-gradient(135deg, var(--danger), var(--accent2));">
+        <div class="card-icon"><i class="fas fa-undo"></i></div>
+        <h3>R₄ — مچ</h3>
+        <p>چرخش نهایی حول Z</p>
+      </div>
+    </div>
+
+    <div style="max-width:900px;width:100%;margin-top:20px;padding:16px 22px;
+      background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.3);
+      border-radius:12px;font-size:12px;line-height:1.8;color:#c0c8dc;">
+      <i class="fas fa-info-circle" style="color:var(--cyan);"></i>
+      <strong style="color:var(--cyan);">نکته:</strong>
+      محورهای R₁ و R₂ <strong>موازی</strong> هستند و در یک صفحه افقی کار می‌کنند.
+      به همین دلیل SCARA در صفحه XY بسیار سریع است.
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۵: سینماتیک مستقیم ═══════ -->
+  <div class="slide" data-slide="5">
+    <h2 class="slide-title">سینماتیک مستقیم SCARA</h2>
+    <p class="slide-sub">موقعیت نوک بر حسب چهار متغیر مفصلی</p>
+
+    <div class="formula-panel">
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-cube"></i>
+          مختصات کارتزین نوک
+        </div>
+        <div class="formula-content">
+          $$ \begin{cases} x = L_1 \cos\theta_1 + L_2 \cos(\theta_1 + \theta_2) \\[6pt] y = L_1 \sin\theta_1 + L_2 \sin(\theta_1 + \theta_2) \\[6pt] z = -d_3 \\[6pt] \phi = \theta_1 + \theta_2 - \theta_4 \end{cases} $$
+        </div>
+        <div class="formula-note">
+          \( L_1, L_2 \): طول لینک‌های افقی — \( d_3 \): جابجایی عمودی — \( \theta_4 \): زاویه مچ
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-calculator"></i>
+          جدول DH SCARA
+        </div>
+        <div class="formula-content">
+          $$ \begin{array}{c|cccc} i & \alpha_{i-1} & a_{i-1} & d_i & \theta_i \\ \hline 1 & 0 & 0 & 0 & \theta_1^* \\ 2 & 0 & L_1 & 0 & \theta_2^* \\ 3 & 0 & L_2 & d_3^* & 0 \\ 4 & 0 & 0 & 0 & \theta_4^* \end{array} $$
+        </div>
+        <div class="formula-note">
+          \( * \): متغیر مفصلی. سه مفصل دورانی و یک مفصل کشویی.
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-arrow-left"></i>
+          سینماتیک معکوس
+        </div>
+        <div class="formula-content">
+          $$ \begin{cases} \theta_2 = \text{atan2}\left(\pm\sqrt{1-D^2}, D\right) \\ D = \dfrac{x^2 + y^2 - L_1^2 - L_2^2}{2 L_1 L_2} \\[6pt] \theta_1 = \text{atan2}(y, x) - \text{atan2}(L_2 \sin\theta_2, L_1 + L_2 \cos\theta_2) \\[6pt] d_3 = -z \\ \theta_4 = \theta_1 + \theta_2 - \phi \end{cases} $$
+        </div>
+        <div class="formula-note">
+          \( \pm \): دو پیکربندی Elbow-Up و Elbow-Down
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۶: شبیه‌ساز SCARA ═══════ -->
+  <div class="slide" data-slide="6">
+    <h2 class="slide-title">شبیه‌ساز تعاملی SCARA</h2>
+    <p class="slide-sub">هدف را با ماوس بکشید — حل IK با Newton-Raphson</p>
+
+    <div class="simulator">
+      <div class="sim-layout">
+        <div class="sim-canvas-wrap">
+          <canvas id="scaraCanvas" width="640" height="500"></canvas>
+        </div>
+
+        <div class="sim-controls">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="sim-control">
+              <label><span>L₁</span><strong id="scaraL1Val">200</strong></label>
+              <input type="range" id="scaraL1" min="120" max="240" value="200" step="1">
+            </div>
+            <div class="sim-control">
+              <label><span>L₂</span><strong id="scaraL2Val">150</strong></label>
+              <input type="range" id="scaraL2" min="80" max="200" value="150" step="1">
+            </div>
+          </div>
+
+          <div class="sim-readout">
+            <span><i class="fas fa-sync-alt" style="color:var(--accent);"></i> θ₁:</span>
+            <strong id="scaraTheta1">۰°</strong>
+          </div>
+          <div class="sim-readout">
+            <span><i class="fas fa-sync" style="color:var(--accent);"></i> θ₂:</span>
+            <strong id="scaraTheta2">۰°</strong>
+          </div>
+          <div class="sim-readout" style="background:rgba(168,85,247,0.1);border-color:rgba(168,85,247,0.3);">
+            <span><i class="fas fa-crosshairs" style="color:var(--purple);"></i> هدف (x,y):</span>
+            <strong id="scaraTarget" style="color:var(--purple);">(۰, ۰)</strong>
+          </div>
+          <div class="sim-readout" style="background:rgba(255,183,0,0.1);border-color:rgba(255,183,0,0.3);">
+            <span><i class="fas fa-calculator" style="color:var(--accent);"></i> خطای IK:</span>
+            <strong id="scaraError" style="color:var(--accent);">۰٫۰۰</strong>
+          </div>
+
+          <div class="sim-buttons">
+            <button class="sim-btn active" id="scaraElbowDown" onclick="setScaraConfig('down')">آرنج پایین</button>
+            <button class="sim-btn" id="scaraElbowUp" onclick="setScaraConfig('up')">آرنج بالا</button>
+          </div>
+          <div class="sim-buttons">
+            <button class="sim-btn" onclick="toggleScaraWorkspace()" id="scaraWsBtn">نمایش فضای کاری</button>
+            <button class="sim-btn" onclick="resetScaraTarget()">ریست هدف</button>
+          </div>
+
+          <div style="font-size:10.5px;color:#8892a8;text-align:center;line-height:1.6;margin-top:6px;">
+            <i class="fas fa-hand-pointer"></i>
+            روی بوم کلیک/بکشید تا هدف جابجا شود
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۷: انطباق انتخابی ═══════ -->
+  <div class="slide" data-slide="7">
+    <h2 class="slide-title">انطباق‌پذیری انتخابی</h2>
+    <p class="slide-sub">ویژگی منحصربه‌فرد SCARA</p>
+
+    <div class="slide-image">
+      <img src="images/selective-compliance.jpg" alt="انطباق انتخابی SCARA"
+           onerror="this.style.display='none'">
+    </div>
+
+    <div class="cards-grid cols-2" style="max-width:850px;">
+      <div class="content-card" style="border-color:rgba(0,212,170,0.4);">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-arrows-alt-v"></i>
+        </div>
+        <h3>صلبیت عمودی (Z)</h3>
+        <p>در جهت Z، SCARA بسیار صلب است — مناسب فشار جاگذاری (Insertion Force)</p>
+      </div>
+      <div class="content-card" style="border-color:rgba(255,183,0,0.4);">
+        <div class="card-icon"><i class="fas fa-arrows-alt-h"></i></div>
+        <h3>انعطاف افقی (XY)</h3>
+        <p>در صفحه XY، انعطاف‌پذیر است — اجازه می‌دهد قطعه با سوراخ هم‌تراز شود</p>
+      </div>
+    </div>
+
+    <div style="max-width:850px;width:100%;margin-top:20px;padding:16px 22px;
+      background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);
+      border-radius:12px;font-size:12px;line-height:1.8;color:#c0c8dc;">
+      <i class="fas fa-lightbulb" style="color:var(--purple);"></i>
+      <strong style="color:var(--purple);">چرا مهم است؟</strong>
+      در مونتاژ بردهای الکترونیکی، اگر قطعه با سوراخ کمی ناهم‌تراز باشد،
+      انعطاف افقی اجازه می‌دهد قطعه خودش را جا بیندازد.
+      این ویژگی، دقت مونتاژ را بدون نیاز به سنسور اضافی افزایش می‌دهد.
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۸: نمونه تجاری ═══════ -->
+  <div class="slide" data-slide="8">
+    <h2 class="slide-title">نمونه‌های تجاری SCARA</h2>
+    <p class="slide-sub">پیشگامان صنعت</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:24px;max-width:1000px;width:100%;align-items:center;">
+      <div class="slide-image square" style="margin:0;">
+        <img src="images/scara-real.jpg" alt="ربات SCARA صنعتی"
+             onerror="this.style.display='none'">
+      </div>
+      <div class="cards-grid cols-2" style="max-width:none;">
+        <div class="content-card">
+          <div class="card-icon"><i class="fas fa-industry"></i></div>
+          <h3>Epson</h3>
+          <p>سری G — پیشرو در سرعت و دقت</p>
+        </div>
+        <div class="content-card">
+          <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+            <i class="fas fa-robot"></i>
+          </div>
+          <h3>Yamaha</h3>
+          <p>سری YK — پرکاربرد در مونتاژ</p>
+        </div>
+        <div class="content-card">
+          <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <h3>Adept</h3>
+          <p>سری Cobra — SCARA با کنترلر پیشرفته</p>
+        </div>
+        <div class="content-card">
+          <div class="card-icon" style="--ci: linear-gradient(135deg, var(--danger), var(--accent2));">
+            <i class="fas fa-cog"></i>
+          </div>
+          <h3>Stäubli</h3>
+          <p>سری TS — دقت بالا برای داروسازی</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۹: فضای کاری ═══════ -->
+  <div class="slide" data-slide="9">
+    <h2 class="slide-title">فضای کاری SCARA</h2>
+    <p class="slide-sub">استوانه کم‌ارتفاع — محدودیت اصلی</p>
+
+    <div class="slide-image">
+      <img src="images/workspace-cylindrical.jpg" alt="فضای کاری استوانه‌ای SCARA"
+           onerror="this.style.display='none'">
+    </div>
+
+    <div class="formula-panel" style="max-width:850px;">
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-circle"></i>
+          شعاع فضای کاری
+        </div>
+        <div class="formula-content">
+          $$ R_{min} = |L_1 - L_2| \quad , \quad R_{max} = L_1 + L_2 $$
+        </div>
+        <div class="formula-note">
+          اگر \( L_1 = L_2 \)، ناحیه‌ای در مرکز وجود ندارد (فضای کاری حلقوی).
+        </div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-arrows-alt-v"></i>
+          ارتفاع فضای کاری
+        </div>
+        <div class="formula-content">
+          $$ h_{min} \le d_3 \le h_{max} $$
+        </div>
+        <div class="formula-note">
+          معمولاً \( 100 \text{ mm} \le d_3 \le 400 \text{ mm} \)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۰: شبیه‌ساز فضای کاری ═══════ -->
+  <div class="slide" data-slide="10">
+    <h2 class="slide-title">شبیه‌ساز فضای کاری</h2>
+    <p class="slide-sub">نقشه حرارتی نقاط reachable — تشخیص تکینگی</p>
+
+    <div class="simulator">
+      <div class="sim-layout">
+        <div class="sim-canvas-wrap">
+          <canvas id="workspaceCanvas" width="560" height="560"></canvas>
+        </div>
+
+        <div class="sim-controls">
+          <div style="font-size:12px;color:#b0b8cc;line-height:1.9;margin-bottom:8px;">
+            <div style="padding:6px 0;"><i class="fas fa-square" style="color:#00d4aa;font-size:10px;"></i> فضای کاری ماهرانه</div>
+            <div style="padding:6px 0;"><i class="fas fa-square" style="color:#ffb700;font-size:10px;"></i> فضای کاری قابل دسترس</div>
+            <div style="padding:6px 0;"><i class="fas fa-square" style="color:#ff4757;font-size:10px;"></i> نقاط تکینگی (مرزی)</div>
+            <div style="padding:6px 0;"><i class="fas fa-circle" style="color:#a855f7;font-size:10px;"></i> نقاط تصادفی</div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="sim-control">
+              <label><span>L₁</span><strong id="wsL1Val">200</strong></label>
+              <input type="range" id="wsL1" min="100" max="250" value="200" step="1">
+            </div>
+            <div class="sim-control">
+              <label><span>L₂</span><strong id="wsL2Val">150</strong></label>
+              <input type="range" id="wsL2" min="80" max="200" value="150" step="1">
+            </div>
+          </div>
+
+          <div class="sim-readout">
+            <span><i class="fas fa-circle" style="color:var(--success);"></i> R_min:</span>
+            <strong id="wsRmin">۵۰</strong>
+          </div>
+          <div class="sim-readout">
+            <span><i class="fas fa-circle" style="color:var(--accent);"></i> R_max:</span>
+            <strong id="wsRmax">۳۵۰</strong>
+          </div>
+
+          <div class="sim-buttons">
+            <button class="sim-btn active" onclick="setWsMode('map')">نقشه</button>
+            <button class="sim-btn" onclick="setWsMode('heat')">حرارتی</button>
+          </div>
+          <div class="sim-buttons">
+            <button class="sim-btn" onclick="regenerateWorkspace()">بازسازی</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۱: کاربردها ═══════ -->
+  <div class="slide" data-slide="11">
+    <h2 class="slide-title">کاربردهای SCARA</h2>
+    <p class="slide-sub">از مونتاژ تا بسته‌بندی</p>
+
+    <div class="slide-image">
+      <img src="images/assembly.jpg" alt="مونتاژ الکترونیک با SCARA"
+           onerror="this.style.display='none'">
+    </div>
+
+    <div class="cards-grid cols-3" style="max-width:900px;">
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-microchip"></i></div>
+        <h3>مونتاژ SMT</h3>
+        <p>جاگذاری قطعات روی PCB با سرعت بالا</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-box-open"></i>
+        </div>
+        <h3>بسته‌بندی</h3>
+        <p>گذاشتن محصول در جعبه با انطباق انتخابی</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+          <i class="fas fa-screwdriver-wrench"></i>
+        </div>
+        <h3>پیچ‌بندی</h3>
+        <p>پیچاندن خودکار با گشتاور کنترل‌شده</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--danger), var(--accent2));">
+          <i class="fas fa-vial"></i>
+        </div>
+        <h3>آزمایشگاه پزشکی</h3>
+        <p>جابجایی نمونه‌ها در میکروپلیت</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-barcode"></i></div>
+        <h3>اسکن بارکد</h3>
+        <p>اسکن سریع در خطوط تولید</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--cyan), var(--accent));">
+          <i class="fas fa-cube"></i>
+        </div>
+        <h3>مونتاژ قطعات</h3>
+        <p>مونتاژ قطعات کوچک با دقت بالا</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۲: مقایسه با دلتا ═══════ -->
+  <div class="slide" data-slide="12">
+    <h2 class="slide-title">SCARA در برابر دلتا</h2>
+    <p class="slide-sub">دو رقیب در سرعت</p>
+
+    <div class="slide-image">
+      <img src="images/compare-delta.jpg" alt="مقایسه SCARA و دلتا"
+           onerror="this.style.display='none'">
+    </div>
+
+    <div class="data-table" style="max-width:900px;">
+      <table>
+        <thead>
+          <tr>
+            <th>معیار</th>
+            <th>SCARA</th>
+            <th>دلتا</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>حداکثر سرعت</td>
+            <td>بالا (تا ۲ m/s)</td>
+            <td><strong style="color:var(--success);">بسیار بالا (تا ۱۰ m/s)</strong></td>
+          </tr>
+          <tr>
+            <td>فضای کاری</td>
+            <td><strong style="color:var(--success);">بزرگ‌تر، استوانه‌ای</strong></td>
+            <td>گنبدی، محدودتر</td>
+          </tr>
+          <tr>
+            <td>ظرفیت بار</td>
+            <td><strong style="color:var(--success);">تا ۱۰ kg</strong></td>
+            <td>معمولاً &lt; ۵ kg</td>
+          </tr>
+          <tr>
+            <td>کاربرد</td>
+            <td>مونتاژ، پیچ‌بندی</td>
+            <td>بسته‌بندی مواد غذایی</td>
+          </tr>
+          <tr>
+            <td>پیچیدگی کنترل</td>
+            <td>ساده‌تر</td>
+            <td>پیچیده‌تر (سینماتیک معکوس سخت)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۳: ملاحظات طراحی ═══════ -->
+  <div class="slide" data-slide="13">
+    <h2 class="slide-title">ملاحظات طراحی SCARA</h2>
+    <p class="slide-sub">نکات مهم در ساخت یا انتخاب</p>
+
+    <div class="cards-grid cols-2" style="max-width:900px;">
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-balance-scale"></i></div>
+        <h3>تعادل لینک‌ها</h3>
+        <p>مرکز جرم لینک‌های افقی باید در محور چرخش باشد تا گشتاور کم شود</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-weight-hanging"></i>
+        </div>
+        <h3>وزن لینک دوم</h3>
+        <p>هرچه سبک‌تر، سریع‌تر — آلومینیوم یا کربن توصیه می‌شود</p>
+      </div>
+      <div class="content-card" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+        <div class="card-icon"><i class="fas fa-circle-notch"></i></div>
+        <h3>یاتاقان‌ها</h3>
+        <p>یاتاقان صلیبی یا ساچمه‌ای برای محورهای R₁ و R₂</p>
+      </div>
+      <div class="content-card" style="--ci: linear-gradient(135deg, var(--danger), var(--accent2));">
+        <div class="card-icon"><i class="fas fa-bolt"></i></div>
+        <h3>موتورها</h3>
+        <p>موتورهای سبک برای R₁ و R₂ (تا ۲ kg)، استپر یا سروو برای P₃</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۴: دینامیک ═══════ -->
+  <div class="slide" data-slide="14">
+    <h2 class="slide-title">دینامیک SCARA</h2>
+    <p class="slide-sub">پیش‌نمایش جلسه ۱۳</p>
+
+    <div class="formula-panel" style="max-width:850px;">
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-calculator"></i>
+          معادله دینامیکی
+        </div>
+        <div class="formula-content">
+          $$ M(q)\ddot{q} + C(q, \dot{q})\dot{q} + G(q) = \tau $$
+        </div>
+        <div class="formula-note">
+          \( q = [\theta_1, \theta_2, d_3, \theta_4]^T \)
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-cube"></i>
+          ماتریس اینرسی (تقریبی)
+        </div>
+        <div class="formula-content">
+          $$ M_{11} = I_1 + I_2 + m_1 l_{c1}^2 + m_2(l_1^2 + l_{c2}^2 + 2l_1 l_{c2}\cos\theta_2) $$
+          $$ M_{12} = M_{21} = I_2 + m_2(l_{c2}^2 + l_1 l_{c2}\cos\theta_2) $$
+          $$ M_{22} = I_2 + m_2 l_{c2}^2 $$
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-wind"></i>
+          بردار جاذبه
+        </div>
+        <div class="formula-content">
+          $$ G(q) = [0, 0, m_{total} g, 0]^T $$
+        </div>
+        <div class="formula-note">
+          فقط مفصل P₃ تحت تأثیر جاذبه است — افقی‌ها از گرانش مستقل‌اند.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۵: جدول مقایسه کامل ═══════ -->
+  <div class="slide" data-slide="15">
+    <h2 class="slide-title">SCARA در یک نگاه</h2>
+    <p class="slide-sub">خلاصه مشخصات کلیدی</p>
+
+    <div class="data-table" style="max-width:900px;">
+      <table>
+        <thead>
+          <tr>
+            <th>پارامتر</th>
+            <th>مقدار</th>
+            <th>توضیح</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ساختار</td>
+            <td><strong>RRPR</strong></td>
+            <td>دو R افقی، یک P عمودی، یک R مچ</td>
+          </tr>
+          <tr>
+            <td>درجات آزادی</td>
+            <td><strong>۴ DOF</strong></td>
+            <td>۳ موقعیت + ۱ جهت</td>
+          </tr>
+          <tr>
+            <td>ظرفیت بار</td>
+            <td>۱ تا ۱۰ kg</td>
+            <td>بسته به مدل</td>
+          </tr>
+          <tr>
+            <td>تکرارپذیری</td>
+            <td>±۰٫۰۱ تا ±۰٫۰۵ mm</td>
+            <td>بسته به مدل</td>
+          </tr>
+          <tr>
+            <td>حداکثر سرعت</td>
+            <td>۲ تا ۴ m/s</td>
+            <td>در صفحه XY</td>
+          </tr>
+          <tr>
+            <td>فضای کاری</td>
+            <td>استوانه کم‌ارتفاع</td>
+            <td>قطر ۳۰۰-۸۰۰ mm، ارتفاع ۱۰۰-۴۰۰ mm</td>
+          </tr>
+          <tr>
+            <td>کاربرد اصلی</td>
+            <td>مونتاژ، بسته‌بندی، پیچ‌بندی</td>
+            <td>صنایع الکترونیک، داروسازی</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۶: تمرین کلاسی ═══════ -->
+  <div class="slide" data-slide="16">
+    <h2 class="slide-title">تمرین‌های کلاسی</h2>
+    <p class="slide-sub">جلسه ۴ — SCARA</p>
+
+    <div class="exercise-wrap">
+      <div class="ex-section a">
+        <h4><i class="fas fa-brain"></i> الف) سؤالات مفهومی</h4>
+        <div class="ex-item">
+          <div class="ex-num">۱</div>
+          <div>چرا SCARA مخفف «Selective Compliance» است؟ چه چیزی «انتخابی» است؟</div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۲</div>
+          <div>چرا SCARA در صفحه XY سرعت بالاتری از ۶R دارد؟ (راهنمایی: به جرم لینک‌های متحرک فکر کنید)</div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۳</div>
+          <div>تفاوت اصلی SCARA با ربات ۲R چیست؟ (حداقل ۳ مورد)</div>
+        </div>
+      </div>
+
+      <div class="ex-section b">
+        <h4><i class="fas fa-flask"></i> ب) تمرین‌های عملی</h4>
+        <div class="ex-item">
+          <div class="ex-num">۱</div>
+          <div>
+            با L₁ = 0.3 m، L₂ = 0.2 m، θ₁ = 30°، θ₂ = 60°، موقعیت نوک (x,y) را محاسبه کنید.
+          </div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۲</div>
+          <div>
+            برای نقطه هدف (x=0.35, y=0.15)، با L₁ = 0.3، L₂ = 0.2،
+            θ₁ و θ₂ را با سینماتیک معکوس حل کنید (هر دو پیکربندی).
+          </div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۳</div>
+          <div>در شبیه‌ساز اسلاید ۶، هدف را به خارج از فضای کاری بکشید — چه اتفاقی می‌افتد؟ چرا؟</div>
+        </div>
+      </div>
+
+      <div class="ex-section c">
+        <h4><i class="fas fa-pen-fancy"></i> ج) تمرین نوشتاری</h4>
+        <div class="ex-item">
+          <div class="ex-num">۱</div>
+          <div>جدول DH کامل SCARA را استخراج کنید و ماتریس تبدیل نهایی T₀⁴ را بنویسید.</div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۲</div>
+          <div>مقایسه‌ای بین SCARA و دلتا برای کاربرد بسته‌بندی مواد غذایی انجام دهید.</div>
+        </div>
+      </div>
+
+      <div class="ex-section d">
+        <h4><i class="fas fa-star"></i> د) چالش خلاقانه ★</h4>
+        <div class="ex-item">
+          <div class="ex-num">★</div>
+          <div>
+            یک SCARA کوچک برای مونتاژ برد آردوینو طراحی کنید.
+            <br>
+            <span style="color:#8892a8;font-size:11.5px;">
+              (طول لینک‌ها، نوع موتور، محدوده حرکت، نحوه دستیابی به انطباق انتخابی — ۲۵۰ کلمه)
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۷: Quiz ═══════ -->
+  <div class="slide" data-slide="17">
+    <h2 class="slide-title">سوال تعاملی</h2>
+    <p class="slide-sub">پاسخ صحیح را انتخاب کنید</p>
+
+    <div class="question-card">
+      <div class="q-icon"><i class="fas fa-question"></i></div>
+      <h3>پیکربندی SCARA در کدام گزینه درست است؟</h3>
+
+      <div class="quiz-options">
+        <button class="quiz-option" onclick="answerQuiz(this, false)">
+          <span class="opt-letter">الف</span>
+          <span>۶R (شش مفصل دورانی)</span>
+        </button>
+        <button class="quiz-option" onclick="answerQuiz(this, true, 1)">
+          <span class="opt-letter">ب</span>
+          <span>RRPR (دو R افقی + یک P عمودی + یک R مچ)</span>
+        </button>
+        <button class="quiz-option" onclick="answerQuiz(this, false)">
+          <span class="opt-letter">ج</span>
+          <span>3P (سه مفصل خطی)</span>
+        </button>
+        <button class="quiz-option" onclick="answerQuiz(this, false)">
+          <span class="opt-letter">د</span>
+          <span>PPP (سه مفصل کشویی)</span>
+        </button>
+      </div>
+
+      <div class="quiz-result"></div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۸: جمع‌بندی ═══════ -->
+  <div class="slide" data-slide="18">
+    <h2 class="slide-title">جمع‌بندی جلسه ۴</h2>
+    <p class="slide-sub">آنچه امروز آموختیم</p>
+
+    <div class="summary-list">
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>SCARA = Selective Compliance Assembly Robot Arm:</strong>
+          ربات مونتاژ با انطباق انتخابی — سخت در Z، نرم در XY.
+        </div>
+      </div>
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>پیکربندی RRPR:</strong>
+          دو مفصل دورانی موازی افقی + یک مفصل کشویی عمودی + یک مفصل دورانی مچ.
+        </div>
+      </div>
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>سینماتیک مستقیم:</strong>
+          x = L₁c₁ + L₂c₁₂, y = L₁s₁ + L₂s₁₂, z = −d₃, φ = θ₁+θ₂−θ₄.
+        </div>
+      </div>
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>سینماتیک معکوس:</strong>
+          با قانون کسینوس‌ها، دو پیکربندی Elbow-Up و Elbow-Down.
+        </div>
+      </div>
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>کاربرد اصلی:</strong>
+          مونتاژ الکترونیک، بسته‌بندی، پیچ‌بندی، آزمایشگاه پزشکی.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۹: منابع ═══════ -->
+  <div class="slide" data-slide="19">
+    <h2 class="slide-title">منابع و مراجع</h2>
+    <p class="slide-sub">برای مطالعه بیشتر</p>
+
+    <div class="cards-grid cols-2" style="max-width:850px;">
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-book"></i></div>
+        <h3>Spong — فصل ۱</h3>
+        <p>Robot Dynamics and Control — مرور کلی SCARA</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-book-open"></i>
+        </div>
+        <h3>Craig — فصل ۱</h3>
+        <p>Introduction to Robotics — SCARA در فصل ۱</p>
+      </div>
+      <div class="content-card" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+        <div class="card-icon"><i class="fas fa-file-pdf"></i></div>
+        <h3>ISO 9283</h3>
+        <p>استاندارد بین‌المللی برای ارزیابی عملکرد ربات صنعتی</p>
+      </div>
+      <div class="content-card" style="--ci: linear-gradient(135deg, var(--danger), var(--accent2));">
+        <div class="card-icon"><i class="fas fa-video"></i></div>
+        <h3>ویدیوهای دکتر گوهری‌منش</h3>
+        <p>جزوات و ویدیوهای آموزشی — ARCSLAB</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۲۰: خداحافظی ═══════ -->
+  <div class="slide goodbye-slide" data-slide="20">
+    <div class="goodbye-icon"><i class="fas fa-hand-peace"></i></div>
+    <h2 class="goodbye-title">تا جلسه بعد!</h2>
+    <p class="goodbye-text">
+      در جلسه ۵ به سینماتیک مستقیم ربات‌های دو و سه لینکی سری
+      با روش استاندارد دناویت-هارتنبرگ (DH) می‌پردازیم.
+    </p>
+    <button class="goodbye-cta" onclick="window.location.href='../../index.html'">
+      <i class="fas fa-home"></i>
+      بازگشت به صفحه اصلی
+    </button>
+    <div style="margin-top:32px;display:inline-flex;align-items:center;gap:12px;
+      padding:14px 24px;background:var(--card);border:1px solid var(--border);
+      border-radius:16px;backdrop-filter:blur(12px);">
+      <div style="width:44px;height:44px;border-radius:50%;
+        background:linear-gradient(135deg,var(--accent),var(--accent2));
+        display:grid;place-items:center;font-size:16px;color:#050818;font-weight:800;">
+        MG
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:13px;font-weight:700;">دکتر مسعود گوهری‌منش</div>
+        <div style="font-size:10.5px;color:#8892a8;">دانشیار — دانشگاه تربت حیدریه</div>
+        <a href="mailto:m.goharimanesh@gmail.com" style="font-size:10px;color:var(--cyan);text-decoration:none;">
+          m.goharimanesh@gmail.com
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- نقاط ناوبری -->
+<div class="nav-dots" id="navDots"></div>
+<div class="slide-counter" id="slideCounter">۱ / ۲۰</div>
+
+<!-- کنترل‌ها -->
+<div class="controls">
+  <button class="ctrl-btn" id="prevBtn" title="قبلی (←)"><i class="fas fa-chevron-right"></i></button>
+  <button class="ctrl-btn" id="nextBtn" title="بعدی (→)"><i class="fas fa-chevron-left"></i></button>
+  <button class="ctrl-btn" id="fsBtn" title="تمام‌صفحه"><i class="fas fa-expand"></i></button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════ منطق مشترک — قبل از شبیه‌سازها ═══════ -->
+<script src="../../shared/lecture.js"></script>
+
+<!-- ═══════ شبیه‌سازهای جلسه ۴ ═══════ -->
+<script>
+window.addEventListener('load', function() {
+  console.log('⏳ شروع مقداردهی شبیه‌سازها...');
+
+  /* ═══════════════════════════════════════════════════
+     شبیه‌ساز ۱: SCARA با حل IK تحلیلی
+  ═══════════════════════════════════════════════════ */
+  (function() {
+    const canvas = document.getElementById('scaraCanvas');
+    if (!canvas) {
+      console.error('❌ scaraCanvas پیدا نشد');
+      return;
+    }
+    console.log('✅ scaraCanvas پیدا شد:', canvas.width, '×', canvas.height);
+
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const ORIGIN_X = W / 2;
+    const ORIGIN_Y = H / 2;
+
+    let L1 = 200, L2 = 150;
+    let targetX = 150, targetY = 50;
+    let config = 'down';
+    let showWorkspace = false;
+    let isDragging = false;
+
+    function solveIK(tx, ty) {
+      const r2 = tx * tx + ty * ty;
+      const r = Math.sqrt(r2);
+      const rMax = L1 + L2;
+      const rMin = Math.abs(L1 - L2);
+
+      if (r > rMax || r < rMin) {
+        return { theta1: 0, theta2: 0, error: Math.abs(r - rMax), unreachable: true };
+      }
+
+      const D = (r2 - L1 * L1 - L2 * L2) / (2 * L1 * L2);
+      const Dc = Math.max(-1, Math.min(1, D));
+      const sign = (config === 'down') ? 1 : -1;
+      const t2 = Math.atan2(sign * Math.sqrt(1 - Dc * Dc), Dc);
+      const k1 = L1 + L2 * Math.cos(t2);
+      const k2 = L2 * Math.sin(t2);
+      const t1 = Math.atan2(ty, tx) - Math.atan2(k2, k1);
+      const ex = L1 * Math.cos(t1) + L2 * Math.cos(t1 + t2) - tx;
+      const ey = L1 * Math.sin(t1) + L2 * Math.sin(t1 + t2) - ty;
+      return { theta1: t1, theta2: t2, error: Math.sqrt(ex * ex + ey * ey), unreachable: false };
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = '#0a0e1a';
+      ctx.fillRect(0, 0, W, H);
+
+      // شبکه
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < W; x += 40) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+      }
+      for (let y = 0; y < H; y += 40) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      }
+
+      // محورها
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.beginPath(); ctx.moveTo(0, ORIGIN_Y); ctx.lineTo(W, ORIGIN_Y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(ORIGIN_X, 0); ctx.lineTo(ORIGIN_X, H); ctx.stroke();
+
+      // فضای کاری
+      if (showWorkspace) {
+        ctx.beginPath();
+        ctx.arc(ORIGIN_X, ORIGIN_Y, L1 + L2, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255,183,0,0.5)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 4]);
+        ctx.stroke();
+        const rMin = Math.abs(L1 - L2);
+        if (rMin > 0) {
+          ctx.beginPath();
+          ctx.arc(ORIGIN_X, ORIGIN_Y, rMin, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(255,71,87,0.5)';
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+      }
+
+      const ik = solveIK(targetX, targetY);
+      const t1 = ik.theta1, t2 = ik.theta2;
+
+      const j2x = ORIGIN_X + L1 * Math.cos(t1);
+      const j2y = ORIGIN_Y - L1 * Math.sin(t1);
+      const tx2 = j2x + L2 * Math.cos(t1 + t2);
+      const ty2 = j2y - L2 * Math.sin(t1 + t2);
+
+      // خط هدف
+      ctx.beginPath();
+      ctx.moveTo(ORIGIN_X, ORIGIN_Y);
+      ctx.lineTo(ORIGIN_X + targetX, ORIGIN_Y - targetY);
+      ctx.strokeStyle = 'rgba(168,85,247,0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // لینک ۱
+      ctx.beginPath();
+      ctx.moveTo(ORIGIN_X, ORIGIN_Y);
+      ctx.lineTo(j2x, j2y);
+      ctx.strokeStyle = '#ffb700';
+      ctx.lineWidth = 14;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // لینک ۲
+      ctx.beginPath();
+      ctx.moveTo(j2x, j2y);
+      ctx.lineTo(tx2, ty2);
+      ctx.strokeStyle = '#ff6b35';
+      ctx.lineWidth = 12;
+      ctx.stroke();
+
+      // مفصل ۱
+      ctx.beginPath();
+      ctx.arc(ORIGIN_X, ORIGIN_Y, 16, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,212,170,0.2)';
+      ctx.fill();
+      ctx.strokeStyle = '#00d4aa';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(ORIGIN_X, ORIGIN_Y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#00d4aa';
+      ctx.fill();
+
+      // مفصل ۲
+      ctx.beginPath();
+      ctx.arc(j2x, j2y, 14, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,212,170,0.2)';
+      ctx.fill();
+      ctx.strokeStyle = '#00d4aa';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(j2x, j2y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#00d4aa';
+      ctx.fill();
+
+      // هدف
+      ctx.beginPath();
+      ctx.arc(ORIGIN_X + targetX, ORIGIN_Y - targetY, 9, 0, Math.PI * 2);
+      ctx.fillStyle = ik.unreachable ? '#ff4757' : '#a855f7';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ORIGIN_X + targetX, ORIGIN_Y - targetY, 17, 0, Math.PI * 2);
+      ctx.strokeStyle = ik.unreachable ? '#ff4757' : '#a855f7';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 3]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // افکتور نهایی
+      ctx.beginPath();
+      ctx.arc(tx2, ty2, 7, 0, Math.PI * 2);
+      ctx.fillStyle = '#ff4757';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // آپدیت readout
+      const t1El = document.getElementById('scaraTheta1');
+      const t2El = document.getElementById('scaraTheta2');
+      const txEl = document.getElementById('scaraTarget');
+      const errEl = document.getElementById('scaraError');
+      if (t1El) t1El.textContent = toFa((t1 * 180 / Math.PI).toFixed(1)) + '°';
+      if (t2El) t2El.textContent = toFa((t2 * 180 / Math.PI).toFixed(1)) + '°';
+      if (txEl) txEl.textContent = '(' + toFa(Math.round(targetX)) + ', ' + toFa(Math.round(targetY)) + ')';
+      if (errEl) errEl.textContent = toFa(ik.error.toFixed(1)) + (ik.unreachable ? ' ⚠' : '');
+
+      requestAnimationFrame(draw);
+    }
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      let cx, cy;
+      if (e.touches) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+      else { cx = e.clientX; cy = e.clientY; }
+      return { x: (cx - rect.left) * scaleX, y: (cy - rect.top) * scaleY };
+    }
+
+    function setTarget(e) {
+      const pos = getPos(e);
+      targetX = pos.x - ORIGIN_X;
+      targetY = -(pos.y - ORIGIN_Y);
+    }
+
+    canvas.addEventListener('mousedown', (e) => { isDragging = true; setTarget(e); });
+    canvas.addEventListener('mousemove', (e) => { if (isDragging) setTarget(e); });
+    canvas.addEventListener('mouseup', () => { isDragging = false; });
+    canvas.addEventListener('mouseleave', () => { isDragging = false; });
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); isDragging = true; setTarget(e); }, { passive: false });
+    canvas.addEventListener('touchmove', (e) => { if (isDragging) { e.preventDefault(); setTarget(e); } }, { passive: false });
+    canvas.addEventListener('touchend', () => { isDragging = false; });
+
+    const l1Input = document.getElementById('scaraL1');
+    const l2Input = document.getElementById('scaraL2');
+    if (l1Input) l1Input.addEventListener('input', () => {
+      L1 = +l1Input.value;
+      document.getElementById('scaraL1Val').textContent = toFa(L1);
+    });
+    if (l2Input) l2Input.addEventListener('input', () => {
+      L2 = +l2Input.value;
+      document.getElementById('scaraL2Val').textContent = toFa(L2);
+    });
+
+    window.setScaraConfig = function(c) {
+      config = c;
+      const down = document.getElementById('scaraElbowDown');
+      const up = document.getElementById('scaraElbowUp');
+      if (down) down.classList.toggle('active', c === 'down');
+      if (up) up.classList.toggle('active', c === 'up');
+      playClick();
+    };
+    window.toggleScaraWorkspace = function() {
+      showWorkspace = !showWorkspace;
+      const btn = document.getElementById('scaraWsBtn');
+      if (btn) btn.classList.toggle('active', showWorkspace);
+      playClick();
+    };
+    window.resetScaraTarget = function() {
+      targetX = 150; targetY = 50;
+      playClick();
+    };
+
+    draw();
+    console.log('✅ شبیه‌ساز SCARA شروع شد');
+  })();
+
+  /* ═══════════════════════════════════════════════════
+     شبیه‌ساز ۲: نقشه فضای کاری
+  ═══════════════════════════════════════════════════ */
+  (function() {
+    const canvas = document.getElementById('workspaceCanvas');
+    if (!canvas) {
+      console.error('❌ workspaceCanvas پیدا نشد');
+      return;
+    }
+    console.log('✅ workspaceCanvas پیدا شد:', canvas.width, '×', canvas.height);
+
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const CX = W / 2, CY = H / 2;
+    const MAX_R = Math.min(W, H) / 2 - 20;
+
+    let L1 = 200, L2 = 150;
+    let mode = 'map';
+    let points = [];
+    let mapCanvas = null;
+
+    function generateMap() {
+      const off = document.createElement('canvas');
+      off.width = W; off.height = H;
+      const octx = off.getContext('2d');
+      const img = octx.createImageData(W, H);
+      const data = img.data;
+      const scale = MAX_R / (L1 + L2 + 10);
+      const rMax_px = (L1 + L2) * scale;
+      const rMin_px = Math.abs(L1 - L2) * scale;
+
+      for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+          const dx = x - CX, dy = y - CY;
+          const r = Math.sqrt(dx * dx + dy * dy);
+          const idx = (y * W + x) * 4;
+          if (r <= rMax_px && r >= rMin_px) {
+            const t = (r - rMin_px) / (rMax_px - rMin_px);
+            if (mode === 'heat') {
+              const ef = Math.min(t, 1 - t);
+              if (ef < 0.1) {
+                data[idx] = 255; data[idx + 1] = 71; data[idx + 2] = 87; data[idx + 3] = 80;
+              } else {
+                data[idx] = 0; data[idx + 1] = 212; data[idx + 2] = 170;
+                data[idx + 3] = Math.floor(30 + ef * 60);
+              }
+            } else {
+              data[idx] = 0; data[idx + 1] = 212; data[idx + 2] = 170; data[idx + 3] = 50;
+            }
+          }
+        }
+      }
+      octx.putImageData(img, 0, 0);
+      mapCanvas = off;
+    }
+
+    function generatePoints() {
+      points = [];
+      const rMin = Math.abs(L1 - L2), rMax = L1 + L2;
+      for (let i = 0; i < 200; i++) {
+        const r = rMin + Math.random() * (rMax - rMin);
+        const th = Math.random() * Math.PI * 2;
+        points.push({ x: r * Math.cos(th), y: r * Math.sin(th) });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = '#0a0e1a';
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < W; x += 40) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+      }
+      for (let y = 0; y < H; y += 40) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      }
+
+      if (mapCanvas) ctx.drawImage(mapCanvas, 0, 0);
+
+      const scale = MAX_R / (L1 + L2 + 10);
+      const rMax_px = (L1 + L2) * scale;
+      const rMin_px = Math.abs(L1 - L2) * scale;
+
+      ctx.beginPath();
+      ctx.arc(CX, CY, rMax_px, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255,183,0,0.6)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.stroke();
+
+      if (rMin_px > 0) {
+        ctx.beginPath();
+        ctx.arc(CX, CY, rMin_px, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255,71,87,0.6)';
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      points.forEach(p => {
+        const px = CX + p.x * scale;
+        const py = CY - p.y * scale;
+        ctx.beginPath();
+        ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(168,85,247,0.7)';
+        ctx.fill();
+      });
+
+      ctx.beginPath();
+      ctx.arc(CX, CY, 8, 0, Math.PI * 2);
+      ctx.fillStyle = '#00d4aa';
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = '11px Vazirmatn';
+      ctx.textAlign = 'left';
+      ctx.fillText('R_max = ' + toFa(L1 + L2), 15, 20);
+      ctx.fillText('R_min = ' + toFa(Math.abs(L1 - L2)), 15, 38);
+
+      requestAnimationFrame(draw);
+    }
+
+    window.setWsMode = function(m) {
+      mode = m;
+      generateMap();
+      playClick();
+    };
+    window.regenerateWorkspace = function() {
+      generatePoints();
+      generateMap();
+      playClick();
+      showToast('فضای کاری بازسازی شد');
+    };
+
+    const wsL1 = document.getElementById('wsL1');
+    const wsL2 = document.getElementById('wsL2');
+    if (wsL1) wsL1.addEventListener('input', () => {
+      L1 = +wsL1.value;
+      document.getElementById('wsL1Val').textContent = toFa(L1);
+      document.getElementById('wsRmax').textContent = toFa(L1 + L2);
+      document.getElementById('wsRmin').textContent = toFa(Math.abs(L1 - L2));
+      generatePoints(); generateMap();
+    });
+    if (wsL2) wsL2.addEventListener('input', () => {
+      L2 = +wsL2.value;
+      document.getElementById('wsL2Val').textContent = toFa(L2);
+      document.getElementById('wsRmax').textContent = toFa(L1 + L2);
+      document.getElementById('wsRmin').textContent = toFa(Math.abs(L1 - L2));
+      generatePoints(); generateMap();
+    });
+
+    generatePoints();
+    generateMap();
+    draw();
+    console.log('✅ شبیه‌ساز workspace شروع شد');
+  })();
+
+  console.log('✅ همه شبیه‌سازها آماده‌اند');
+});
+</script>
+</body>
+</html>

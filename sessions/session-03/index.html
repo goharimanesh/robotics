@@ -1,0 +1,2188 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جلسه ۳ — ساختار ربات ۲R | دکتر گوهری‌منش</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      processEscapes: true
+    },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+
+<style>
+:root {
+  --accent: #ffb700;
+  --accent2: #ff6b35;
+  --success: #00d4aa;
+  --danger: #ff4757;
+  --purple: #a855f7;
+  --pink: #ec4899;
+  --cyan: #06b6d4;
+  --dark: #050818;
+  --card: rgba(255,255,255,0.05);
+  --border: rgba(255,255,255,0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%; overflow: hidden;
+  font-family: 'Vazirmatn', sans-serif;
+  background: var(--dark); color: #e8ecf5;
+  user-select: none;
+}
+
+.bg-wrap {
+  position: fixed; inset: 0; z-index: -2;
+  background: radial-gradient(ellipse at top, #0a1030 0%, #050818 60%);
+  overflow: hidden;
+}
+.bubble {
+  position: absolute; border-radius: 50%;
+  filter: blur(80px); opacity: 0.3;
+  animation: float 22s infinite ease-in-out;
+}
+.b1 { width: 500px; height: 500px; background: #ffb700; top: -10%; right: -8%; }
+.b2 { width: 440px; height: 440px; background: #00d4aa; bottom: -15%; left: -8%; animation-delay: -7s; }
+.b3 { width: 360px; height: 360px; background: #a855f7; top: 35%; left: 40%; animation-delay: -14s; opacity: 0.2; }
+@keyframes float {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(60px,-50px) scale(1.1); }
+  66% { transform: translate(-40px,40px) scale(0.95); }
+}
+.particles { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+.particle {
+  position: absolute; width: 2px; height: 2px;
+  border-radius: 50%; animation: rise linear infinite; opacity: 0;
+}
+@keyframes rise {
+  0% { transform: translateY(100vh) scale(0); opacity: 0; }
+  10% { opacity: 0.8; }
+  90% { opacity: 0.6; }
+  100% { transform: translateY(-20vh) scale(1.2); opacity: 0; }
+}
+
+.top-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 20px;
+  background: rgba(5,8,24,0.75);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.header-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; font-weight: 700; color: #8892a8;
+}
+.header-brand i { color: var(--accent); font-size: 14px; }
+
+.instructor-signature {
+  position: fixed; top: 10px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 95;
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 16px;
+  background: rgba(5,8,24,0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,183,0,0.2);
+  border-radius: 100px;
+  pointer-events: none;
+}
+.instructor-signature img {
+  height: 28px; width: auto;
+  filter: drop-shadow(0 0 4px rgba(255,183,0,0.3));
+}
+.instructor-signature .sig-fallback {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: none;
+  place-items: center;
+  font-size: 11px; color: #050818; font-weight: 800;
+}
+.instructor-signature .sig-text { display: flex; flex-direction: column; line-height: 1.2; }
+.instructor-signature .sig-text strong {
+  font-size: 10.5px; color: var(--accent); font-weight: 700;
+}
+.instructor-signature .sig-text span { font-size: 8.5px; color: #8892a8; }
+
+.progress-bar {
+  position: fixed; top: 0; left: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  z-index: 110;
+  transition: width 0.4s ease;
+  box-shadow: 0 0 12px var(--accent);
+}
+
+.controls {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  display: flex; gap: 8px;
+  padding: 8px 12px;
+  background: rgba(5,8,24,0.75);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+}
+.ctrl-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: none; background: rgba(255,255,255,0.06);
+  color: #e8ecf5; cursor: pointer;
+  display: grid; place-items: center;
+  font-size: 13px;
+  transition: all 0.25s;
+}
+.ctrl-btn:hover { background: rgba(255,183,0,0.2); color: var(--accent); }
+.ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.nav-dots {
+  position: fixed; left: 20px; top: 50%;
+  transform: translateY(-50%);
+  z-index: 90;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.nav-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.nav-dot:hover { background: rgba(255,183,0,0.5); transform: scale(1.2); }
+.nav-dot.active {
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+  transform: scale(1.4);
+}
+.slide-counter {
+  position: fixed; bottom: 20px; right: 20px;
+  z-index: 90;
+  font-size: 12px; color: #8892a8;
+  background: rgba(5,8,24,0.7);
+  padding: 6px 14px;
+  border-radius: 100px;
+  backdrop-filter: blur(12px);
+  font-variant-numeric: tabular-nums;
+}
+
+.slides-container { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+.slide {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 90px 60px 80px;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0.5s;
+  overflow-y: auto;
+}
+.slide.active { opacity: 1; visibility: visible; }
+.slide.active > * { animation: slideIn 0.6s ease backwards; }
+.slide.active > *:nth-child(1) { animation-delay: 0.05s; }
+.slide.active > *:nth-child(2) { animation-delay: 0.15s; }
+.slide.active > *:nth-child(3) { animation-delay: 0.25s; }
+.slide.active > *:nth-child(4) { animation-delay: 0.35s; }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-title {
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 800;
+  margin-bottom: 12px;
+  text-align: center;
+  background: linear-gradient(135deg, #fff, var(--accent));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.slide-sub {
+  font-size: clamp(13px, 1.5vw, 15px);
+  color: #8892a8;
+  text-align: center;
+  margin-bottom: 32px;
+  max-width: 700px;
+}
+
+.cover-slide { text-align: center; }
+.cover-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 20px;
+  background: rgba(255,183,0,0.1);
+  border: 1px solid rgba(255,183,0,0.3);
+  border-radius: 100px;
+  font-size: 13px; color: var(--accent);
+  margin-bottom: 30px;
+}
+.cover-badge i { animation: rotate 4s linear infinite; }
+@keyframes rotate { to { transform: rotate(360deg); } }
+
+.cover-title {
+  font-size: clamp(34px, 5.5vw, 64px);
+  font-weight: 900;
+  line-height: 1.25;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--accent2) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.cover-desc {
+  font-size: clamp(14px, 1.8vw, 18px);
+  color: #b0b8cc;
+  max-width: 780px;
+  margin: 0 auto 40px;
+  line-height: 1.9;
+}
+.cover-instructor {
+  display: inline-flex; align-items: center; gap: 16px;
+  padding: 16px 28px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  backdrop-filter: blur(16px);
+}
+.cover-instructor .avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: grid; place-items: center;
+  font-size: 20px; color: #050818; font-weight: 800;
+}
+.cover-instructor .info { text-align: right; }
+.cover-instructor .info strong { display: block; font-size: 16px; margin-bottom: 3px; }
+.cover-instructor .info span { font-size: 12px; color: #8892a8; display: block; }
+.cover-instructor .info a {
+  font-size: 11px; color: var(--cyan);
+  text-decoration: none; margin-top: 4px;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  width: 100%; max-width: 950px;
+}
+.cards-grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+.cards-grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.content-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  backdrop-filter: blur(12px);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.content-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(255,183,0,0.12);
+}
+.content-card .card-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: var(--ci, linear-gradient(135deg, var(--accent), var(--accent2)));
+  display: grid; place-items: center;
+  font-size: 16px; color: #050818;
+  margin-bottom: 10px;
+}
+.content-card h3 { font-size: 13px; font-weight: 700; margin-bottom: 5px; }
+.content-card p { font-size: 11.5px; color: #b0b8cc; line-height: 1.7; }
+
+/* شبیه‌ساز */
+.simulator {
+  width: 100%; max-width: 1000px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  backdrop-filter: blur(12px);
+}
+.sim-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px;
+  align-items: center;
+}
+.sim-svg-wrap {
+  background: rgba(0,0,0,0.3);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+.sim-svg-wrap svg { max-width: 100%; height: auto; }
+
+.sim-controls { display: flex; flex-direction: column; gap: 14px; }
+.sim-control label {
+  display: block; font-size: 11.5px; color: #8892a8;
+  margin-bottom: 5px;
+}
+.sim-control label strong { color: var(--accent); font-variant-numeric: tabular-nums; }
+.sim-control input[type=range] {
+  width: 100%; height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+.sim-control input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 12px var(--accent);
+}
+.sim-control input[type=range]::-moz-range-thumb {
+  width: 18px; height: 18px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 12px var(--accent);
+}
+.sim-readout {
+  display: flex; justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(0,212,170,0.1);
+  border: 1px solid rgba(0,212,170,0.3);
+  border-radius: 10px;
+  font-size: 11.5px;
+}
+.sim-readout strong { color: var(--success); font-variant-numeric: tabular-nums; }
+
+/* فرمول‌ها */
+.formula-panel {
+  width: 100%; max-width: 850px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.formula-block {
+  background: linear-gradient(135deg, rgba(168,85,247,0.08), rgba(6,182,212,0.06));
+  border: 1px solid rgba(168,85,247,0.25);
+  border-radius: 14px;
+  padding: 20px 24px;
+}
+.formula-block .formula-label {
+  font-size: 12px;
+  color: var(--purple);
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.formula-block .formula-content {
+  text-align: center;
+  color: #fff;
+  font-size: 15px;
+  overflow-x: auto;
+  padding: 8px 0;
+}
+.formula-block .formula-note {
+  margin-top: 10px;
+  font-size: 11px;
+  color: #8892a8;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* جدول */
+.data-table {
+  width: 100%; max-width: 900px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+}
+.data-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.data-table th {
+  background: rgba(255,183,0,0.1);
+  color: var(--accent);
+  padding: 12px 10px;
+  font-weight: 700;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  font-size: 11.5px;
+}
+.data-table td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: #c0c8dc;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+.data-table .param-name {
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 11px;
+}
+.data-table .param-en {
+  display: block;
+  font-size: 9.5px;
+  color: #8892a8;
+  direction: ltr;
+  margin-top: 2px;
+  font-family: 'Courier New', monospace;
+}
+.data-table .param-value {
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+  font-family: 'Courier New', monospace;
+  color: var(--success);
+}
+
+/* تمرین */
+.exercise-wrap {
+  width: 100%; max-width: 900px;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 4px;
+  padding-left: 12px;
+}
+.exercise-wrap::-webkit-scrollbar { width: 6px; }
+.exercise-wrap::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 3px; }
+.exercise-wrap::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+.ex-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 14px;
+  backdrop-filter: blur(12px);
+}
+.ex-section.a { border-right: 4px solid #fbbf24; }
+.ex-section.b { border-right: 4px solid var(--success); }
+.ex-section.c { border-right: 4px solid var(--purple); }
+.ex-section.d { border-right: 4px solid var(--danger); }
+.ex-section h4 {
+  font-size: 14px; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.ex-section.a h4 { color: #fbbf24; }
+.ex-section.b h4 { color: var(--success); }
+.ex-section.c h4 { color: var(--purple); }
+.ex-section.d h4 { color: var(--danger); }
+.ex-item {
+  display: flex; gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px dashed rgba(255,255,255,0.06);
+  font-size: 12.5px;
+  color: #c0c8dc;
+  line-height: 1.8;
+}
+.ex-item:last-child { border-bottom: none; }
+.ex-item .ex-num {
+  width: 24px; height: 24px; flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  display: grid; place-items: center;
+  font-size: 11px; font-weight: 800;
+  color: var(--accent);
+}
+.ex-section.a .ex-num { background: rgba(251,191,36,0.2); color: #fbbf24; }
+.ex-section.b .ex-num { background: rgba(0,212,170,0.2); color: var(--success); }
+.ex-section.c .ex-num { background: rgba(168,85,247,0.2); color: var(--purple); }
+.ex-section.d .ex-num { background: rgba(255,71,87,0.2); color: var(--danger); }
+
+/* Quiz */
+.question-card {
+  max-width: 720px;
+  width: 100%;
+  background: var(--card);
+  border: 2px solid rgba(255,183,0,0.3);
+  border-radius: 20px;
+  padding: 32px;
+  backdrop-filter: blur(12px);
+  text-align: center;
+}
+.question-card .q-icon {
+  width: 60px; height: 60px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: grid; place-items: center;
+  font-size: 28px; color: #050818;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 20px rgba(255,183,0,0.4); }
+  50% { box-shadow: 0 0 40px rgba(255,183,0,0.7); }
+}
+.question-card h3 {
+  font-size: 16px; margin-bottom: 20px;
+  line-height: 1.7;
+}
+.quiz-options {
+  display: flex; flex-direction: column; gap: 10px;
+  text-align: right;
+}
+.quiz-option {
+  padding: 14px 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: 'Vazirmatn', sans-serif;
+  font-size: 13px;
+  color: #e8ecf5;
+  transition: all 0.25s;
+  display: flex; align-items: center; gap: 12px;
+  text-align: right;
+}
+.quiz-option:hover { background: rgba(255,183,0,0.1); border-color: var(--accent); }
+.quiz-option .opt-letter {
+  width: 28px; height: 28px; flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  display: grid; place-items: center;
+  font-weight: 800; font-size: 12px;
+  color: var(--accent);
+}
+.quiz-option.correct { background: rgba(0,212,170,0.15); border-color: var(--success); }
+.quiz-option.correct .opt-letter { background: var(--success); color: #050818; }
+.quiz-option.wrong { background: rgba(255,71,87,0.15); border-color: var(--danger); }
+.quiz-option.wrong .opt-letter { background: var(--danger); color: #fff; }
+.quiz-option:disabled { cursor: not-allowed; }
+.quiz-result {
+  margin-top: 20px;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  display: none;
+}
+.quiz-result.show { display: block; }
+.quiz-result.ok { background: rgba(0,212,170,0.15); color: var(--success); }
+.quiz-result.no { background: rgba(255,71,87,0.15); color: var(--danger); }
+
+.summary-list {
+  max-width: 750px; width: 100%;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.summary-item {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 16px 20px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.summary-item i {
+  color: var(--success);
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.summary-item strong { color: var(--accent); }
+
+.goodbye-slide { text-align: center; }
+.goodbye-icon {
+  width: 100px; height: 100px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: grid; place-items: center;
+  font-size: 44px; color: #050818;
+  animation: goodbyeWave 2s infinite;
+  box-shadow: 0 0 50px rgba(255,183,0,0.5);
+}
+@keyframes goodbyeWave {
+  0%,100% { transform: rotate(-8deg) scale(1); }
+  50% { transform: rotate(8deg) scale(1.05); }
+}
+.goodbye-title {
+  font-size: clamp(26px, 4vw, 42px);
+  font-weight: 900;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.goodbye-text {
+  font-size: clamp(14px, 1.6vw, 16px);
+  color: #b0b8cc;
+  max-width: 600px;
+  margin: 0 auto 32px;
+  line-height: 1.9;
+}
+.goodbye-cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #050818;
+  border: none; border-radius: 100px;
+  font-family: 'Vazirmatn', sans-serif;
+  font-size: 14px; font-weight: 800;
+  cursor: pointer; text-decoration: none;
+  transition: all 0.3s;
+  box-shadow: 0 8px 30px rgba(255,183,0,0.4);
+}
+.goodbye-cta:hover { transform: translateY(-3px) scale(1.03); }
+
+.confetti-piece {
+  position: fixed;
+  width: 10px; height: 10px;
+  z-index: 999;
+  pointer-events: none;
+  animation: confettiFall 3s linear forwards;
+}
+@keyframes confettiFall {
+  0% { transform: translateY(-20vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+.toast {
+  position: fixed;
+  bottom: 80px; left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: rgba(10,14,39,0.95);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 10px 22px;
+  border-radius: 100px;
+  font-size: 12px; font-weight: 600;
+  backdrop-filter: blur(20px);
+  z-index: 999;
+  transition: transform 0.4s ease;
+  box-shadow: 0 8px 30px rgba(255,183,0,0.3);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 1100px) {
+  .sim-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .nav-dots { display: none; }
+}
+@media (max-width: 600px) {
+  .slide { padding: 80px 20px 70px; }
+  .controls { bottom: 12px; padding: 6px 10px; gap: 5px; }
+  .ctrl-btn { width: 32px; height: 32px; font-size: 11px; }
+  .slide-counter { bottom: 12px; right: 12px; padding: 4px 10px; font-size: 10.5px; }
+  .instructor-signature { top: 6px; padding: 4px 10px; }
+  .instructor-signature img { height: 22px; }
+  .instructor-signature .sig-text span { display: none; }
+  .instructor-signature .sig-text strong { font-size: 9px; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-wrap">
+  <div class="bubble b1"></div>
+  <div class="bubble b2"></div>
+  <div class="bubble b3"></div>
+</div>
+<div class="particles" id="particles"></div>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="instructor-signature">
+  <img src="../../assets/signature.png" alt="امضای دکتر گوهری‌منش"
+       onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';">
+  <div class="sig-fallback">MG</div>
+  <div class="sig-text">
+    <strong>دکتر مسعود گوهری‌منش</strong>
+    <span>دانشیار — دانشگاه تربت حیدریه</span>
+  </div>
+</div>
+
+<header class="top-header">
+  <div class="header-brand">
+    <i class="fas fa-robot"></i>
+    <span>جلسه ۳ — ساختار ربات ۲R</span>
+  </div>
+  <button class="ctrl-btn" id="soundBtn" title="صدا"><i class="fas fa-volume-up"></i></button>
+</header>
+
+<div class="slides-container" id="slidesContainer">
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱: کاور
+  ═══════════════════════════════════════════ -->
+  <div class="slide cover-slide" data-slide="1">
+    <div class="cover-badge">
+      <i class="fas fa-graduation-cap"></i>
+      <span>جلسه ۳ از ۱۶ — فاز ۱</span>
+    </div>
+    <h1 class="cover-title">شناخت ساختاری و فیزیکی<br>ربات دو لینکی سری (2R)</h1>
+    <p class="cover-desc">
+      ربات ۲R صفحه‌ای، مدل پایه‌ای است که تمام مبانی سینماتیکی، دینامیکی و کنترلی
+      روی آن پیاده‌سازی می‌شود. در این جلسه با هندسه، پارامترهای فیزیکی،
+      اینرسی و آناتومی سخت‌افزاری آن آشنا می‌شویم.
+    </p>
+    <div class="cover-instructor">
+      <div class="avatar">MG</div>
+      <div class="info">
+        <strong>دکتر مسعود گوهری‌منش</strong>
+        <span>دانشیار گروه مهندسی مکانیک — دانشگاه تربت حیدریه</span>
+        <a href="mailto:m.goharimanesh@gmail.com">
+          <i class="fas fa-envelope"></i> m.goharimanesh@gmail.com
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۲: سوال انگیزشی
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="2">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="width:100px;height:100px;margin:0 auto 20px;border-radius:50%;
+        background:linear-gradient(135deg,var(--accent),var(--accent2));
+        display:grid;place-items:center;font-size:44px;color:#050818;
+        animation:pulse 2s infinite;box-shadow:0 0 40px rgba(255,183,0,0.5);">
+        <i class="fas fa-question"></i>
+      </div>
+    </div>
+    <h2 class="slide-title">چرا ربات ۲R؟</h2>
+    <p class="slide-sub">
+      چرا ساده‌ترین ربات صنعتی، بهترین مدل آموزشی است؟
+    </p>
+
+    <div class="cards-grid cols-3" style="max-width:850px;">
+      <div class="content-card" onclick="showToast('📐 فقط دو متغیر: θ₁ و θ₂ — تحلیل ساده‌تر')">
+        <div class="card-icon"><i class="fas fa-superscript"></i></div>
+        <h3>سادگی ریاضی</h3>
+        <p>فقط دو متغیر مفصلی دارد — ایده‌آل برای آموزش</p>
+      </div>
+      <div class="content-card" onclick="showToast('🎯 تمام مفاهیم رباتیک روی ۲R قابل پیاده‌سازی است')">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-cubes"></i>
+        </div>
+        <h3>پایه همه مفاهیم</h3>
+        <p>سینماتیک، دینامیک، کنترل، مسیر — همه روی ۲R</p>
+      </div>
+      <div class="content-card" onclick="showToast('🔧 ساخت آسان با آردوینو و سروو')">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+          <i class="fas fa-tools"></i>
+        </div>
+        <h3>قابل ساخت</h3>
+        <p>با آردوینو و سروو در چند ساعت ساختنی است</p>
+      </div>
+    </div>
+
+    <div style="max-width:800px;width:100%;margin-top:24px;padding:16px 22px;
+      background:rgba(255,183,0,0.08);border:1px solid rgba(255,183,0,0.25);
+      border-radius:12px;font-size:12.5px;line-height:1.8;color:#c0c8dc;">
+      <i class="fas fa-lightbulb" style="color:var(--accent);"></i>
+      <strong style="color:var(--accent);">نکته:</strong>
+      تمام کنترل‌کننده‌ها (PID، CTC) و الگوریتم‌های مسیر‌یابی (Cubic، Quintic)
+      ابتدا روی ۲R تست می‌شوند و سپس به ربات‌های واقعی تعمیم می‌یابند.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۳: معرفی ربات ۲R
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="3">
+    <h2 class="slide-title">ربات ۲R صفحه‌ای</h2>
+    <p class="slide-sub">دو لینک + دو مفصل دورانی + پایه ثابت</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:950px;width:100%;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;
+        padding:20px;backdrop-filter:blur(12px);">
+        <svg viewBox="0 0 400 300" style="width:100%;height:auto;">
+          <!-- زمین -->
+          <line x1="20" y1="260" x2="380" y2="260" stroke="#444" stroke-width="2"/>
+          <!-- پایه -->
+          <rect x="180" y="240" width="40" height="20" fill="#666" rx="3"/>
+          <!-- لینک ۱ -->
+          <line x1="200" y1="250" x2="200" y2="150" stroke="#ffb700" stroke-width="14" stroke-linecap="round"/>
+          <circle cx="200" cy="250" r="16" fill="none" stroke="#00d4aa" stroke-width="3"/>
+          <circle cx="200" cy="250" r="5" fill="#00d4aa"/>
+          <!-- لینک ۲ -->
+          <line x1="200" y1="150" x2="300" y2="150" stroke="#ff6b35" stroke-width="12" stroke-linecap="round"/>
+          <circle cx="200" cy="150" r="14" fill="none" stroke="#00d4aa" stroke-width="3"/>
+          <circle cx="200" cy="150" r="5" fill="#00d4aa"/>
+          <!-- عملگر نهایی -->
+          <circle cx="300" cy="150" r="10" fill="#ff4757"/>
+          <circle cx="300" cy="150" r="18" fill="none" stroke="#ff4757" stroke-width="2" stroke-dasharray="4,3"/>
+          <!-- برچسب‌ها -->
+          <text x="170" y="200" fill="#ffb700" font-size="14" font-family="Vazirmatn" font-weight="bold">L₁</text>
+          <text x="245" y="135" fill="#ff6b35" font-size="14" font-family="Vazirmatn" font-weight="bold">L₂</text>
+          <text x="185" y="285" fill="#8892a8" font-size="11" font-family="Vazirmatn">پایه (ثابت)</text>
+          <text x="285" y="130" fill="#ff4757" font-size="11" font-family="Vazirmatn">عملگر</text>
+          <text x="155" y="270" fill="#00d4aa" font-size="12" font-family="Vazirmatn">θ₁</text>
+          <text x="210" y="130" fill="#00d4aa" font-size="12" font-family="Vazirmatn">θ₂</text>
+        </svg>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;
+        padding:20px;backdrop-filter:blur(12px);">
+        <h3 style="font-size:15px;color:var(--accent);margin-bottom:12px;">
+          <i class="fas fa-info-circle"></i> مشخصات
+        </h3>
+        <div style="font-size:12px;line-height:2;color:#b0b8cc;">
+          <div style="padding:8px 0;border-bottom:1px dashed rgba(255,255,255,0.06);">
+            <strong style="color:var(--accent);">ساختار:</strong> RR (دو مفصل دورانی)
+          </div>
+          <div style="padding:8px 0;border-bottom:1px dashed rgba(255,255,255,0.06);">
+            <strong style="color:var(--accent);">درجات آزادی:</strong> ۲ DOF
+          </div>
+          <div style="padding:8px 0;border-bottom:1px dashed rgba(255,255,255,0.06);">
+            <strong style="color:var(--accent);">طول لینک‌ها:</strong> L₁, L₂
+          </div>
+          <div style="padding:8px 0;border-bottom:1px dashed rgba(255,255,255,0.06);">
+            <strong style="color:var(--accent);">زاویه مفاصل:</strong> θ₁ (نسبت به زمین)، θ₂ (نسبت به امتداد لینک ۱)
+          </div>
+          <div style="padding:8px 0;">
+            <strong style="color:var(--accent);">فضای کاری:</strong> صفحه‌ای، دایره‌ای
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۴: هندسه و تعاریف زوایا
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="4">
+    <h2 class="slide-title">هندسه و تعاریف زوایا</h2>
+    <p class="slide-sub">پارامترهای هندسی ربات ۲R</p>
+
+    <div class="cards-grid cols-2" style="max-width:850px;">
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-ruler"></i></div>
+        <h3>L₁ و L₂ — طول لینک‌ها</h3>
+        <p>طول لینک اول و دوم (از مرکز مفصل تا مرکز مفصل بعدی)</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-rotate"></i>
+        </div>
+        <h3>θ₁ — زاویه مفصل اول</h3>
+        <p>نسبت به محور x زمین (ثابت)</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+          <i class="fas fa-rotate-left"></i>
+        </div>
+        <h3>θ₂ — زاویه مفصل دوم</h3>
+        <p>نسبت به امتداد لینک اول</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--danger), var(--accent2));">
+          <i class="fas fa-crosshairs"></i>
+        </div>
+        <h3>(x, y) — موقعیت نوک</h3>
+        <p>مختصات کارتزین عملگر نهایی در صفحه XY</p>
+      </div>
+    </div>
+
+    <div style="max-width:850px;width:100%;margin-top:20px;padding:16px 22px;
+      background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.3);
+      border-radius:12px;font-size:12px;line-height:1.8;color:#c0c8dc;">
+      <i class="fas fa-info-circle" style="color:var(--cyan);"></i>
+      <strong style="color:var(--cyan);">نکته:</strong>
+      زاویه θ₂ را می‌توان به دو صورت تعریف کرد: مطلق (نسبت به زمین) یا نسبی (نسبت به لینک ۱).
+      در این دوره از تعریف نسبی استفاده می‌کنیم که در رباتیک استاندارد است.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۵: شبیه‌ساز تعاملی ۲R
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="5">
+    <h2 class="slide-title">شبیه‌ساز تعاملی ربات ۲R</h2>
+    <p class="slide-sub">اسلایدرها را حرکت دهید و حرکت بازو را ببینید</p>
+
+    <div class="simulator">
+      <div class="sim-layout">
+        <div class="sim-svg-wrap">
+          <svg id="robot2R" viewBox="0 0 400 350" style="width:100%;height:auto;">
+            <!-- شبکه پس‌زمینه -->
+            <defs>
+              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              </pattern>
+            </defs>
+            <rect width="400" height="350" fill="url(#grid)"/>
+            
+            <!-- محورها -->
+            <line x1="0" y1="175" x2="400" y2="175" stroke="#333" stroke-width="1"/>
+            <line x1="200" y1="0" x2="200" y2="350" stroke="#333" stroke-width="1"/>
+            
+            <!-- فضای کاری (دایره) -->
+            <circle cx="200" cy="175" r="140" fill="rgba(255,183,0,0.05)"
+              stroke="rgba(255,183,0,0.2)" stroke-width="1" stroke-dasharray="5,5"/>
+            <circle cx="200" cy="175" r="30" fill="rgba(255,71,87,0.05)"
+              stroke="rgba(255,71,87,0.2)" stroke-width="1" stroke-dasharray="3,3"/>
+
+            <!-- لینک ۱ -->
+            <line id="link1" x1="200" y1="175" x2="300" y2="175"
+              stroke="#ffb700" stroke-width="14" stroke-linecap="round"/>
+            <!-- مفصل ۱ -->
+            <circle cx="200" cy="175" r="16" fill="none" stroke="#00d4aa" stroke-width="3"/>
+            <circle cx="200" cy="175" r="5" fill="#00d4aa"/>
+            
+            <!-- لینک ۲ -->
+            <line id="link2" x1="300" y1="175" x2="400" y2="175"
+              stroke="#ff6b35" stroke-width="12" stroke-linecap="round"/>
+            <!-- مفصل ۲ -->
+            <circle id="joint2" cx="300" cy="175" r="14" fill="none" stroke="#00d4aa" stroke-width="3"/>
+            <circle id="joint2Core" cx="300" cy="175" r="5" fill="#00d4aa"/>
+            
+            <!-- عملگر نهایی -->
+            <circle id="endEffector" cx="400" cy="175" r="10" fill="#ff4757"/>
+            <circle id="endEffectorGlow" cx="400" cy="175" r="18" fill="none"
+              stroke="#ff4757" stroke-width="2" stroke-dasharray="4,3"/>
+            
+            <!-- برچسب موقعیت -->
+            <text id="posLabel" x="400" y="155" fill="#ff4757" font-size="11"
+              font-family="Vazirmatn" text-anchor="middle" font-weight="bold">(0, 0)</text>
+          </svg>
+        </div>
+
+        <div class="sim-controls">
+          <div class="sim-control">
+            <label>
+              <span>زاویه θ₁ (مفصل ۱):</span>
+              <strong id="theta1Val">۰°</strong>
+            </label>
+            <input type="range" id="theta1" min="-180" max="180" value="0" step="1">
+          </div>
+          <div class="sim-control">
+            <label>
+              <span>زاویه θ₂ (مفصل ۲):</span>
+              <strong id="theta2Val">۰°</strong>
+            </label>
+            <input type="range" id="theta2" min="-180" max="180" value="0" step="1">
+          </div>
+          <div class="sim-control">
+            <label>
+              <span>طول L₁:</span>
+              <strong id="l1Val">۱۲۰</strong>
+            </label>
+            <input type="range" id="l1Input" min="40" max="160" value="120" step="1">
+          </div>
+          <div class="sim-control">
+            <label>
+              <span>طول L₂:</span>
+              <strong id="l2Val">۹۰</strong>
+            </label>
+            <input type="range" id="l2Input" min="40" max="160" value="90" step="1">
+          </div>
+          <div class="sim-readout">
+            <span><i class="fas fa-crosshairs" style="color:var(--accent);"></i> موقعیت نوک:</span>
+            <span>(<strong id="tipX">۰</strong>, <strong id="tipY">۰</strong>)</span>
+          </div>
+          <div class="sim-readout" style="background:rgba(168,85,247,0.1);border-color:rgba(168,85,247,0.3);">
+            <span><i class="fas fa-angle-double-right" style="color:var(--purple);"></i> جهت نوک:</span>
+            <span><strong id="tipAngle" style="color:var(--purple);">۰°</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۶: فرمول‌های سینماتیک مستقیم
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="6">
+    <h2 class="slide-title">سینماتیک مستقیم ۲R</h2>
+    <p class="slide-sub">موقعیت نوک بر حسب زوایای مفصلی</p>
+
+    <div class="formula-panel">
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-cube"></i>
+          مختصات x و y نوک بازو
+        </div>
+        <div class="formula-content">
+          $$ \begin{cases} x = L_1 \cos(\theta_1) + L_2 \cos(\theta_1 + \theta_2) \\[6pt] y = L_1 \sin(\theta_1) + L_2 \sin(\theta_1 + \theta_2) \end{cases} $$
+        </div>
+        <div class="formula-note">
+          \( L_1, L_2 \): طول لینک‌ها — \( \theta_1, \theta_2 \): زوایای مفصلی
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-compass"></i>
+          جهت‌گیری عملگر نهایی
+        </div>
+        <div class="formula-content">
+          $$ \phi = \theta_1 + \theta_2 $$
+        </div>
+        <div class="formula-note">
+          \( \phi \): زاویه مطلق نوک بازو نسبت به محور x
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-calculator"></i>
+          فرم ماتریسی
+        </div>
+        <div class="formula-content">
+          $$ \begin{bmatrix} x \\ y \\ \phi \end{bmatrix} = \begin{bmatrix} L_1 c_1 + L_2 c_{12} \\ L_1 s_1 + L_2 s_{12} \\ \theta_1 + \theta_2 \end{bmatrix} $$
+        </div>
+        <div class="formula-note">
+          \( c_1 = \cos\theta_1 \), \( s_{12} = \sin(\theta_1 + \theta_2) \), …
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۷: مشخصات فیزیکی
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="7">
+    <h2 class="slide-title">مشخصات فیزیکی لینک‌ها</h2>
+    <p class="slide-sub">جرم، مرکز جرم و گشتاور اینرسی</p>
+
+    <div class="cards-grid cols-2" style="max-width:850px;">
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-weight-hanging"></i></div>
+        <h3>m₁, m₂ — جرم لینک‌ها</h3>
+        <p>جرم هر لینک (کیلوگرم) — مستقیماً در معادلات دینامیکی ظاهر می‌شود</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-circle-dot"></i>
+        </div>
+        <h3>G₁, G₂ — مرکز جرم</h3>
+        <p>مرکز جرم هر لینک — معمولاً در وسط لینک (L/2)</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+          <i class="fas fa-rotate"></i>
+        </div>
+        <h3>I<sub>z1</sub>, I<sub>z2</sub> — گشتاور اینرسی</h3>
+        <p>گشتاور اینرسی حول مرکز جرم (kg·m²)</p>
+      </div>
+      <div class="content-card" style="--ci: linear-gradient(135deg, var(--danger), var(--accent2));">
+        <div class="card-icon"><i class="fas fa-grip-lines"></i></div>
+        <h3>J — ممان قطبی سطح</h3>
+        <p>ممان قطبی سطح مقطع لینک (برای محاسبه صلبیت)</p>
+      </div>
+    </div>
+
+    <div style="max-width:850px;width:100%;margin-top:20px;padding:16px 22px;
+      background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.3);
+      border-radius:12px;font-size:12px;line-height:1.8;color:#c0c8dc;">
+      <i class="fas fa-info-circle" style="color:var(--success);"></i>
+      <strong style="color:var(--success);">نکته:</strong>
+      در SolidWorks پس از طراحی هر لینک، خصوصیات جرم و اینرسی به‌صورت خودکار
+      با فرمان <code style="background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:4px;color:var(--accent);">Evaluate → Mass Properties</code>
+      استخراج می‌شوند.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۸: شبیه‌ساز اینرسی
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="8">
+    <h2 class="slide-title">شبیه‌ساز تعاملی اینرسی</h2>
+    <p class="slide-sub">تغییر جرم و طول، محاسبه زنده گشتاور</p>
+
+    <div class="simulator">
+      <div class="sim-layout">
+        <div class="sim-svg-wrap">
+          <svg id="inertiaSVG" viewBox="0 0 400 350" style="width:100%;height:auto;">
+            <rect width="400" height="350" fill="url(#grid)"/>
+            <line x1="0" y1="175" x2="400" y2="175" stroke="#333" stroke-width="1"/>
+            <line x1="200" y1="0" x2="200" y2="350" stroke="#333" stroke-width="1"/>
+            
+            <!-- لینک ۱ -->
+            <line id="inLink1" x1="200" y1="175" x2="300" y2="175"
+              stroke="#ffb700" stroke-width="14" stroke-linecap="round"/>
+            <circle cx="200" cy="175" r="16" fill="none" stroke="#00d4aa" stroke-width="3"/>
+            <circle cx="200" cy="175" r="5" fill="#00d4aa"/>
+            
+            <!-- مرکز جرم لینک ۱ -->
+            <circle id="inG1" cx="250" cy="175" r="10" fill="#ff6b35" opacity="0.7"/>
+            <text id="inG1Label" x="250" y="200" fill="#ff6b35" font-size="10"
+              font-family="Vazirmatn" text-anchor="middle">G₁</text>
+            
+            <!-- لینک ۲ -->
+            <line id="inLink2" x1="300" y1="175" x2="400" y2="175"
+              stroke="#ff6b35" stroke-width="12" stroke-linecap="round"/>
+            <circle id="inJoint2" cx="300" cy="175" r="14" fill="none" stroke="#00d4aa" stroke-width="3"/>
+            <circle id="inJoint2Core" cx="300" cy="175" r="5" fill="#00d4aa"/>
+            
+            <!-- مرکز جرم لینک ۲ -->
+            <circle id="inG2" cx="350" cy="175" r="10" fill="#a855f7" opacity="0.7"/>
+            <text id="inG2Label" x="350" y="200" fill="#a855f7" font-size="10"
+              font-family="Vazirmatn" text-anchor="middle">G₂</text>
+            
+            <!-- عملگر -->
+            <circle id="inEnd" cx="400" cy="175" r="10" fill="#ff4757"/>
+          </svg>
+        </div>
+
+        <div class="sim-controls">
+          <div class="sim-control">
+            <label>
+              <span>جرم لینک ۱ (m₁):</span>
+              <strong id="m1Val">۰٫۵ kg</strong>
+            </label>
+            <input type="range" id="m1" min="0.1" max="3" value="0.5" step="0.1">
+          </div>
+          <div class="sim-control">
+            <label>
+              <span>جرم لینک ۲ (m₂):</span>
+              <strong id="m2Val">۰٫۳ kg</strong>
+            </label>
+            <input type="range" id="m2" min="0.1" max="3" value="0.3" step="0.1">
+          </div>
+          <div class="sim-control">
+            <label>
+              <span>طول L₁:</span>
+              <strong id="inL1Val">۱۰۰</strong>
+            </label>
+            <input type="range" id="inL1" min="60" max="160" value="100" step="1">
+          </div>
+          <div class="sim-control">
+            <label>
+              <span>طول L₂:</span>
+              <strong id="inL2Val">۸۰</strong>
+            </label>
+            <input type="range" id="inL2" min="60" max="160" value="80" step="1">
+          </div>
+          
+          <div class="sim-readout" style="background:rgba(255,183,0,0.1);border-color:rgba(255,183,0,0.3);">
+            <span><i class="fas fa-weight-hanging" style="color:var(--accent);"></i> گشتاور گرانشی مفصل ۱:</span>
+            <span><strong id="torque1" style="color:var(--accent);">۰ N·m</strong></span>
+          </div>
+          <div class="sim-readout" style="background:rgba(168,85,247,0.1);border-color:rgba(168,85,247,0.3);">
+            <span><i class="fas fa-weight-hanging" style="color:var(--purple);"></i> گشتاور گرانشی مفصل ۲:</span>
+            <span><strong id="torque2" style="color:var(--purple);">۰ N·m</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۹: مرکز جرم
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="9">
+    <h2 class="slide-title">مرکز جرم لینک‌ها</h2>
+    <p class="slide-sub">موقعیت مرکز جرم در فضای کارتزین</p>
+
+    <div class="formula-panel">
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-circle-dot"></i>
+          مرکز جرم لینک ۱ (G₁)
+        </div>
+        <div class="formula-content">
+          $$ \begin{cases} x_{G_1} = \dfrac{L_1}{2} \cos\theta_1 \\[6pt] y_{G_1} = \dfrac{L_1}{2} \sin\theta_1 \end{cases} $$
+        </div>
+        <div class="formula-note">
+          فرض می‌کنیم لینک یکنواخت است، پس مرکز جرم در وسط آن است.
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-circle-dot"></i>
+          مرکز جرم لینک ۲ (G₂)
+        </div>
+        <div class="formula-content">
+          $$ \begin{cases} x_{G_2} = L_1 \cos\theta_1 + \dfrac{L_2}{2} \cos(\theta_1 + \theta_2) \\[6pt] y_{G_2} = L_1 \sin\theta_1 + \dfrac{L_2}{2} \sin(\theta_1 + \theta_2) \end{cases} $$
+        </div>
+        <div class="formula-note">
+          مرکز جرم لینک ۲ نسبت به ابتدای لینک ۱ محاسبه می‌شود.
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-calculator"></i>
+          مرکز جرم کل سیستم
+        </div>
+        <div class="formula-content">
+          $$ \mathbf{r}_{cm} = \dfrac{m_1 \mathbf{r}_{G_1} + m_2 \mathbf{r}_{G_2}}{m_1 + m_2} $$
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۰: گشتاور اینرسی
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="10">
+    <h2 class="slide-title">گشتاور اینرسی</h2>
+    <p class="slide-sub">مقاومت لینک در برابر شتاب زاویه‌ای</p>
+
+    <div class="formula-panel">
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-grip-lines"></i>
+          گشتاور اینرسی میله یکنواخت (حول مرکز جرم)
+        </div>
+        <div class="formula-content">
+          $$ I_G = \dfrac{1}{12} m L^2 $$
+        </div>
+        <div class="formula-note">
+          برای لینک با مقطع مستطیلی: \( I_G = \dfrac{1}{12} m (L^2 + w^2) \) که w عرض لینک است.
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-rotate"></i>
+          قضیه محور موازی (Steiner)
+        </div>
+        <div class="formula-content">
+          $$ I_O = I_G + m d^2 $$
+        </div>
+        <div class="formula-note">
+          \( I_O \): اینرسی حول محور مفصل — \( d \): فاصله مرکز جرم تا محور چرخش
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-arrow-right"></i>
+          اینرسی معادل مفصل ۱
+        </div>
+        <div class="formula-content">
+          $$ I_{eq,1} = I_{G_1} + m_1 \left(\dfrac{L_1}{2}\right)^2 + I_{G_2} + m_2 \left[ L_1^2 + \left(\dfrac{L_2}{2}\right)^2 + L_1 L_2 \cos\theta_2 \right] $$
+        </div>
+        <div class="formula-note">
+          وابسته به θ₂ — به همین دلیل اینرسی ربات ۲R متغیر با پیکربندی است.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۱: دیاگرام آزاد بدنه (FBD)
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="11">
+    <h2 class="slide-title">دیاگرام آزاد بدنه (FBD)</h2>
+    <p class="slide-sub">نیروها و گشتاورهای وارد بر لینک‌ها</p>
+
+    <div style="max-width:950px;width:100%;background:var(--card);border:1px solid var(--border);
+      border-radius:18px;padding:24px;backdrop-filter:blur(12px);">
+      <svg viewBox="0 0 700 400" style="width:100%;height:auto;">
+        <!-- زمین -->
+        <line x1="20" y1="360" x2="680" y2="360" stroke="#444" stroke-width="2"/>
+        
+        <!-- پایه -->
+        <rect x="180" y="340" width="60" height="20" fill="#555"/>
+        
+        <!-- لینک ۱ -->
+        <line x1="210" y1="340" x2="380" y2="180" stroke="#ffb700" stroke-width="18" stroke-linecap="round" opacity="0.9"/>
+        <!-- مرکز جرم G1 -->
+        <circle cx="295" cy="260" r="12" fill="#ff6b35"/>
+        <text x="295" y="245" fill="#ff6b35" font-size="14" font-family="Vazirmatn" text-anchor="middle" font-weight="bold">G₁</text>
+        
+        <!-- بردار وزن لینک ۱ -->
+        <line x1="295" y1="260" x2="295" y2="310" stroke="#00d4aa" stroke-width="2" marker-end="url(#arrowGreen)"/>
+        <text x="315" y="295" fill="#00d4aa" font-size="12" font-family="Vazirmatn">m₁g</text>
+        
+        <!-- مفصل ۱ -->
+        <circle cx="210" cy="340" r="20" fill="none" stroke="#00d4aa" stroke-width="3"/>
+        <circle cx="210" cy="340" r="6" fill="#00d4aa"/>
+        <text x="175" y="355" fill="#00d4aa" font-size="11" font-family="Vazirmatn">θ₁</text>
+        
+        <!-- گشتاور مفصل ۱ -->
+        <path d="M 240 320 Q 260 300 245 285" fill="none" stroke="#ff4757" stroke-width="2.5" marker-end="url(#arrowRed)"/>
+        <text x="265" y="310" fill="#ff4757" font-size="13" font-family="Vazirmatn" font-weight="bold">τ₁</text>
+        
+        <!-- لینک ۲ -->
+        <line x1="380" y1="180" x2="560" y2="220" stroke="#ff6b35" stroke-width="16" stroke-linecap="round" opacity="0.9"/>
+        <!-- مرکز جرم G2 -->
+        <circle cx="470" cy="200" r="12" fill="#a855f7"/>
+        <text x="470" y="185" fill="#a855f7" font-size="14" font-family="Vazirmatn" text-anchor="middle" font-weight="bold">G₂</text>
+        
+        <!-- بردار وزن لینک ۲ -->
+        <line x1="470" y1="200" x2="470" y2="250" stroke="#00d4aa" stroke-width="2" marker-end="url(#arrowGreen)"/>
+        <text x="490" y="235" fill="#00d4aa" font-size="12" font-family="Vazirmatn">m₂g</text>
+        
+        <!-- مفصل ۲ -->
+        <circle cx="380" cy="180" r="18" fill="none" stroke="#00d4aa" stroke-width="3"/>
+        <circle cx="380" cy="180" r="6" fill="#00d4aa"/>
+        <text x="350" y="165" fill="#00d4aa" font-size="11" font-family="Vazirmatn">θ₂</text>
+        
+        <!-- گشتاور مفصل ۲ -->
+        <path d="M 410 165 Q 430 145 415 130" fill="none" stroke="#ff4757" stroke-width="2.5" marker-end="url(#arrowRed)"/>
+        <text x="435" y="150" fill="#ff4757" font-size="13" font-family="Vazirmatn" font-weight="bold">τ₂</text>
+        
+        <!-- عملگر نهایی -->
+        <circle cx="560" cy="220" r="12" fill="#ff4757"/>
+        <circle cx="560" cy="220" r="22" fill="none" stroke="#ff4757" stroke-width="2" stroke-dasharray="4,3"/>
+        <text x="560" y="260" fill="#ff4757" font-size="11" font-family="Vazirmatn" text-anchor="middle">عملگر</text>
+        
+        <!-- تعریف فلش‌ها -->
+        <defs>
+          <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#00d4aa"/>
+          </marker>
+          <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#ff4757"/>
+          </marker>
+        </defs>
+        
+        <!-- برچسب‌ها -->
+        <text x="350" y="50" fill="#ffb700" font-size="14" font-family="Vazirmatn" font-weight="bold">
+          نیروهای وارد بر سیستم ۲R
+        </text>
+      </svg>
+    </div>
+
+    <div style="max-width:950px;width:100%;margin-top:20px;padding:16px 22px;
+      background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);
+      border-radius:12px;font-size:12px;line-height:1.8;color:#c0c8dc;">
+      <i class="fas fa-info-circle" style="color:var(--purple);"></i>
+      <strong style="color:var(--purple);">توضیح FBD:</strong>
+      برای هر لینک باید سه معادله تعادل نوشت: 
+      <strong>∑Fx = 0</strong>، <strong>∑Fy = 0</strong>، <strong>∑M = 0</strong>.
+      در روش نیوتن-اویلر، این معادلات برای هر لینک جداگانه نوشته و با نیروهای مفصل حل می‌شوند.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۲: آناتومی سخت‌افزاری
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="12">
+    <h2 class="slide-title">آناتومی سخت‌افزاری</h2>
+    <p class="slide-sub">اجزای فیزیکی ربات ۲R</p>
+
+    <div class="cards-grid cols-3" style="max-width:950px;">
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-layer-group"></i></div>
+        <h3>بدنه (Body)</h3>
+        <p>چوب، پلکسی‌گلاس یا آلومینیوم — معمولاً ۳ تا ۵ میلی‌متر</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-gear"></i>
+        </div>
+        <h3>موتورها (Actuators)</h3>
+        <p>سروو SG90 (سبک) یا MG996R (قوی) — یا استپر NEMA 17</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+          <i class="fas fa-circle-notch"></i>
+        </div>
+        <h3>یاتاقان (Bearings)</h3>
+        <p>یاتاقان ساچمه‌ای یا بوش برنجی برای کاهش اصطکاک</p>
+      </div>
+      <div class="content-card" style="--ci: linear-gradient(135deg, var(--danger), var(--accent2));">
+        <div class="card-icon"><i class="fas fa-microchip"></i></div>
+        <h3>برد کنترل</h3>
+        <p>Arduino Uno / Mega — با درایور سروو (PCA9685)</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-plug"></i></div>
+        <h3>منبع تغذیه</h3>
+        <p>آداپتور ۵-۶ ولت ۲-۵ آمپر برای سرووها</p>
+      </div>
+      <div class="content-card" style="--ci: linear-gradient(135deg, var(--accent), var(--accent2));">
+        <div class="card-icon"><i class="fas fa-grip"></i></div>
+        <h3>ابزارگیر</h3>
+        <p>گریپر دو انگشتی، آهن‌ربا، مکنده و ...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۳: موتورها و انتخاب
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="13">
+    <h2 class="slide-title">انتخاب موتور</h2>
+    <p class="slide-sub">مقایسه سه نوع عملگر رایج</p>
+
+    <div class="data-table">
+      <table>
+        <thead>
+          <tr>
+            <th>نوع موتور</th>
+            <th>مزیت</th>
+            <th>عیب</th>
+            <th>کاربرد در ۲R</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <span class="param-name">سروو (Servo)</span>
+              <span class="param-en">SG90, MG996R</span>
+            </td>
+            <td>کنترل ساده، گشتاور بالا در حجم کم</td>
+            <td>زاویه محدود (۰-۱۸۰°)</td>
+            <td>مناسب برای ربات آموزشی</td>
+          </tr>
+          <tr>
+            <td>
+              <span class="param-name">استپر (Stepper)</span>
+              <span class="param-en">NEMA 17</span>
+            </td>
+            <td>دقت بالا، چرخش نامحدود</td>
+            <td>کنترل پیچیده‌تر، نیاز به درایور</td>
+            <td>مناسب برای دقت بالا</td>
+          </tr>
+          <tr>
+            <td>
+              <span class="param-name">DC با انکودر</span>
+              <span class="param-en">DC + Encoder</span>
+            </td>
+            <td>سرعت و گشتاور بالا، چرخش نامحدود</td>
+            <td>نیاز به کنترلر حلقه بسته</td>
+            <td>مناسب ربات‌های صنعتی</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="max-width:900px;width:100%;margin-top:20px;padding:16px 22px;
+      background:rgba(255,183,0,0.08);border:1px solid rgba(255,183,0,0.25);
+      border-radius:12px;font-size:12px;line-height:1.8;color:#c0c8dc;">
+      <i class="fas fa-lightbulb" style="color:var(--accent);"></i>
+      <strong style="color:var(--accent);">نکته:</strong>
+      برای ربات آموزشی، سرووهای SG90 یا MG996R با آردوینو کافی است.
+      برای کارهای دقیق‌تر (مثل مسیریابی)، از استپرها استفاده کنید.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۴: یاتاقان و اتصالات
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="14">
+    <h2 class="slide-title">یاتاقان و اتصالات مفاصل</h2>
+    <p class="slide-sub">کاهش اصطکاک و افزایش عمر مفصل</p>
+
+    <div class="cards-grid cols-2" style="max-width:850px;">
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-circle-notch"></i></div>
+        <h3>یاتاقان ساچمه‌ای</h3>
+        <p>برای بارهای سنگین — کاهش اصطکاک به حداقل، عمر طولانی</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));">
+          <i class="fas fa-ring"></i>
+        </div>
+        <h3>بوش برنجی</h3>
+        <p>گزینه اقتصادی — مناسب بارهای سبک و سرعت‌های پایین</p>
+      </div>
+      <div class="content-card" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));">
+        <div class="card-icon"><i class="fas fa-link"></i></div>
+        <h3>کوپلینگ</h3>
+        <p>اتصال موتور به لینک با انتقال گشتاور — فنری یا صلب</p>
+      </div>
+      <div class="content-card" style="--ci: linear-gradient(135deg, var(--danger), var(--accent2));">
+        <div class="card-icon"><i class="fas fa-screwdriver"></i></div>
+        <h3>پیچ و مهره</h3>
+        <p>M3 یا M4 برای اتصالات — با واشر فنری برای جلوگیری از شل شدن</p>
+      </div>
+    </div>
+
+    <div style="max-width:850px;width:100%;margin-top:20px;padding:16px 22px;
+      background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);
+      border-radius:12px;font-size:12px;line-height:1.8;color:#c0c8dc;">
+      <i class="fas fa-info-circle" style="color:var(--purple);"></i>
+      <strong style="color:var(--purple);">نکته مهم:</strong>
+      در ربات‌های دقیق، <strong>لقی (Backlash)</strong> مفاصل منبع اصلی خطاست.
+      استفاده از یاتاقان با کیفیت و کوپلینگ صلب، لقی را به حداقل می‌رساند.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۵: فرمول‌های دینامیکی
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="15">
+    <h2 class="slide-title">معادلات دینامیکی ۲R</h2>
+    <p class="slide-sub">فرم لاگرانژ — پیش‌نیاز جلسه ۱۳</p>
+
+    <div class="formula-panel">
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-calculator"></i>
+          فرم استاندارد دینامیک ربات
+        </div>
+        <div class="formula-content">
+          $$ M(q)\ddot{q} + C(q, \dot{q})\dot{q} + G(q) = \tau $$
+        </div>
+        <div class="formula-note">
+          \( M(q) \): ماتریس اینرسی — \( C \): کوریولیس و مرکزگرا — \( G \): جاذبه — \( \tau \): گشتاور مفاصل
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-cube"></i>
+          ماتریس اینرسی M(q) برای ۲R
+        </div>
+        <div class="formula-content">
+          $$ M(q) = \begin{bmatrix} M_{11} & M_{12} \\ M_{21} & M_{22} \end{bmatrix} $$
+          $$ \begin{aligned} M_{11} &= m_1 l_{c1}^2 + m_2 (l_1^2 + l_{c2}^2 + 2 l_1 l_{c2} \cos\theta_2) + I_1 + I_2 \\ M_{12} &= M_{21} = m_2 (l_{c2}^2 + l_1 l_{c2} \cos\theta_2) + I_2 \\ M_{22} &= m_2 l_{c2}^2 + I_2 \end{aligned} $$
+        </div>
+        <div class="formula-note">
+          \( l_{c1}, l_{c2} \): فاصله مرکز جرم تا مفصل — \( I_1, I_2 \): گشتاور اینرسی حول مرکز جرم
+        </div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-label">
+          <i class="fas fa-wind"></i>
+          بردار گشتاور جاذبه G(q)
+        </div>
+        <div class="formula-content">
+          $$ G(q) = \begin{bmatrix} G_1 \\ G_2 \end{bmatrix} = \begin{bmatrix} (m_1 l_{c1} + m_2 l_1) g \cos\theta_1 + m_2 l_{c2} g \cos(\theta_1 + \theta_2) \\ m_2 l_{c2} g \cos(\theta_1 + \theta_2) \end{bmatrix} $$
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۶: جدول پارامترهای نمونه
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="16">
+    <h2 class="slide-title">پارامترهای نمونه ربات ۲R</h2>
+    <p class="slide-sub">مقادیر پیشنهادی برای پروژه عملی</p>
+
+    <div class="data-table">
+      <table>
+        <thead>
+          <tr>
+            <th>پارامتر</th>
+            <th>نماد</th>
+            <th>مقدار</th>
+            <th>واحد</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="param-name">طول لینک ۱</span></td>
+            <td>L₁</td>
+            <td><span class="param-value">0.20</span></td>
+            <td>m</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">طول لینک ۲</span></td>
+            <td>L₂</td>
+            <td><span class="param-value">0.15</span></td>
+            <td>m</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">جرم لینک ۱</span></td>
+            <td>m₁</td>
+            <td><span class="param-value">0.30</span></td>
+            <td>kg</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">جرم لینک ۲</span></td>
+            <td>m₂</td>
+            <td><span class="param-value">0.20</span></td>
+            <td>kg</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">مرکز جرم ۱</span></td>
+            <td>l<sub>c1</sub></td>
+            <td><span class="param-value">0.10</span></td>
+            <td>m</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">مرکز جرم ۲</span></td>
+            <td>l<sub>c2</sub></td>
+            <td><span class="param-value">0.075</span></td>
+            <td>m</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">گشتاور اینرسی ۱</span></td>
+            <td>I₁</td>
+            <td><span class="param-value">1.0 × 10⁻³</span></td>
+            <td>kg·m²</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">گشتاور اینرسی ۲</span></td>
+            <td>I₂</td>
+            <td><span class="param-value">0.4 × 10⁻³</span></td>
+            <td>kg·m²</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="max-width:900px;width:100%;margin-top:16px;padding:14px 20px;
+      background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.3);
+      border-radius:12px;font-size:11.5px;line-height:1.7;color:#c0c8dc;">
+      <i class="fas fa-info-circle" style="color:var(--success);"></i>
+      این مقادیر برای ربات ۲R با سرووهای SG90 و بدنه پلکسی‌گلاس ۳ میلی‌متری پیشنهاد می‌شود.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۷: تمرین کلاسی
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="17">
+    <h2 class="slide-title">تمرین‌های کلاسی</h2>
+    <p class="slide-sub">جلسه ۳ — ساختار ۲R</p>
+
+    <div class="exercise-wrap">
+      <div class="ex-section a">
+        <h4><i class="fas fa-brain"></i> الف) سؤالات مفهومی</h4>
+        <div class="ex-item">
+          <div class="ex-num">۱</div>
+          <div>چرا ربات ۲R به عنوان مدل پایه در آموزش رباتیک استفاده می‌شود؟ حداقل سه دلیل بیاورید.</div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۲</div>
+          <div>تفاوت θ₂ مطلق و نسبی چیست؟ کدام در رباتیک استانداردتر است؟</div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۳</div>
+          <div>چرا گشتاور اینرسی معادل مفصل ۱ به θ₂ وابسته است؟ (راهنمایی: به فرمول I<sub>eq,1</sub> نگاه کنید)</div>
+        </div>
+      </div>
+
+      <div class="ex-section b">
+        <h4><i class="fas fa-flask"></i> ب) تمرین‌های عملی</h4>
+        <div class="ex-item">
+          <div class="ex-num">۱</div>
+          <div>
+            با فرض L₁ = 0.20 m، L₂ = 0.15 m، θ₁ = 30°، θ₂ = 45°، موقعیت نوک (x, y) را محاسبه کنید.
+          </div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۲</div>
+          <div>
+            در SolidWorks یک لینک با ابعاد ۲۰۰×۳۰×۳ میلی‌متر طراحی کنید و با <code>Evaluate → Mass Properties</code> جرم و گشتاور اینرسی آن را استخراج کنید.
+          </div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۳</div>
+          <div>
+            با استفاده از فرمول I<sub>G</sub> = (1/12)mL²، گشتاور اینرسی لینک ۱ را دستی محاسبه و با نتیجه SolidWorks مقایسه کنید.
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-section c">
+        <h4><i class="fas fa-pen-fancy"></i> ج) تمرین نوشتاری</h4>
+        <div class="ex-item">
+          <div class="ex-num">۱</div>
+          <div>دیاگرام آزاد بدنه (FBD) لینک ۲ را رسم کنید و معادلات تعادل نیرو و گشتاور را بنویسید.</div>
+        </div>
+        <div class="ex-item">
+          <div class="ex-num">۲</div>
+          <div>مقایسه‌ای بین سروو SG90 و MG996R انجام دهید: گشتاور، سرعت، جریان مصرفی و قیمت.</div>
+        </div>
+      </div>
+
+      <div class="ex-section d">
+        <h4><i class="fas fa-star"></i> د) چالش خلاقانه ★</h4>
+        <div class="ex-item">
+          <div class="ex-num">★</div>
+          <div>
+            یک ربات ۲R با ابعاد دلخواه طراحی کنید که بتواند یک فنجان را از نقطه A به نقطه B منتقل کند.
+            <br>
+            <span style="color:#8892a8;font-size:11.5px;">
+              (طول لینک‌ها، نوع موتور، ابزارگیر و حداکثر بار قابل حمل را مشخص کنید — ۲۰۰ کلمه)
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۸: Quiz تعاملی
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="18">
+    <h2 class="slide-title">سوال تعاملی</h2>
+    <p class="slide-sub">پاسخ صحیح را انتخاب کنید</p>
+
+    <div class="question-card">
+      <div class="q-icon"><i class="fas fa-question"></i></div>
+      <h3>در ربات ۲R با L₁ = 0.2 m، L₂ = 0.15 m، θ₁ = 0°، θ₂ = 0°، موقعیت نوک در کدام گزینه است؟</h3>
+
+      <div class="quiz-options" id="quizOptions">
+        <button class="quiz-option" onclick="answerQuiz(this, false)">
+          <span class="opt-letter">الف</span>
+          <span>(0.15, 0) m</span>
+        </button>
+        <button class="quiz-option" onclick="answerQuiz(this, true)">
+          <span class="opt-letter">ب</span>
+          <span>(0.35, 0) m</span>
+        </button>
+        <button class="quiz-option" onclick="answerQuiz(this, false)">
+          <span class="opt-letter">ج</span>
+          <span>(0.20, 0.15) m</span>
+        </button>
+        <button class="quiz-option" onclick="answerQuiz(this, false)">
+          <span class="opt-letter">د</span>
+          <span>(0, 0.35) m</span>
+        </button>
+      </div>
+
+      <div class="quiz-result" id="quizResult"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۱۹: جمع‌بندی
+  ═══════════════════════════════════════════ -->
+  <div class="slide" data-slide="19">
+    <h2 class="slide-title">جمع‌بندی جلسه ۳</h2>
+    <p class="slide-sub">آنچه امروز آموختیم</p>
+
+    <div class="summary-list">
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>هندسه ۲R:</strong>
+          دو لینک L₁ و L₂ + دو مفصل دورانی θ₁ و θ₂ + ۲ DOF.
+        </div>
+      </div>
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>سینماتیک مستقیم:</strong>
+          x = L₁cosθ₁ + L₂cos(θ₁+θ₂), y = L₁sinθ₁ + L₂sin(θ₁+θ₂), φ = θ₁+θ₂.
+        </div>
+      </div>
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>پارامترهای فیزیکی:</strong>
+          m₁, m₂، مراکز جرم G₁, G₂ و گشتاورهای اینرسی I<sub>z1</sub>, I<sub>z2</sub>.
+        </div>
+      </div>
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>گشتاور اینرسی:</strong>
+          I<sub>G</sub> = (1/12)mL²، و با قضیه اشتاینر I<sub>O</sub> = I<sub>G</sub> + md².
+        </div>
+      </div>
+      <div class="summary-item">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>دینامیک ۲R:</strong>
+          M(q)q̈ + C(q,q̇)q̇ + G(q) = τ — پیش‌نمایش جلسه ۱۳.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       اسلاید ۲۰: خداحافظی
+  ═══════════════════════════════════════════ -->
+  <div class="slide goodbye-slide" data-slide="20">
+    <div class="goodbye-icon"><i class="fas fa-hand-peace"></i></div>
+    <h2 class="goodbye-title">تا جلسه بعد!</h2>
+    <p class="goodbye-text">
+      در جلسه ۴ با ربات اسکارا (SCARA) و ویژگی منحصربه‌فرد
+      انطباق‌پذیری انتخابی آن آشنا می‌شویم.
+    </p>
+    <button class="goodbye-cta" onclick="window.location.href='../../index.html'">
+      <i class="fas fa-home"></i>
+      بازگشت به صفحه اصلی
+    </button>
+    <div style="margin-top:32px;display:inline-flex;align-items:center;gap:12px;
+      padding:14px 24px;background:var(--card);border:1px solid var(--border);
+      border-radius:16px;backdrop-filter:blur(12px);">
+      <div style="width:44px;height:44px;border-radius:50%;
+        background:linear-gradient(135deg,var(--accent),var(--accent2));
+        display:grid;place-items:center;font-size:16px;color:#050818;font-weight:800;">
+        MG
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:13px;font-weight:700;">دکتر مسعود گوهری‌منش</div>
+        <div style="font-size:10.5px;color:#8892a8;">دانشیار — دانشگاه تربت حیدریه</div>
+        <a href="mailto:m.goharimanesh@gmail.com" style="font-size:10px;color:var(--cyan);text-decoration:none;">
+          m.goharimanesh@gmail.com
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="nav-dots" id="navDots"></div>
+<div class="slide-counter" id="slideCounter">۱ / ۲۰</div>
+
+<div class="controls">
+  <button class="ctrl-btn" id="prevBtn" title="قبلی (←)"><i class="fas fa-chevron-right"></i></button>
+  <button class="ctrl-btn" id="nextBtn" title="بعدی (→)"><i class="fas fa-chevron-left"></i></button>
+  <button class="ctrl-btn" id="fsBtn" title="تمام‌صفحه"><i class="fas fa-expand"></i></button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   ناوبری
+═══════════════════════════════════════════════ */
+const slides = document.querySelectorAll('.slide');
+const totalSlides = slides.length;
+let currentSlide = 0;
+
+const navDots = document.getElementById('navDots');
+slides.forEach((_, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+  dot.addEventListener('click', () => goToSlide(i));
+  navDots.appendChild(dot);
+});
+
+function toFa(n) { return String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
+
+function goToSlide(index) {
+  if (index < 0 || index >= totalSlides) return;
+  slides[currentSlide].classList.remove('active');
+  currentSlide = index;
+  slides[currentSlide].classList.add('active');
+  document.querySelectorAll('.nav-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === currentSlide);
+  });
+  const pct = ((currentSlide + 1) / totalSlides) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('slideCounter').textContent = `${toFa(currentSlide + 1)} / ${toFa(totalSlides)}`;
+  document.getElementById('prevBtn').disabled = currentSlide === 0;
+  document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+  playSlideSound();
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise();
+  }
+}
+function nextSlide() { goToSlide(currentSlide + 1); }
+function prevSlide() { goToSlide(currentSlide - 1); }
+document.getElementById('nextBtn').addEventListener('click', nextSlide);
+document.getElementById('prevBtn').addEventListener('click', prevSlide);
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); prevSlide(); }
+  else if (e.key === 'Home') { e.preventDefault(); goToSlide(0); }
+  else if (e.key === 'End') { e.preventDefault(); goToSlide(totalSlides - 1); }
+});
+
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
+document.addEventListener('touchend', (e) => {
+  const diff = touchStartX - e.changedTouches[0].screenX;
+  if (Math.abs(diff) > 60) {
+    if (diff > 0) nextSlide();
+    else prevSlide();
+  }
+});
+
+goToSlide(0);
+
+/* ═══════════════════════════════════════════════
+   صدا
+═══════════════════════════════════════════════ */
+let audioCtx = null;
+let soundEnabled = true;
+function initAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+function playTone(freq, dur, type = 'sine', vol = 0.06) {
+  if (!soundEnabled) return;
+  initAudio();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type; osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, audioCtx.currentTime);
+  gain.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(); osc.stop(audioCtx.currentTime + dur);
+}
+function playClick() { playTone(880, 0.06, 'sine', 0.04); }
+function playSlideSound() {
+  if (!soundEnabled) return;
+  playTone(523, 0.1, 'sine', 0.04);
+  setTimeout(() => playTone(784, 0.12, 'sine', 0.04), 60);
+}
+function playSuccess() {
+  if (!soundEnabled) return;
+  playTone(523, 0.12, 'sine', 0.06);
+  setTimeout(() => playTone(659, 0.12, 'sine', 0.06), 80);
+  setTimeout(() => playTone(784, 0.2, 'sine', 0.06), 160);
+  setTimeout(() => playTone(1046, 0.3, 'sine', 0.06), 260);
+}
+function playError() {
+  if (!soundEnabled) return;
+  playTone(300, 0.15, 'sawtooth', 0.05);
+  setTimeout(() => playTone(200, 0.2, 'sawtooth', 0.05), 100);
+}
+const soundBtn = document.getElementById('soundBtn');
+soundBtn.addEventListener('click', () => {
+  soundEnabled = !soundEnabled;
+  soundBtn.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
+  if (soundEnabled) playClick();
+});
+
+const fsBtn = document.getElementById('fsBtn');
+fsBtn.addEventListener('click', () => {
+  playClick();
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+    fsBtn.innerHTML = '<i class="fas fa-compress"></i>';
+  } else {
+    document.exitFullscreen();
+    fsBtn.innerHTML = '<i class="fas fa-expand"></i>';
+  }
+});
+
+/* ═══════════════════════════════════════════════
+   Toast
+═══════════════════════════════════════════════ */
+const toastEl = document.getElementById('toast');
+let toastTimer;
+function showToast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2500);
+}
+
+/* ═══════════════════════════════════════════════
+   ذرات
+═══════════════════════════════════════════════ */
+const particlesWrap = document.getElementById('particles');
+const colors = ['#ffb700', '#00d4aa', '#a855f7', '#06b6d4', '#ff6b35'];
+for (let i = 0; i < 30; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  p.style.left = Math.random() * 100 + '%';
+  p.style.animationDuration = (12 + Math.random() * 18) + 's';
+  p.style.animationDelay = (Math.random() * 20) + 's';
+  p.style.background = colors[Math.floor(Math.random() * colors.length)];
+  p.style.boxShadow = `0 0 8px ${p.style.background}`;
+  particlesWrap.appendChild(p);
+}
+
+/* ═══════════════════════════════════════════════
+   شبیه‌ساز ۲R
+═══════════════════════════════════════════════ */
+const theta1Input = document.getElementById('theta1');
+const theta2Input = document.getElementById('theta2');
+const l1Input = document.getElementById('l1Input');
+const l2Input = document.getElementById('l2Input');
+
+const link1 = document.getElementById('link1');
+const link2 = document.getElementById('link2');
+const joint2 = document.getElementById('joint2');
+const joint2Core = document.getElementById('joint2Core');
+const endEffector = document.getElementById('endEffector');
+const endEffectorGlow = document.getElementById('endEffectorGlow');
+const posLabel = document.getElementById('posLabel');
+const theta1Val = document.getElementById('theta1Val');
+const theta2Val = document.getElementById('theta2Val');
+const l1Val = document.getElementById('l1Val');
+const l2Val = document.getElementById('l2Val');
+const tipXEl = document.getElementById('tipX');
+const tipYEl = document.getElementById('tipY');
+const tipAngleEl = document.getElementById('tipAngle');
+
+const ORIGIN_X = 200;
+const ORIGIN_Y = 175;
+
+function updateRobot() {
+  const t1 = parseFloat(theta1Input.value) * Math.PI / 180;
+  const t2 = parseFloat(theta2Input.value) * Math.PI / 180;
+  const L1 = parseFloat(l1Input.value);
+  const L2 = parseFloat(l2Input.value);
+  
+  // موقعیت مفصل ۲ (نوک لینک ۱)
+  const j2x = ORIGIN_X + L1 * Math.cos(t1);
+  const j2y = ORIGIN_Y - L1 * Math.sin(t1);
+  
+  // موقعیت نوک بازو
+  const tx = j2x + L2 * Math.cos(t1 + t2);
+  const ty = j2y - L2 * Math.sin(t1 + t2);
+  
+  // آپدیت SVG
+  link1.setAttribute('x2', j2x);
+  link1.setAttribute('y2', j2y);
+  link2.setAttribute('x1', j2x);
+  link2.setAttribute('y1', j2y);
+  link2.setAttribute('x2', tx);
+  link2.setAttribute('y2', ty);
+  joint2.setAttribute('cx', j2x);
+  joint2.setAttribute('cy', j2y);
+  joint2Core.setAttribute('cx', j2x);
+  joint2Core.setAttribute('cy', j2y);
+  endEffector.setAttribute('cx', tx);
+  endEffector.setAttribute('cy', ty);
+  endEffectorGlow.setAttribute('cx', tx);
+  endEffectorGlow.setAttribute('cy', ty);
+  
+  // محاسبه مختصات واقعی (نسبت به پایه)
+  const realX = (tx - ORIGIN_X) / 100; // 100 pixel = 1 unit برای نمایش
+  const realY = -(ty - ORIGIN_Y) / 100;
+  
+  // برچسب
+  posLabel.setAttribute('x', tx);
+  posLabel.setAttribute('y', ty - 20);
+  posLabel.textContent = `(${realX.toFixed(2)}, ${realY.toFixed(2)})`;
+  
+  // مقادیر نمایشی
+  theta1Val.textContent = toFa(parseInt(theta1Input.value)) + '°';
+  theta2Val.textContent = toFa(parseInt(theta2Input.value)) + '°';
+  l1Val.textContent = toFa(parseInt(l1Input.value));
+  l2Val.textContent = toFa(parseInt(l2Input.value));
+  tipXEl.textContent = realX.toFixed(2).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  tipYEl.textContent = realY.toFixed(2).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  tipAngleEl.textContent = toFa(parseInt(theta1Input.value) + parseInt(theta2Input.value)) + '°';
+}
+
+[theta1Input, theta2Input, l1Input, l2Input].forEach(el => {
+  el.addEventListener('input', updateRobot);
+});
+updateRobot();
+
+/* ═══════════════════════════════════════════════
+   شبیه‌ساز اینرسی
+═══════════════════════════════════════════════ */
+const m1Input = document.getElementById('m1');
+const m2Input = document.getElementById('m2');
+const inL1Input = document.getElementById('inL1');
+const inL2Input = document.getElementById('inL2');
+
+const inLink1 = document.getElementById('inLink1');
+const inLink2 = document.getElementById('inLink2');
+const inJoint2 = document.getElementById('inJoint2');
+const inJoint2Core = document.getElementById('inJoint2Core');
+const inG1 = document.getElementById('inG1');
+const inG1Label = document.getElementById('inG1Label');
+const inG2 = document.getElementById('inG2');
+const inG2Label = document.getElementById('inG2Label');
+const inEnd = document.getElementById('inEnd');
+const m1Val = document.getElementById('m1Val');
+const m2Val = document.getElementById('m2Val');
+const inL1Val = document.getElementById('inL1Val');
+const inL2Val = document.getElementById('inL2Val');
+const torque1El = document.getElementById('torque1');
+const torque2El = document.getElementById('torque2');
+
+const G_ACC = 9.81;
+
+function updateInertia() {
+  const m1 = parseFloat(m1Input.value);
+  const m2 = parseFloat(m2Input.value);
+  const L1 = parseFloat(inL1Input.value);
+  const L2 = parseFloat(inL2Input.value);
+  
+  // موقعیت‌ها
+  const j2x = ORIGIN_X + L1;
+  const j2y = ORIGIN_Y;
+  const tx = j2x + L2;
+  const ty = j2y;
+  
+  // مراکز جرم
+  const g1x = ORIGIN_X + L1/2;
+  const g1y = ORIGIN_Y;
+  const g2x = j2x + L2/2;
+  const g2y = j2y;
+  
+  // آپدیت SVG
+  inLink1.setAttribute('x2', j2x);
+  inLink1.setAttribute('y2', j2y);
+  inLink2.setAttribute('x1', j2x);
+  inLink2.setAttribute('y1', j2y);
+  inLink2.setAttribute('x2', tx);
+  inLink2.setAttribute('y2', ty);
+  inJoint2.setAttribute('cx', j2x);
+  inJoint2.setAttribute('cy', j2y);
+  inJoint2Core.setAttribute('cx', j2x);
+  inJoint2Core.setAttribute('cy', j2y);
+  inG1.setAttribute('cx', g1x);
+  inG1.setAttribute('cy', g1y);
+  inG1Label.setAttribute('x', g1x);
+  inG1Label.setAttribute('y', g1y + 25);
+  inG2.setAttribute('cx', g2x);
+  inG2.setAttribute('cy', g2y);
+  inG2Label.setAttribute('x', g2x);
+  inG2Label.setAttribute('y', g2y + 25);
+  inEnd.setAttribute('cx', tx);
+  inEnd.setAttribute('cy', ty);
+  
+  // محاسبه گشتاور گرانشی (حالت افقی: cos(θ)=1)
+  // τ₁ = (m₁·L₁/2 + m₂·L₁ + m₂·L₂/2)·g
+  // τ₂ = m₂·L₂/2·g
+  const L1_m = L1 / 100; // تبدیل به متر فرضی
+  const L2_m = L2 / 100;
+  const tau1 = (m1 * L1_m/2 + m2 * L1_m + m2 * L2_m/2) * G_ACC;
+  const tau2 = m2 * L2_m/2 * G_ACC;
+  
+  // نمایش
+  m1Val.textContent = m1.toFixed(1).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]) + ' kg';
+  m2Val.textContent = m2.toFixed(1).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]) + ' kg';
+  inL1Val.textContent = toFa(parseInt(inL1Input.value));
+  inL2Val.textContent = toFa(parseInt(inL2Input.value));
+  torque1El.textContent = tau1.toFixed(2).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]) + ' N·m';
+  torque2El.textContent = tau2.toFixed(2).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]) + ' N·m';
+}
+
+[m1Input, m2Input, inL1Input, inL2Input].forEach(el => {
+  el.addEventListener('input', updateInertia);
+});
+updateInertia();
+
+/* ═══════════════════════════════════════════════
+   Quiz
+═══════════════════════════════════════════════ */
+function answerQuiz(btn, isCorrect) {
+  const options = document.querySelectorAll('#quizOptions .quiz-option');
+  const result = document.getElementById('quizResult');
+  options.forEach(o => o.disabled = true);
+  if (isCorrect) {
+    btn.classList.add('correct');
+    result.className = 'quiz-result show ok';
+    result.innerHTML = '<i class="fas fa-check-circle"></i> آفرین! x = L₁ + L₂ = 0.35، y = 0.';
+    playSuccess();
+    fireConfetti();
+    setTimeout(() => goToSlide(18), 2000);
+  } else {
+    btn.classList.add('wrong');
+    result.className = 'quiz-result show no';
+    result.innerHTML = '<i class="fas fa-times-circle"></i> پاسخ صحیح نبود — گزینه ب (0.35, 0) درست است.';
+    playError();
+    options[1].classList.add('correct');
+    setTimeout(() => goToSlide(18), 2200);
+  }
+}
+
+function fireConfetti() {
+  const cols = ['#ffb700', '#00d4aa', '#a855f7', '#ff6b35', '#06b6d4', '#ec4899'];
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = cols[Math.floor(Math.random() * cols.length)];
+    c.style.animationDelay = (Math.random() * 0.5) + 's';
+    c.style.animationDuration = (2 + Math.random() * 1.5) + 's';
+    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
+  }
+}
+
+document.querySelectorAll('.content-card, .app-card, .arch-card').forEach(c => {
+  c.addEventListener('click', playClick);
+});
+</script>
+</body>
+</html>
