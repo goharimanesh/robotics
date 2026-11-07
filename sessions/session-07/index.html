@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جلسه ۷ — سینماتیک معکوس جبری و مکانیزم چهارمیله‌ای | دکتر مسعود گوهری‌منش</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../shared/lecture.css">
+
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']], processEscapes: true },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+
+<style>
+:root {
+  --accent: #ffb700; --accent2: #ff6b35; --success: #00d4aa; --danger: #ff4757;
+  --purple: #a855f7; --pink: #ec4899; --cyan: #06b6d4; --dark: #050818;
+  --card: rgba(255,255,255,0.05); --border: rgba(255,255,255,0.1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; font-family: 'Vazirmatn', sans-serif;
+  background: var(--dark); color: #e8ecf5; user-select: none; }
+
+.bg-wrap { position: fixed; inset: 0; z-index: -2; background: radial-gradient(ellipse at top, #0a1030 0%, #050818 60%); overflow: hidden; }
+.bubble { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; animation: float 22s infinite ease-in-out; }
+.b1 { width: 500px; height: 500px; background: #ffb700; top: -10%; right: -8%; }
+.b2 { width: 440px; height: 440px; background: #00d4aa; bottom: -15%; left: -8%; animation-delay: -7s; }
+.b3 { width: 360px; height: 360px; background: #a855f7; top: 35%; left: 40%; animation-delay: -14s; opacity: 0.2; }
+@keyframes float { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(60px,-50px) scale(1.1); } 66% { transform: translate(-40px,40px) scale(0.95); } }
+
+.particles { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+.particle { position: absolute; width: 2px; height: 2px; border-radius: 50%; animation: rise linear infinite; opacity: 0; }
+@keyframes rise { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 10% { opacity: 0.8; } 90% { opacity: 0.6; } 100% { transform: translateY(-20vh) scale(1.2); opacity: 0; } }
+
+.top-header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: rgba(5,8,24,0.75); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+.header-brand { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 700; color: #8892a8; }
+.header-brand i { color: var(--accent); font-size: 14px; }
+
+.instructor-signature { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 95; display: flex; align-items: center; gap: 8px; padding: 6px 16px; background: rgba(5,8,24,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,183,0,0.2); border-radius: 100px; pointer-events: none; }
+.instructor-signature .sig-fallback { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: grid; place-items: center; font-size: 11px; color: #050818; font-weight: 800; }
+.instructor-signature .sig-text { display: flex; flex-direction: column; line-height: 1.2; text-align: right; }
+.instructor-signature .sig-text strong { font-size: 10.5px; color: var(--accent); font-weight: 700; }
+.instructor-signature .sig-text span { font-size: 8.5px; color: #8892a8; }
+
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); z-index: 110; transition: width 0.4s ease; box-shadow: 0 0 12px var(--accent); }
+
+.controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 90; display: flex; gap: 8px; padding: 8px 12px; background: rgba(5,8,24,0.75); backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: 100px; }
+.ctrl-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: rgba(255,255,255,0.06); color: #e8ecf5; cursor: pointer; display: grid; place-items: center; font-size: 13px; transition: all 0.25s; }
+.ctrl-btn:hover { background: rgba(255,183,0,0.2); color: var(--accent); }
+.ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.nav-dots { position: fixed; left: 20px; top: 50%; transform: translateY(-50%); z-index: 90; display: flex; flex-direction: column; gap: 8px; max-height: 80vh; overflow-y: auto; padding: 4px; }
+.nav-dot { width: 8px; height: 8px; flex-shrink: 0; border-radius: 50%; background: rgba(255,255,255,0.15); cursor: pointer; transition: all 0.3s; }
+.nav-dot:hover, .nav-dot.active { background: var(--accent); box-shadow: 0 0 12px var(--accent); transform: scale(1.4); }
+.slide-counter { position: fixed; bottom: 20px; right: 20px; z-index: 90; font-size: 12px; color: #8892a8; background: rgba(5,8,24,0.7); padding: 6px 14px; border-radius: 100px; backdrop-filter: blur(12px); font-variant-numeric: tabular-nums; }
+
+.slides-container { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+.slide { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 40px 70px; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.5s; overflow-y: auto; }
+.slide.active { opacity: 1; visibility: visible; }
+.slide.active > * { animation: slideIn 0.6s ease backwards; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+.slide-title { font-size: clamp(22px, 3vw, 32px); font-weight: 800; margin-bottom: 10px; text-align: center; background: linear-gradient(135deg, #fff, var(--accent)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.slide-sub { font-size: clamp(12px, 1.4vw, 14px); color: #8892a8; text-align: center; margin-bottom: 20px; max-width: 850px; line-height: 1.8; }
+
+/* ═════ اصلاح نمایش تصاویر ═════ */
+.img-container {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.img-container img {
+  max-width: 100%;
+  height: auto;
+  max-height: 45vh;
+  object-fit: contain;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.img-container img:hover {
+  transform: scale(1.01);
+  box-shadow: 0 12px 50px rgba(255,183,0,0.15);
+}
+
+/* مودال بزرگ‌نمایی تصویر */
+.lightbox {
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(5,8,24,0.95);
+  display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(10px);
+}
+.lightbox.open { display: flex; }
+.lightbox img {
+  max-width: 95vw; max-height: 90vh;
+  border-radius: 12px;
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 50px rgba(255,183,0,0.3);
+}
+.lightbox .close-btn {
+  position: absolute; top: 20px; right: 20px;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255,255,255,0.1); border: 1px solid var(--border);
+  color: #fff; cursor: pointer; font-size: 18px;
+  display: grid; place-items: center;
+}
+.lightbox .close-btn:hover { background: var(--danger); }
+
+.cards-grid { display: grid; gap: 16px; width: 100%; max-width: 960px; }
+.cols-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.cols-3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.cols-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+.content-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; backdrop-filter: blur(12px); transition: all 0.3s; }
+.content-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 10px 30px rgba(255,183,0,0.15); }
+.content-card .card-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--ci, linear-gradient(135deg, var(--accent), var(--accent2))); display: grid; place-items: center; font-size: 18px; color: #050818; margin-bottom: 12px; }
+.content-card h3 { font-size: 14.5px; font-weight: 700; margin-bottom: 6px; }
+.content-card p { font-size: 12px; color: #b0b8cc; line-height: 1.8; }
+
+.code-box { background: #0f1322; border-radius: 12px; padding: 16px; font-family: 'Courier New', monospace; font-size: 12px; color: #d4d4d4; direction: ltr; text-align: left; overflow-x: auto; border: 1px solid var(--border); line-height: 1.6; }
+.code-box .keyword { color: #569cd6; font-weight: bold; }
+.code-box .string { color: #ce9178; }
+.code-box .comment { color: #6a9955; font-style: italic; }
+.code-box .func { color: #dcdcaa; }
+.code-box .var { color: #4fc1ff; }
+.code-box .num { color: #b5cea8; }
+
+.formula-box { width: 100%; max-width: 900px; background: rgba(255,183,0,0.06); border: 1px solid rgba(255,183,0,0.25); border-radius: 16px; padding: 20px 24px; margin: 12px 0; direction: ltr; text-align: center; overflow-x: auto; }
+.formula-box .f-label { direction: rtl; text-align: right; font-size: 12px; color: var(--accent); font-weight: 700; margin-bottom: 10px; }
+
+.data-table { width: 100%; max-width: 900px; border-collapse: collapse; margin: 16px 0; background: var(--card); border-radius: 14px; overflow: hidden; border: 1px solid var(--border); font-size: 13px; }
+.data-table th { background: rgba(255,183,0,0.12); color: var(--accent); padding: 12px; font-weight: 700; text-align: center; border-bottom: 1px solid var(--border); }
+.data-table td { padding: 12px; text-align: center; border-bottom: 1px solid var(--border); color: #c0c8dc; }
+.data-table tr:last-child td { border-bottom: none; }
+
+.simulator { width: 100%; max-width: 1080px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 22px; backdrop-filter: blur(12px); }
+.sim-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+.sim-canvas-wrap { background: rgba(0,0,0,0.4); border-radius: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--border); }
+.sim-controls { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.sim-control label { display: flex; justify-content: space-between; font-size: 12px; color: #8892a8; margin-bottom: 4px; }
+.sim-control label strong { color: var(--accent); font-variant-numeric: tabular-nums; }
+.sim-control input[type=range] { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; -webkit-appearance: none; outline: none; }
+.sim-control input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--accent); border-radius: 50%; cursor: pointer; box-shadow: 0 0 12px var(--accent); }
+.sim-actions { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+.sim-action-btn { padding: 8px 14px; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #d0d8e8; cursor: pointer; font-family: 'Vazirmatn'; font-size: 12px; transition: all 0.25s; display: flex; align-items: center; gap: 6px; }
+.sim-action-btn:hover { background: rgba(255,183,0,0.15); border-color: var(--accent); color: var(--accent); }
+.sim-action-btn.active { background: rgba(255,183,0,0.2); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+
+.ik-status { margin-top: 12px; padding: 10px 14px; border-radius: 12px; font-size: 11.5px; line-height: 1.7; display: flex; gap: 8px; align-items: flex-start; }
+.ik-status.ok { background: rgba(0,212,170,0.12); border: 1px solid rgba(0,212,170,0.35); color: #7ee8d1; }
+.ik-status.err { background: rgba(255,71,87,0.12); border: 1px solid rgba(255,71,87,0.35); color: #ffb3bb; }
+.ik-status i { font-size: 14px; margin-top: 2px; }
+
+.exercise-wrap { width: 100%; max-width: 920px; max-height: 60vh; overflow-y: auto; padding: 4px; padding-left: 10px; }
+.exercise-wrap::-webkit-scrollbar { width: 6px; }
+.exercise-wrap::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+.ex-section { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; margin-bottom: 14px; backdrop-filter: blur(12px); }
+.ex-section.a { border-right: 4px solid #fbbf24; }
+.ex-section.b { border-right: 4px solid var(--success); }
+.ex-section.c { border-right: 4px solid var(--purple); }
+.ex-section.d { border-right: 4px solid var(--danger); }
+.ex-section h4 { font-size: 13.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.ex-section.a h4 { color: #fbbf24; }
+.ex-section.b h4 { color: var(--success); }
+.ex-section.c h4 { color: var(--purple); }
+.ex-section.d h4 { color: var(--danger); }
+.ex-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px dashed rgba(255,255,255,0.06); font-size: 12.5px; color: #c0c8dc; line-height: 1.8; }
+.ex-item:last-child { border-bottom: none; }
+.ex-num { width: 24px; height: 24px; flex-shrink: 0; border-radius: 50%; background: rgba(255,255,255,0.08); display: grid; place-items: center; font-size: 11px; font-weight: 800; color: var(--accent); }
+
+.question-card { max-width: 720px; width: 100%; background: var(--card); border: 2px solid rgba(255,183,0,0.3); border-radius: 20px; padding: 26px; backdrop-filter: blur(12px); text-align: center; }
+.quiz-options { display: flex; flex-direction: column; gap: 10px; text-align: right; margin-top: 16px; }
+.quiz-option { padding: 14px 18px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; font-family: 'Vazirmatn'; font-size: 13px; color: #e8ecf5; transition: all 0.25s; display: flex; align-items: center; gap: 12px; }
+.quiz-option:hover { background: rgba(255,183,0,0.1); border-color: var(--accent); }
+.quiz-option.correct { background: rgba(0,212,170,0.15); border-color: var(--success); }
+.quiz-option.wrong { background: rgba(255,71,87,0.15); border-color: var(--danger); }
+.quiz-result { margin-top: 16px; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 600; display: none; }
+.quiz-result.show { display: block; }
+
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(10,14,39,0.95); border: 1px solid var(--accent); color: var(--accent); padding: 10px 22px; border-radius: 100px; font-size: 12px; font-weight: 600; backdrop-filter: blur(20px); z-index: 999; transition: transform 0.4s ease; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 820px) {
+  .sim-layout { grid-template-columns: 1fr; }
+  .img-container img { max-height: 30vh; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-wrap">
+  <div class="bubble b1"></div>
+  <div class="bubble b2"></div>
+  <div class="bubble b3"></div>
+</div>
+<div class="particles" id="particles"></div>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="instructor-signature">
+  <div class="sig-fallback">MG</div>
+  <div class="sig-text">
+    <strong>دکتر مسعود گوهری‌منش</strong>
+    <span>دانشیار — دانشگاه تربت حیدریه</span>
+  </div>
+</div>
+
+<header class="top-header">
+  <div class="header-brand"><i class="fas fa-robot"></i><span>جلسه ۷ — سینماتیک معکوس جبری و مکانیزم چهارمیله‌ای</span></div>
+  <button class="ctrl-btn" id="soundBtn" title="صدا"><i class="fas fa-volume-up"></i></button>
+</header>
+
+<!-- ═════ لایت‌باکس ═════ -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="close-btn" onclick="closeLightbox(event, true)"><i class="fas fa-times"></i></button>
+  <img src="" alt="نمایش بزرگ">
+</div>
+
+<div class="slides-container" id="slidesContainer">
+
+  <!-- ═══════ اسلاید ۱: کاور ═══════ -->
+  <div class="slide" data-slide="1">
+    <div style="display:inline-flex; gap:8px; padding:8px 20px; background:rgba(255,183,0,0.1); border:1px solid rgba(255,183,0,0.3); border-radius:100px; font-size:13px; color:var(--accent); margin-bottom:20px;">
+      <i class="fas fa-graduation-cap"></i> جلسه ۷ از ۱۶ — آغاز فاز ۳
+    </div>
+    <div class="img-container">
+      <img src="assets/session07-hero.jpg" alt="سینماتیک معکوس ربات دو لینکی" onclick="openLightbox(this.src)">
+    </div>
+    <h1 class="slide-title">سینماتیک معکوس ربات ۲R به شیوه جبری</h1>
+    <p class="slide-sub">
+      از مسئله معکوس تا حل بسته: استخراج روابط تحلیلی، حل ابهام پیکربندی‌های
+      Elbow-Up و Elbow-Down، و مقایسه با حل عددی <code>fsolve</code> در متلب.
+    </p>
+  </div>
+
+  <!-- ═══════ اسلاید ۲: چرا IK مهم است؟ ═══════ -->
+  <div class="slide" data-slide="2">
+    <h2 class="slide-title">چرا سینماتیک معکوس قلب کنترل ربات است؟</h2>
+    <p class="slide-sub">ربات برای رسیدن به نقطه هدف، باید زوایای مفاصل را بداند — نه برعکس</p>
+    <div class="cards-grid cols-3">
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-arrow-right-arrow-left"></i></div>
+        <h3>مستقیم (FK) — ساده و یکتا</h3>
+        <p>ورودی: $\boldsymbol{\theta}$ → خروجی: موقعیت نوک. همیشه یک جواب دارد و محاسبه سریع است.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));"><i class="fas fa-random"></i></div>
+        <h3>معکوس (IK) — غیرخطی و چندجوابه</h3>
+        <p>ورودی: $(x, y)$ → خروجی: $\boldsymbol{\theta}$. ممکن است صفر، یک یا چند جواب داشته باشد.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));"><i class="fas fa-bullseye"></i></div>
+        <h3>کاربرد در عمل</h3>
+        <p>تعقیب مسیر، جوشکاری، برداشتن قطعه — همیشه در قالب «برو به نقطه (x, y)» تعریف می‌شود.</p>
+      </div>
+    </div>
+    <div style="max-width:850px; background:rgba(0,212,170,0.08); border:1px solid rgba(0,212,170,0.3); border-radius:12px; padding:14px 20px; font-size:12.5px; color:#c0c8dc; line-height:1.8; margin-top:20px;">
+      <i class="fas fa-lightbulb" style="color:var(--success);"></i>
+      <strong>نکته کلیدی:</strong> در بیشتر مسائل صنعتی، کاربر مختصات هدف را مشخص می‌کند و کنترل‌کننده باید در هر گام زمانی معادلات IK را حل کند — بنابراین IK بخش «گران‌قیمت» محاسباتی است.
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۳: تعریف مسئله ریاضی ═══════ -->
+  <div class="slide" data-slide="3">
+    <h2 class="slide-title">تعریف ریاضی مسئله برای ربات صفحه‌ای ۲R</h2>
+    <p class="slide-sub">دنبال $\theta_1$ و $\theta_2$ هستیم به‌گونه‌ای که نوک بازو به $(x, y)$ برسد</p>
+    <div class="formula-box">
+      <div class="f-label">معادلات سینماتیک مستقیم (پایه مسئله):</div>
+      $$ x = L_1 \cos\theta_1 + L_2 \cos(\theta_1 + \theta_2) $$
+      $$ y = L_1 \sin\theta_1 + L_2 \sin(\theta_1 + \theta_2) $$
+    </div>
+    <div class="cards-grid cols-2" style="margin-top:10px;">
+      <div class="content-card">
+        <div class="card-icon"><i class="fas fa-question"></i></div>
+        <h3>چه داده‌ای داریم؟</h3>
+        <p>طول لینک‌های $L_1$، $L_2$ و مختصات هدف $(x, y)$ در فضای کاری.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--purple), var(--pink));"><i class="fas fa-key"></i></div>
+        <h3>چه چیزی می‌خواهیم؟</h3>
+        <p>زوایای $\theta_1$، $\theta_2$ که هر دو معادله فوق را همزمان برآورده کنند.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۴: دو پیکربندی ═══════ -->
+  <div class="slide" data-slide="4">
+    <h2 class="slide-title">چرا دو جواب؟ (Elbow-Up و Elbow-Down)</h2>
+    <p class="slide-sub">یک هدف ثابت، دو حالت مچ/آرنج ممکن</p>
+    <div class="img-container">
+      <img src="assets/session07-two-solutions.jpg" alt="پیکربندی‌های Elbow Up و Elbow Down" onclick="openLightbox(this.src)">
+    </div>
+    <div class="cards-grid cols-2">
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--accent), var(--accent2));"><i class="fas fa-chevron-up"></i></div>
+        <h3>Elbow-Up</h3>
+        <p>مفصل آرنج بالاتر از خط اتصال قرار دارد. مناسب کارهای بالای میز.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));"><i class="fas fa-chevron-down"></i></div>
+        <h3>Elbow-Down</h3>
+        <p>مفصل آرنج پایین‌تر است. مناسب محیط‌های بسته و بدون مانع.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۵: گام اول حل جبری ═══════ -->
+  <div class="slide" data-slide="5">
+    <h2 class="slide-title">گام اول حل جبری: استخراج $\theta_2$</h2>
+    <p class="slide-sub">با جمع مربعات دو معادله، $\theta_1$ حذف می‌شود</p>
+    <div class="formula-box">
+      <div class="f-label">مرحله ۱ — جمع مربعات:</div>
+      $$ x^2 + y^2 = L_1^2 + L_2^2 + 2 L_1 L_2 \cos\theta_2 $$
+      <div class="f-label" style="margin-top:14px;">مرحله ۲ — حل برای $\cos\theta_2$:</div>
+      $$ \cos\theta_2 = \frac{x^2 + y^2 - L_1^2 - L_2^2}{2 L_1 L_2} \triangleq D $$
+      <div class="f-label" style="margin-top:14px;">مرحله ۳ — دو جواب:</div>
+      $$ \theta_2 = \pm \arccos(D) $$
+    </div>
+    <div style="max-width:850px; background:rgba(255,71,87,0.08); border:1px solid rgba(255,71,87,0.3); border-radius:12px; padding:14px 20px; font-size:12.5px; color:#c0c8dc; line-height:1.8; margin-top:14px;">
+      <i class="fas fa-circle-exclamation" style="color:var(--danger);"></i>
+      <strong>شرط وجود جواب:</strong> باید $-1 \le D \le 1$ باشد؛ در غیر این صورت هدف خارج از فضای کاری است.
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۶: گام دوم حل جبری ═══════ -->
+  <div class="slide" data-slide="6">
+    <h2 class="slide-title">گام دوم حل جبری: استخراج $\theta_1$</h2>
+    <p class="slide-sub">با داشتن $\theta_2$، معادله به یک چرخش ساده تبدیل می‌شود</p>
+    <div class="formula-box">
+      <div class="f-label">بازنویسی معادلات با جمع کمکی:</div>
+      $$ x = k_1 \cos\theta_1 - k_2 \sin\theta_1,\quad y = k_1 \sin\theta_1 + k_2 \cos\theta_1 $$
+      $$ k_1 = L_1 + L_2\cos\theta_2,\quad k_2 = L_2\sin\theta_2 $$
+      <div class="f-label" style="margin-top:14px;">فرم نهایی با atan2 (پایدار در تمام ربع‌ها):</div>
+      $$ \theta_1 = \operatorname{atan2}(y,\, x) - \operatorname{atan2}(k_2,\, k_1) $$
+    </div>
+    <div style="max-width:850px; background:rgba(0,212,170,0.08); border:1px solid rgba(0,212,170,0.3); border-radius:12px; padding:14px 20px; font-size:12.5px; color:#c0c8dc; line-height:1.8; margin-top:14px;">
+      <i class="fas fa-check-circle" style="color:var(--success);"></i>
+      <strong>نکته حرفه‌ای:</strong> همیشه از <code>atan2(y, x)</code> استفاده کنید، نه <code>atan(y/x)</code> — چون atan2 قادر به تفکیک ربع‌ها است.
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۷: فضای کاری ═══════ -->
+  <div class="slide" data-slide="7">
+    <h2 class="slide-title">فضای کاری: کجا جواب وجود دارد؟</h2>
+    <p class="slide-sub">ناحیه حلقوی بین دو دایره داخلی و خارجی</p>
+    <div class="img-container">
+      <img src="assets/session07-workspace.jpg" alt="فضای کاری حلقوی ربات ۲R" onclick="openLightbox(this.src)">
+    </div>
+    <div class="formula-box" style="max-width:880px;">
+      <div class="f-label">شرط فضای کاری (reachability):</div>
+      $$ |L_1 - L_2| \le \sqrt{x^2 + y^2} \le L_1 + L_2 $$
+    </div>
+    <div class="cards-grid cols-3" style="margin-top:14px;">
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--danger), var(--accent2));"><i class="fas fa-times"></i></div>
+        <h3>خارج از دایره بزرگ</h3>
+        <p>هدف دورتر از $L_1 + L_2$ است — دسترسی ناممکن.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, #fbbf24, var(--accent));"><i class="fas fa-circle-notch"></i></div>
+        <h3>داخل دایره کوچک</h3>
+        <p>هدف بسیار نزدیک به پایه — فقط با $\theta_2$ بسیار بزرگ.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci: linear-gradient(135deg, var(--success), var(--cyan));"><i class="fas fa-check"></i></div>
+        <h3>ناحیه حلقوی</h3>
+        <p>بین دو دایره — همیشه یک یا دو جواب.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۸: کد متلب حل جبری ═══════ -->
+  <div class="slide" data-slide="8">
+    <h2 class="slide-title">پیاده‌سازی جبری در MATLAB</h2>
+    <p class="slide-sub">تابع کامل حل بسته سینماتیک معکوس</p>
+    <div class="code-box" style="max-width:880px;">
+<span class="keyword">function</span> [th1, th2] = ik_2R(x, y, L1, L2)<br>
+<span class="comment">% سینماتیک معکوس ربات ۲R به روش جبری</span><br><br>
+&nbsp;&nbsp;<span class="comment">% گام ۱: بررسی فضای کاری</span><br>
+&nbsp;&nbsp;r2 = x^<span class="num">2</span> + y^<span class="num">2</span>;<br>
+&nbsp;&nbsp;<span class="keyword">if</span> r2 > (L1+L2)^<span class="num">2</span> || r2 < (L1-L2)^<span class="num">2</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">error</span>(<span class="string">'هدف خارج از فضای کاری است'</span>);<br>
+&nbsp;&nbsp;<span class="keyword">end</span><br><br>
+&nbsp;&nbsp;<span class="comment">% گام ۲: حل برای theta2</span><br>
+&nbsp;&nbsp;D = (r2 - L1^<span class="num">2</span> - L2^<span class="num">2</span>) / (<span class="num">2</span>*L1*L2);<br>
+&nbsp;&nbsp;D = <span class="func">max</span>(<span class="func">min</span>(D, <span class="num">1</span>), -<span class="num">1</span>);<br>
+&nbsp;&nbsp;th2a = <span class="func">acos</span>(D);<br>
+&nbsp;&nbsp;th2b = -<span class="func">acos</span>(D);<br><br>
+&nbsp;&nbsp;<span class="comment">% گام ۳: حل برای theta1 در هر پیکربندی</span><br>
+&nbsp;&nbsp;th1a = <span class="func">atan2</span>(y, x) - <span class="func">atan2</span>(L2*<span class="func">sin</span>(th2a), L1 + L2*<span class="func">cos</span>(th2a));<br>
+&nbsp;&nbsp;th1b = <span class="func">atan2</span>(y, x) - <span class="func">atan2</span>(L2*<span class="func">sin</span>(th2b), L1 + L2*<span class="func">cos</span>(th2b));<br><br>
+&nbsp;&nbsp;th1 = [th1a, th1b];<br>
+&nbsp;&nbsp;th2 = [th2a, th2b];<br>
+<span class="keyword">end</span>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۹: fsolve ═══════ -->
+  <div class="slide" data-slide="9">
+    <h2 class="slide-title">حل عددی با <code>fsolve</code> در MATLAB</h2>
+    <p class="slide-sub">رویکرد جایگزین زمانی که حل بسته ممکن نیست</p>
+    <div class="code-box" style="max-width:880px;">
+<span class="comment">% تعریف معادلات خطا (سیستم غیرخطی)</span><br>
+<span class="keyword">function</span> F = ik_equations(q, x, y, L1, L2)<br>
+&nbsp;&nbsp;th1 = q(<span class="num">1</span>); th2 = q(<span class="num">2</span>);<br>
+&nbsp;&nbsp;F(<span class="num">1</span>) = L1*<span class="func">cos</span>(th1) + L2*<span class="func">cos</span>(th1+th2) - x;<br>
+&nbsp;&nbsp;F(<span class="num">2</span>) = L1*<span class="func">sin</span>(th1) + L2*<span class="func">sin</span>(th1+th2) - y;<br>
+<span class="keyword">end</span><br><br>
+<span class="comment">% حل عددی با حدس اولیه</span><br>
+x = <span class="num">0.866</span>; y = <span class="num">1.0</span>;<br>
+L1 = <span class="num">1</span>; L2 = <span class="num">0.8</span>;<br>
+q0 = [<span class="num">0</span>, <span class="num">0</span>];<br>
+q_sol = <span class="func">fsolve</span>(@(q) ik_equations(q,x,y,L1,L2), q0);<br>
+<span class="func">disp</span>(<span class="func">rad2deg</span>(q_sol));
+    </div>
+    <div style="max-width:850px; background:rgba(255,183,0,0.08); border:1px solid rgba(255,183,0,0.3); border-radius:12px; padding:14px 20px; font-size:12.5px; color:#c0c8dc; line-height:1.8; margin-top:14px;">
+      <i class="fas fa-triangle-exclamation" style="color:var(--accent);"></i>
+      <strong>هشدار:</strong> <code>fsolve</code> فقط یک جواب در همسایگی حدس اولیه می‌دهد. برای یافتن هر دو پیکربندی، دو حدس متفاوت بدهید.
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۰: چرخه fsolve ═══════ -->
+  <div class="slide" data-slide="10">
+    <h2 class="slide-title">چرخه حل عددی گام‌به‌گام</h2>
+    <p class="slide-sub">آنچه در هر تکرار fsolve رخ می‌دهد</p>
+    <div class="img-container">
+      <img src="assets/session07-fsolve-flow.jpg" alt="چرخه حل عددی fsolve" onclick="openLightbox(this.src)">
+    </div>
+    <div class="cards-grid cols-4">
+      <div class="content-card"><div class="card-icon"><i class="fas fa-1"></i></div><h3>حدس اولیه</h3><p>$\boldsymbol{\theta}^{(0)}$ انتخاب می‌شود.</p></div>
+      <div class="content-card"><div class="card-icon" style="--ci:linear-gradient(135deg,var(--success),var(--cyan));"><i class="fas fa-2"></i></div><h3>سینماتیک مستقیم</h3><p>نوک بازو برای حدس فعلی محاسبه می‌شود.</p></div>
+      <div class="content-card"><div class="card-icon" style="--ci:linear-gradient(135deg,var(--purple),var(--pink));"><i class="fas fa-3"></i></div><h3>خطا و ژاکوبین</h3><p>خطا و ماتریس ژاکوبین به‌روزرسانی می‌شوند.</p></div>
+      <div class="content-card"><div class="card-icon" style="--ci:linear-gradient(135deg,var(--danger),var(--accent2));"><i class="fas fa-4"></i></div><h3>تکرار</h3><p>تا همگرایی $\|\mathbf{F}\| < \epsilon$ ادامه می‌یابد.</p></div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۱: شبیه‌ساز تعاملی IK ═══════ -->
+  <div class="slide" data-slide="11">
+    <h2 class="slide-title">شبیه‌ساز تعاملی: هدف را جابجا کنید</h2>
+    <p class="slide-sub">روی بوم کلیک کنید — ربات خودش را برای رسیدن به هدف تنظیم می‌کند</p>
+    <div class="simulator">
+      <div class="sim-layout">
+        <div>
+          <div class="sim-canvas-wrap" style="height:320px;">
+            <canvas id="ikCanvas" width="460" height="320" style="cursor: crosshair; max-width: 100%;"></canvas>
+          </div>
+          <div class="sim-actions">
+            <button class="sim-action-btn active" id="btnElbowUp" onclick="setElbow('up')"><i class="fas fa-chevron-up"></i> Elbow-Up</button>
+            <button class="sim-action-btn" id="btnElbowDown" onclick="setElbow('down')"><i class="fas fa-chevron-down"></i> Elbow-Down</button>
+            <button class="sim-action-btn" onclick="resetTarget()"><i class="fas fa-rotate-left"></i> ریست</button>
+          </div>
+          <div class="ik-status ok" id="ikStatus">
+            <i class="fas fa-info-circle"></i>
+            <span>مختصات هدف: <strong id="targetXY">(0.87, 1.00)</strong></span>
+          </div>
+        </div>
+        <div>
+          <div class="code-box" id="ikCodeBox" style="height:380px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۲: پیاده‌سازی پایتون ═══════ -->
+  <div class="slide" data-slide="12">
+    <h2 class="slide-title">پیاده‌سازی IK در Python</h2>
+    <p class="slide-sub">همراه با NumPy برای محاسبه و ترسیم دو پیکربندی</p>
+    <div class="code-box" style="max-width:880px;">
+<span class="keyword">import</span> numpy <span class="keyword">as</span> np<br><br>
+<span class="keyword">def</span> <span class="func">ik_2R</span>(x, y, L1, L2):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;r2 = x**<span class="num">2</span> + y**<span class="num">2</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> r2 > (L1+L2)**<span class="num">2</span> <span class="keyword">or</span> r2 < (L1-L2)**<span class="num">2</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="keyword">None</span>  <span class="comment"># خارج از فضای کاری</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;D = np.clip((r2 - L1**<span class="num">2</span> - L2**<span class="num">2</span>) / (<span class="num">2</span>*L1*L2), -<span class="num">1</span>, <span class="num">1</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;solutions = []<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">for</span> th2 <span class="keyword">in</span> [np.arccos(D), -np.arccos(D)]:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;th1 = np.arctan2(y, x) - np.arctan2(L2*np.sin(th2), L1 + L2*np.cos(th2))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;solutions.append((th1, th2))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> solutions<br><br>
+<span class="comment"># تست</span><br>
+<span class="func">print</span>(np.rad2deg(ik_2R(<span class="num">0.866</span>, <span class="num">1.0</span>, <span class="num">1.0</span>, <span class="num">0.8</span>)))
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۳: مقایسه جبری و عددی ═══════ -->
+  <div class="slide" data-slide="13">
+    <h2 class="slide-title">حل جبری در برابر حل عددی</h2>
+    <p class="slide-sub">کدام روش را کجا به کار ببریم؟</p>
+    <div class="data-table">
+      <table>
+        <thead><tr><th>ویژگی</th><th>حل جبری (Closed-Form)</th><th>حل عددی (fsolve / Newton)</th></tr></thead>
+        <tbody>
+          <tr><td>سرعت</td><td>بسیار بالا (میکروثانیه)</td><td>متوسط (میلی‌ثانیه)</td></tr>
+          <tr><td>تعداد جواب</td><td>همه جواب‌ها (Up/Down)</td><td>فقط یک جواب در همسایگی حدس</td></tr>
+          <tr><td>حساسیت</td><td>پایدار — فقط شرط فضای کاری</td><td>وابسته به حدس اولیه</td></tr>
+          <tr><td>کاربرد</td><td>ربات‌های ساده، کنترل بلادرنگ</td><td>ربات‌های پیچیده با DH غیرخطی</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="max-width:850px; background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.3); border-radius:12px; padding:14px 20px; font-size:12.5px; color:#c0c8dc; line-height:1.8; margin-top:14px;">
+      <i class="fas fa-graduation-cap" style="color:var(--purple);"></i>
+      <strong>اصل مهندسی:</strong> اول ببینید حل جبری ممکن است یا نه؛ فقط در صورت غیرممکن بودن (مثل ربات‌های ۶+ درجه آزادی عمومی) به روش‌های عددی پناه ببرید.
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۴: مکانیزم چهارمیله‌ای (تصویر) ═══════ -->
+  <div class="slide" data-slide="14">
+    <h2 class="slide-title">زنجیره سینماتیکی بسته: مکانیزم چهارمیله‌ای</h2>
+    <p class="slide-sub">از زنجیره باز (ربات ۲R) به زنجیره بسته — این بار ورودی و خروجی هر دو مفصل چرخشی هستند</p>
+    <div class="img-container">
+      <img src="assets/session07-fourbar.jpg" alt="مکانیزم چهارمیله‌ای" onclick="openLightbox(this.src)">
+    </div>
+    <div class="cards-grid cols-3">
+      <div class="content-card">
+        <div class="card-icon" style="--ci:linear-gradient(135deg,var(--accent),var(--accent2));"><i class="fas fa-circle-notch"></i></div>
+        <h3>لینک ورودی (Crank)</h3>
+        <p>زاویه $\theta_2$ — توسط موتور کنترل می‌شود.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci:linear-gradient(135deg,var(--success),var(--cyan));"><i class="fas fa-arrows-left-right"></i></div>
+        <h3>لینک کوپلر (Coupler)</h3>
+        <p>لینک میانی که حرکت ورودی را به خروجی منتقل می‌کند.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci:linear-gradient(135deg,var(--purple),var(--pink));"><i class="fas fa-arrow-trend-up"></i></div>
+        <h3>لینک خروجی (Rocker)</h3>
+        <p>زاویه $\theta_4$ — متغیر وابسته که باید محاسبه شود.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۵: فرمولاسیون با اعداد مختلط ═══════ -->
+  <div class="slide" data-slide="15">
+    <h2 class="slide-title">فرمول‌بندی با اعداد مختلط</h2>
+    <p class="slide-sub">نمایش هر لینک به صورت یک بردار در صفحه مختلط — ساده‌ترین روش برای حلقه‌های بسته</p>
+    <div class="img-container" style="max-width:520px;">
+      <img src="assets/session07-complex-plane.jpg" alt="صفحه مختلط" onclick="openLightbox(this.src)" style="max-height:26vh;">
+    </div>
+    <div class="formula-box">
+      <div class="f-label">معادله بستن حلقه (Loop-Closure Equation):</div>
+      $$ L_1 + L_2 e^{i\theta_2} + L_3 e^{i\theta_3} = L_4 e^{i\theta_4} $$
+      <div class="f-label" style="margin-top:14px;">جدا کردن اجزای حقیقی و موهومی:</div>
+      $$ L_1 + L_2\cos\theta_2 + L_3\cos\theta_3 = L_4\cos\theta_4 $$
+      $$ L_2\sin\theta_2 + L_3\sin\theta_3 = L_4\sin\theta_4 $$
+    </div>
+    <div style="max-width:850px; background:rgba(0,212,170,0.08); border:1px solid rgba(0,212,170,0.3); border-radius:12px; padding:14px 20px; font-size:12.5px; color:#c0c8dc; line-height:1.8; margin-top:14px;">
+      <i class="fas fa-lightbulb" style="color:var(--success);"></i>
+      <strong>چرا اعداد مختلط؟</strong> ضرب $L\,e^{i\theta}$ همزمان طول و زاویه را کد می‌کند. جمع برداری مستقیماً از روی شکل قابل نوشتن است و محاسبات را بسیار ساده می‌کند.
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۶: حل بسته زاویه خروجی ═══════ -->
+  <div class="slide" data-slide="16">
+    <h2 class="slide-title">استخراج $\theta_4$ بر حسب $\theta_2$ (سینماتیک مستقیم)</h2>
+    <p class="slide-sub">با حذف $\theta_3$ (زاویه کوپلر) از معادلات، به یک معادله تک‌متغیره می‌رسیم</p>
+    <div class="formula-box">
+      <div class="f-label">حذف $\theta_3$ با جمع مربعات (مشابه ربات ۲R):</div>
+      $$ \cos(\theta_4 - \theta_2) = \frac{L_1^2 + L_2^2 + L_4^2 - L_3^2 - 2L_1 L_2\cos\theta_2}{2 L_1 L_4} \triangleq C $$
+      <div class="f-label" style="margin-top:14px;">دو جواب (مشابه Elbow-Up/Down):</div>
+      $$ \theta_4 = \theta_2 \pm \arccos(C) $$
+    </div>
+    <div style="max-width:850px; background:rgba(255,183,0,0.08); border:1px solid rgba(255,183,0,0.3); border-radius:12px; padding:14px 20px; font-size:12.5px; color:#c0c8dc; line-height:1.8; margin-top:14px;">
+      <i class="fas fa-triangle-exclamation" style="color:var(--accent);"></i>
+      <strong>شرط وجود:</strong> $-1 \le C \le 1$. همچنین زاویه $\theta_3$ از رابطه $\sin\theta_3$ به دست می‌آید.
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۷: سینماتیک معکوس چهارمیله‌ای ═══════ -->
+  <div class="slide" data-slide="17">
+    <h2 class="slide-title">سینماتیک معکوس چهارمیله‌ای: $\theta_2$ بر حسب $\theta_4$</h2>
+    <p class="slide-sub">معکوس رابطه قبل — این بار ورودی خروجی و برعکس می‌شود</p>
+    <div class="formula-box">
+      <div class="f-label">با تقارن معادلات و جایگزینی $L_1 \leftrightarrow L_3$ و $\theta_2 \leftrightarrow \theta_4$:</div>
+      $$ \cos(\theta_4 - \theta_2) = \frac{L_3^2 + L_4^2 + L_2^2 - L_1^2 - 2L_3 L_4\cos\theta_4}{2 L_2 L_3} \triangleq C' $$
+      <div class="f-label" style="margin-top:14px;">و در نهایت:</div>
+      $$ \theta_2 = \theta_4 \pm \arccos(C') $$
+    </div>
+    <div style="max-width:850px; background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.3); border-radius:12px; padding:14px 20px; font-size:12.5px; color:#c0c8dc; line-height:1.8; margin-top:14px;">
+      <i class="fas fa-circle-info" style="color:var(--purple);"></i>
+      <strong>نکته مهم:</strong> در مکانیزم چهارمیله‌ای، حل معکوس به اندازه حل مستقیم ساده است — این ویژگی خاص مکانیزم‌های تک‌حلقه‌ای است و در ربات‌های چندحلقه‌ای عمومی برقرار نیست.
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۸: چرا کنترل‌کننده لازم است؟ ═══════ -->
+  <div class="slide" data-slide="18">
+    <h2 class="slide-title">چرا با وجود FK فرم بسته، باز هم کنترل‌کننده لازم است؟</h2>
+    <p class="slide-sub">سینماتیک فقط هندسه را می‌گوید؛ دینامیک و اغتشاشات را نه!</p>
+    <div class="img-container">
+      <img src="assets/session07-control-loop.jpg" alt="حلقه کنترل" onclick="openLightbox(this.src)" style="max-height:32vh;">
+    </div>
+    <div class="cards-grid cols-2" style="margin-top:10px;">
+      <div class="content-card">
+        <div class="card-icon" style="--ci:linear-gradient(135deg,var(--danger),var(--accent2));"><i class="fas fa-weight-hanging"></i></div>
+        <h3>۱. دینامیک و اینرسی</h3>
+        <p>FK می‌گوید «اگر $\boldsymbol{\theta}$ بود، نوک کجاست» — اما نمی‌گوید با چه گشتاوری به $\boldsymbol{\theta}$ برسیم. جرم، اصطکاک و کوریولیس باید با کنترل‌کننده جبران شوند.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci:linear-gradient(135deg,var(--accent),var(--accent2));"><i class="fas fa-bolt"></i></div>
+        <h3>۲. اغتشاشات خارجی</h3>
+        <p>برخورد با مانع، تغییر بار، ارتعاش پایه — همه این‌ها خطا ایجاد می‌کنند. فقط حلقه بسته کنترل می‌تواند خطا را اصلاح کند.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci:linear-gradient(135deg,var(--success),var(--cyan));"><i class="fas fa-clock"></i></div>
+        <h3>۳. تأخیر و اشباع عملگر</h3>
+        <p>موتور الکتریکی نمی‌تواند بی‌نهایت سریع گشتاور بدهد. کنترل‌کننده باید محدودیت‌های عملی را لحاظ کند.</p>
+      </div>
+      <div class="content-card">
+        <div class="card-icon" style="--ci:linear-gradient(135deg,var(--purple),var(--pink));"><i class="fas fa-crosshairs"></i></div>
+        <h3>۴. عدم قطعیت پارامترها</h3>
+        <p>طول و جرم واقعی لینک‌ها همیشه با مدل ریاضی مطابقت ندارد — کنترل‌کننده این اختلاف را جبران می‌کند.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۱۹: پیاده‌سازی کد متلب چهارمیله‌ای ═══════ -->
+  <div class="slide" data-slide="19">
+    <h2 class="slide-title">کد MATLAB حل چهارمیله‌ای (FK و IK)</h2>
+    <p class="slide-sub">پیاده‌سازی روابط مختلط در یک اسکریپت فشرده</p>
+    <div class="code-box" style="max-width:880px;">
+<span class="keyword">function</span> th4 = fourbar_fk(th2, L1, L2, L3, L4)<br>
+&nbsp;&nbsp;<span class="comment">% سینماتیک مستقیم: th4 بر حسب th2</span><br>
+&nbsp;&nbsp;C = (L1^<span class="num">2</span> + L2^<span class="num">2</span> + L4^<span class="num">2</span> - L3^<span class="num">2</span> - <span class="num">2</span>*L1*L2*<span class="func">cos</span>(th2)) / (<span class="num">2</span>*L1*L4);<br>
+&nbsp;&nbsp;C = <span class="func">max</span>(<span class="func">min</span>(C,<span class="num">1</span>),-<span class="num">1</span>);<br>
+&nbsp;&nbsp;th4 = th2 + [<span class="num">1</span>;-<span class="num">1</span>]*<span class="func">acos</span>(C); <span class="comment">% دو حالت (Open / Crossed)</span><br>
+<span class="keyword">end</span><br><br>
+<span class="keyword">function</span> th2 = fourbar_ik(th4, L1, L2, L3, L4)<br>
+&nbsp;&nbsp;<span class="comment">% سینماتیک معکوس: th2 بر حسب th4</span><br>
+&nbsp;&nbsp;Cp = (L3^<span class="num">2</span> + L4^<span class="num">2</span> + L2^<span class="num">2</span> - L1^<span class="num">2</span> - <span class="num">2</span>*L3*L4*<span class="func">cos</span>(th4)) / (<span class="num">2</span>*L2*L3);<br>
+&nbsp;&nbsp;Cp = <span class="func">max</span>(<span class="func">min</span>(Cp,<span class="num">1</span>),-<span class="num">1</span>);<br>
+&nbsp;&nbsp;th2 = th4 + [<span class="num">1</span>;-<span class="num">1</span>]*<span class="func">acos</span>(Cp);<br>
+<span class="keyword">end</span>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۲۰: تمرین‌های کلاسی ═══════ -->
+  <div class="slide" data-slide="20">
+    <h2 class="slide-title">تمرین‌های کلاسی جلسه هفتم</h2>
+    <p class="slide-sub">تمرین‌های جبری، عددی، مکانیزم و پروژه‌ای</p>
+    <div class="exercise-wrap">
+      <div class="ex-section a">
+        <h4><i class="fas fa-square-root-alt"></i> الف) تمرین جبری</h4>
+        <div class="ex-item"><div class="ex-num">۱</div><div>برای $L_1 = 1.0$ و $L_2 = 0.8$، زوایای IK را برای نقاط $(0.5, 0.5)$ و $(1.2, 0.5)$ محاسبه کنید و صحت را با FK بسنجید.</div></div>
+        <div class="ex-item"><div class="ex-num">۲</div><div>نشان دهید هنگام رسیدن به مرز دایره بزرگ ($r = L_1 + L_2$)، جواب Elbow-Up و Elbow-Down یکی می‌شوند — چرا؟</div></div>
+      </div>
+      <div class="ex-section b">
+        <h4><i class="fas fa-code"></i> ب) تمرین عددی و کدنویسی</h4>
+        <div class="ex-item"><div class="ex-num">۱</div><div>تابع جبری <code>ik_2R</code> را در متلب/پایتون بنویسید و با <code>fsolve</code> برای ۱۰ نقطه مقایسه کنید.</div></div>
+        <div class="ex-item"><div class="ex-num">۲</div><div>مکانیزم چهارمیله‌ای با $L_1=1, L_2=0.6, L_3=0.9, L_4=0.7$ را در متلب مدل کنید و $\theta_4$ را برای $\theta_2 \in [0, 2\pi]$ رسم کنید.</div></div>
+      </div>
+      <div class="ex-section c">
+        <h4><i class="fas fa-microscope"></i> ج) تحلیل کنترل‌کننده</h4>
+        <div class="ex-item"><div class="ex-num">۱</div><div>چرا در ربات‌های صنعتی، حتی با داشتن حل بسته IK، از کنترل‌کننده PID یا CTC استفاده می‌شود؟ (در ۵ خط توضیح دهید)</div></div>
+      </div>
+      <div class="ex-section d">
+        <h4><i class="fas fa-star"></i> د) چالش پژوهشی ★</h4>
+        <div class="ex-item"><div class="ex-num">★</div><div>نمودار «پرش پیکربندی» را در مکانیزم چهارمیله‌ای رسم کنید: در طول یک دور کامل $\theta_2$، کجا جواب Open و Crossed جای یکدیگر را می‌گیرند و چه شرطی برای جلوگیری از این پرش وجود دارد؟</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۲۱: کوئیز ═══════ -->
+  <div class="slide" data-slide="21">
+    <h2 class="slide-title">پرسش تعاملی جلسه ۷</h2>
+    <p class="slide-sub">سنجش درک شرایط وجود جواب IK</p>
+    <div class="question-card">
+      <h3 style="font-size:16px; margin-bottom:14px; line-height:1.8;">
+        برای ربات ۲R با $L_1 = 1$ و $L_2 = 0.8$، هدف در $(2.0, 0.0)$ قرار دارد. نتیجه حل IK چیست؟
+      </h3>
+      <div class="quiz-options">
+        <button class="quiz-option" onclick="answerQuiz(this, false)"><span>الف) تنها یک جواب یکتا در $\theta_1 = 0$</span></button>
+        <button class="quiz-option" onclick="answerQuiz(this, true)"><span>ب) هیچ جوابی وجود ندارد چون $r = 2.0 > L_1 + L_2 = 1.8$</span></button>
+        <button class="quiz-option" onclick="answerQuiz(this, false)"><span>ج) دو جواب Elbow-Up و Elbow-Down با آرنج روی محور x</span></button>
+      </div>
+      <div class="quiz-result" id="quizResult"></div>
+    </div>
+  </div>
+
+  <!-- ═══════ اسلاید ۲۲: جمع‌بندی ═══════ -->
+  <div class="slide" data-slide="22">
+    <div style="width:70px; height:70px; margin:0 auto 16px; border-radius:50%; background:linear-gradient(135deg, var(--accent), var(--accent2)); display:grid; place-items:center; font-size:32px; color:#050818;">
+      <i class="fas fa-check-double"></i>
+    </div>
+    <h2 class="slide-title">جمع‌بندی: تسلط بر IK جبری و مکانیزم‌های بسته</h2>
+    <p class="slide-sub">
+      اکنون می‌توانید برای هر نقطه در فضای کاری، زوایای مفاصل را محاسبه کنید،
+      بین پیکربندی‌ها آگاهانه انتخاب نمایید، حلقه‌های بسته چهارمیله‌ای را با اعداد مختلط حل کنید
+      و بفهمید چرا سینماتیک به‌تنهایی برای کنترل کافی نیست.
+    </p>
+    <div class="summary-list" style="margin-top:14px;">
+      <div class="summary-item"><i class="fas fa-check"></i><div><strong>حل بسته ۲R:</strong> $\theta_2 = \pm\arccos(D)$، $\theta_1 = \operatorname{atan2}(y,x) - \operatorname{atan2}(k_2, k_1)$</div></div>
+      <div class="summary-item"><i class="fas fa-check"></i><div><strong>چهارمیله‌ای با اعداد مختلط:</strong> $\theta_4 = \theta_2 \pm \arccos(C)$ و برعکس $\theta_2 = \theta_4 \pm \arccos(C')$</div></div>
+      <div class="summary-item"><i class="fas fa-check"></i><div><strong>نیاز به کنترل‌کننده:</strong> جبران دینامیک، اغتشاش، تأخیر و عدم قطعیت — FK به‌تنهایی کافی نیست</div></div>
+    </div>
+    <div style="margin-top:20px; display:inline-flex; gap:16px; flex-wrap:wrap; justify-content:center;">
+      <button class="ctrl-btn" style="width:auto; padding:0 24px; border-radius:100px; background:linear-gradient(135deg, var(--accent), var(--accent2)); color:#050818; font-weight:800; font-family:'Vazirmatn';" onclick="window.location.href='../../index.html'">
+        <i class="fas fa-home" style="margin-left:6px;"></i> صفحه اصلی دوره
+      </button>
+      <button class="ctrl-btn" style="width:auto; padding:0 24px; border-radius:100px; background:rgba(0,212,170,0.15); border:1px solid var(--success); color:var(--success); font-weight:800; font-family:'Vazirmatn';" onclick="window.location.href='../session-08/index.html'">
+        <i class="fas fa-arrow-left" style="margin-left:6px;"></i> جلسه بعد (۸)
+      </button>
+    </div>
+    <div style="margin-top:24px; font-size:12px; color:#8892a8;">
+      <strong>جلسه آینده (فاز ۳):</strong> کنترل ربات ۲R در Simulink و SimMechanics — اعمال گشتاور و تحلیل پاسخ
+    </div>
+  </div>
+
+</div>
+
+<div class="nav-dots" id="navDots"></div>
+<div class="slide-counter" id="slideCounter">۱ / ۲۲</div>
+<div class="controls">
+  <button class="ctrl-btn" id="prevBtn" title="قبلی"><i class="fas fa-chevron-right"></i></button>
+  <button class="ctrl-btn" id="nextBtn" title="بعدی"><i class="fas fa-chevron-left"></i></button>
+  <button class="ctrl-btn" id="fsBtn" title="تمام‌صفحه"><i class="fas fa-expand"></i></button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═════ ناوبری ═════ */
+const slides = document.querySelectorAll('.slide');
+let currentSlide = 0;
+const totalSlides = slides.length;
+const navDots = document.getElementById('navDots');
+const toFa = n => String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+
+slides.forEach((_, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+  dot.onclick = () => goToSlide(i);
+  navDots.appendChild(dot);
+});
+
+function goToSlide(idx) {
+  if (idx < 0 || idx >= totalSlides) return;
+  slides[currentSlide].classList.remove('active');
+  currentSlide = idx;
+  slides[currentSlide].classList.add('active');
+  document.querySelectorAll('.nav-dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+  document.getElementById('progressBar').style.width = ((currentSlide + 1) / totalSlides * 100) + '%';
+  document.getElementById('slideCounter').textContent = `${toFa(currentSlide + 1)} / ${toFa(totalSlides)}`;
+  document.getElementById('prevBtn').disabled = currentSlide === 0;
+  document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+  if (currentSlide === 10) drawIK();
+}
+
+document.getElementById('nextBtn').onclick = () => goToSlide(currentSlide + 1);
+document.getElementById('prevBtn').onclick = () => goToSlide(currentSlide - 1);
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft' || e.key === ' ') { e.preventDefault(); goToSlide(currentSlide + 1); }
+  if (e.key === 'ArrowRight') { e.preventDefault(); goToSlide(currentSlide - 1); }
+  if (e.key === 'Escape') closeLightbox(null, true);
+});
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+document.getElementById('fsBtn').onclick = () => {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+};
+
+/* ═════ ذرات ═════ */
+const particlesWrap = document.getElementById('particles');
+const colors = ['#ffb700', '#00d4aa', '#a855f7', '#06b6d4', '#ff6b35'];
+for (let i = 0; i < 30; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  p.style.left = Math.random() * 100 + '%';
+  p.style.animationDuration = (12 + Math.random() * 18) + 's';
+  p.style.animationDelay = (Math.random() * 20) + 's';
+  p.style.background = colors[Math.floor(Math.random() * colors.length)];
+  p.style.boxShadow = `0 0 8px ${p.style.background}`;
+  p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+  particlesWrap.appendChild(p);
+}
+
+/* ═════ لایت‌باکس ═════ */
+function openLightbox(src) {
+  const lb = document.getElementById('lightbox');
+  lb.querySelector('img').src = src;
+  lb.classList.add('open');
+}
+function closeLightbox(e, force) {
+  if (force || e.target.classList.contains('lightbox') || e.target.closest('.close-btn')) {
+    document.getElementById('lightbox').classList.remove('open');
+  }
+}
+
+/* ═════ شبیه‌ساز IK ═════ */
+const cvs = document.getElementById('ikCanvas');
+const ctx = cvs.getContext('2d');
+const L1 = 90, L2 = 75;
+let targetX = 0.87 * 60;
+let targetY = 1.0 * 60;
+let elbowMode = 'up';
+const scale = 60;
+let originX = 100, originY = cvs.height - 30;
+
+function setElbow(mode) {
+  elbowMode = mode;
+  document.getElementById('btnElbowUp').classList.toggle('active', mode === 'up');
+  document.getElementById('btnElbowDown').classList.toggle('active', mode === 'down');
+  drawIK();
+}
+function resetTarget() {
+  targetX = 0.87 * scale;
+  targetY = 1.0 * scale;
+  drawIK();
+  showToast('هدف بازنشانی شد');
+}
+cvs.addEventListener('click', (e) => {
+  const rect = cvs.getBoundingClientRect();
+  const sx = (e.clientX - rect.left) * (cvs.width / rect.width);
+  const sy = (e.clientY - rect.top) * (cvs.height / rect.height);
+  targetX = sx - originX;
+  targetY = -(sy - originY);
+  drawIK();
+});
+
+function ikSolve(x, y, L1m, L2m) {
+  const r2 = x*x + y*y;
+  if (r2 > (L1m + L2m)**2 || r2 < (L1m - L2m)**2) return null;
+  const D = Math.max(-1, Math.min(1, (r2 - L1m*L1m - L2m*L2m) / (2*L1m*L2m)));
+  const th2a = Math.acos(D);
+  const th2b = -Math.acos(D);
+  const mkTh1 = (th2) => Math.atan2(y, x) - Math.atan2(L2m*Math.sin(th2), L1m + L2m*Math.cos(th2));
+  return {
+    up: { th1: mkTh1(th2a), th2: th2a },
+    down: { th1: mkTh1(th2b), th2: th2b }
+  };
+}
+
+function drawIK() {
+  ctx.clearRect(0, 0, cvs.width, cvs.height);
+  const L1m = L1 / scale, L2m = L2 / scale;
+  const xm = targetX / scale, ym = targetY / scale;
+  const sol = ikSolve(xm, ym, L1m, L2m);
+  const statusEl = document.getElementById('ikStatus');
+  const xyEl = document.getElementById('targetXY');
+
+  ctx.fillStyle = 'rgba(255,255,255,0.05)';
+  ctx.fillRect(0, originY, cvs.width, cvs.height - originY);
+  ctx.strokeStyle = 'rgba(255,183,0,0.12)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= cvs.width; i += scale/2) {
+    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, cvs.height); ctx.stroke();
+  }
+  for (let j = 0; j <= cvs.height; j += scale/2) {
+    ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(cvs.width, j); ctx.stroke();
+  }
+
+  ctx.beginPath();
+  ctx.arc(originX + targetX, originY - targetY, 6, 0, Math.PI*2);
+  ctx.fillStyle = '#ff4757';
+  ctx.shadowColor = '#ff4757'; ctx.shadowBlur = 15;
+  ctx.fill(); ctx.shadowBlur = 0;
+
+  if (!sol) {
+    statusEl.className = 'ik-status err';
+    statusEl.innerHTML = `<i class="fas fa-times-circle"></i><span>هدف در (${xm.toFixed(2)}, ${ym.toFixed(2)}) خارج از فضای کاری است — دسترسی ناممکن.</span>`;
+    xyEl.textContent = `(${xm.toFixed(2)}, ${ym.toFixed(2)})`;
+    document.getElementById('ikCodeBox').innerHTML = `<span class="comment">// خارج از فضای کاری — حل IK ممکن نیست</span><br><span class="keyword">return</span> <span class="keyword">null</span>`;
+    return;
+  }
+
+  const cfg = sol[elbowMode];
+  const th1 = cfg.th1, th2 = cfg.th2;
+  const j1x = originX + L1 * Math.cos(th1);
+  const j1y = originY - L1 * Math.sin(th1);
+  const j2x = j1x + L2 * Math.cos(th1 + th2);
+  const j2y = j1y - L2 * Math.sin(th1 + th2);
+
+  ctx.beginPath(); ctx.moveTo(originX, originY); ctx.lineTo(j1x, j1y);
+  ctx.strokeStyle = '#ffb700'; ctx.lineWidth = 9; ctx.lineCap = 'round';
+  ctx.shadowColor = '#ffb700'; ctx.shadowBlur = 12;
+  ctx.stroke(); ctx.shadowBlur = 0;
+
+  ctx.beginPath(); ctx.moveTo(j1x, j1y); ctx.lineTo(j2x, j2y);
+  ctx.strokeStyle = '#00d4aa'; ctx.lineWidth = 7;
+  ctx.shadowColor = '#00d4aa'; ctx.shadowBlur = 10;
+  ctx.stroke(); ctx.shadowBlur = 0;
+
+  ctx.fillStyle = '#050818'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+  [[originX, originY, 10], [j1x, j1y, 8], [j2x, j2y, 6]].forEach(p => {
+    ctx.beginPath(); ctx.arc(p[0], p[1], p[2], 0, Math.PI*2); ctx.fill(); ctx.stroke();
+  });
+
+  statusEl.className = 'ik-status ok';
+  const th1d = (th1*180/Math.PI).toFixed(1);
+  const th2d = (th2*180/Math.PI).toFixed(1);
+  statusEl.innerHTML = `<i class="fas fa-check-circle"></i><span>هدف: <strong>(${xm.toFixed(2)}, ${ym.toFixed(2)})</strong> — θ₁ = ${th1d}° , θ₂ = ${th2d}°</span>`;
+  xyEl.textContent = `(${xm.toFixed(2)}, ${ym.toFixed(2)})`;
+
+  const modeText = elbowMode === 'up' ? 'Elbow-Up' : 'Elbow-Down';
+  document.getElementById('ikCodeBox').innerHTML =
+    `<span class="comment">// حالت: ${modeText}</span>\n` +
+    `<span class="comment">// ورودی: x=${xm.toFixed(3)}, y=${ym.toFixed(3)}</span>\n\n` +
+    `r2 = ${(xm*xm+ym*ym).toFixed(4)};\n` +
+    `D  = ${(Math.max(-1,Math.min(1,(xm*xm+ym*ym-L1m*L1m-L2m*L2m)/(2*L1m*L2m)))).toFixed(4)};\n\n` +
+    `th2 = ${(th2*180/Math.PI).toFixed(2)}°;\n` +
+    `th1 = ${(th1*180/Math.PI).toFixed(2)}°;\n\n` +
+    `<span class="comment">// Forward check:</span>\n` +
+    `x_end = ${(xm).toFixed(4)};\n` +
+    `y_end = ${(ym).toFixed(4)};`;
+}
+
+/* ═════ کوئیز ═════ */
+function answerQuiz(btn, isCorrect) {
+  const res = document.getElementById('quizResult');
+  document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
+  if (isCorrect) {
+    btn.classList.add('correct');
+    res.className = 'quiz-result show';
+    res.style.background = 'rgba(0,212,170,0.15)';
+    res.style.color = '#00d4aa';
+    res.innerHTML = '<i class="fas fa-check-circle"></i> کاملاً درست است! چون فاصله هدف از مبدأ (۲.۰) از حداکثر دسترسی ($L_1+L_2=1.8$) بیشتر است، $D > 1$ می‌شود و $\\arccos$ تعریف نمی‌شود.';
+  } else {
+    btn.classList.add('wrong');
+    res.className = 'quiz-result show';
+    res.style.background = 'rgba(255,71,87,0.15)';
+    res.style.color = '#ff4757';
+    res.innerHTML = '<i class="fas fa-times-circle"></i> نادرست! گزینه ب صحیح است — هدف خارج از فضای کاری است.';
+  }
+}
+
+/* شروع */
+goToSlide(0);
+setTimeout(() => drawIK(), 100);
+</script>
+</body>
+</html>
