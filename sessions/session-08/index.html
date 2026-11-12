@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جلسه ۸ — دینامیک لاگرانژ، Simscape Multibody و کنترل آونگ معکوس و ربات ۲R | دکتر مسعود گوهری‌منش</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../shared/lecture.css">
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$']],processEscapes:true},svg:{fontCache:'global'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+<style>
+:root{--accent:#ffb700;--accent2:#ff6b35;--success:#00d4aa;--danger:#ff4757;--purple:#a855f7;--pink:#ec4899;--cyan:#06b6d4;--dark:#050818;--card:rgba(255,255,255,.05);--border:rgba(255,255,255,.1)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;font-family:'Vazirmatn',sans-serif;background:var(--dark);color:#e8ecf5}
+.bg-wrap{position:fixed;inset:0;z-index:-2;background:radial-gradient(ellipse at top,#0a1030,#050818 60%);overflow:hidden}
+.bubble{position:absolute;border-radius:50%;filter:blur(80px);opacity:.3;animation:float 22s infinite ease-in-out}
+.b1{width:500px;height:500px;background:#ffb700;top:-10%;right:-8%}.b2{width:440px;height:440px;background:#00d4aa;bottom:-15%;left:-8%;animation-delay:-7s}.b3{width:360px;height:360px;background:#a855f7;top:35%;left:40%;animation-delay:-14s;opacity:.2}
+@keyframes float{0%,100%{transform:translate(0,0)}33%{transform:translate(60px,-50px) scale(1.1)}66%{transform:translate(-40px,40px)}}
+.top-header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:10px 20px;background:rgba(5,8,24,.75);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.header-brand{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;color:#8892a8}.header-brand i{color:var(--accent)}
+.header-sec{font-size:11px;color:var(--accent);background:rgba(255,183,0,.08);border:1px solid rgba(255,183,0,.25);padding:4px 12px;border-radius:100px}
+.sig{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:105;display:flex;align-items:center;gap:8px;padding:6px 16px;background:rgba(5,8,24,.7);border:1px solid rgba(255,183,0,.2);border-radius:100px;pointer-events:none}
+.sig b{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:11px;color:#050818}
+.sig div{display:flex;flex-direction:column;line-height:1.2}.sig strong{font-size:10.5px;color:var(--accent)}.sig span{font-size:8.5px;color:#8892a8}
+.progress-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:110;transition:width .4s;box-shadow:0 0 12px var(--accent)}
+.controls{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:90;display:flex;gap:8px;padding:8px 12px;background:rgba(5,8,24,.75);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:100px}
+.ctrl-btn{width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,.06);color:#e8ecf5;cursor:pointer;font-size:13px}
+.ctrl-btn:hover{background:rgba(255,183,0,.2);color:var(--accent)}.ctrl-btn:disabled{opacity:.3}
+.nav-dots{position:fixed;left:16px;top:50%;transform:translateY(-50%);z-index:90;display:flex;flex-direction:column;gap:6px}
+.nav-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.15);cursor:pointer;transition:.3s}.nav-dot.active{background:var(--accent);box-shadow:0 0 12px var(--accent);transform:scale(1.4)}
+.slide-counter{position:fixed;bottom:20px;right:20px;z-index:90;font-size:12px;color:#8892a8;background:rgba(5,8,24,.7);padding:6px 14px;border-radius:100px}
+.slides-container{position:relative;width:100vw;height:100vh;overflow:hidden}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:78px 48px 80px;opacity:0;visibility:hidden;transition:opacity .5s;overflow-y:auto}
+.slide>*:first-child{margin-top:auto}.slide>*:last-child{margin-bottom:auto}
+.slide.active{opacity:1;visibility:visible}.slide.active>*{animation:slideIn .6s ease backwards}
+@keyframes slideIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+.kicker{display:inline-flex;gap:8px;align-items:center;padding:5px 14px;background:rgba(255,183,0,.08);border:1px solid rgba(255,183,0,.25);border-radius:100px;font-size:11.5px;color:var(--accent);margin-bottom:10px}
+.slide-title{font-size:clamp(21px,2.8vw,30px);font-weight:800;margin-bottom:8px;text-align:center;background:linear-gradient(135deg,#fff,var(--accent));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1.5}
+.slide-sub{font-size:clamp(12px,1.35vw,14px);color:#8892a8;text-align:center;margin-bottom:16px;max-width:900px;line-height:1.9}
+.img-container{width:100%;max-width:960px;display:flex;justify-content:center;margin-bottom:14px}
+.img-container img{max-width:100%;max-height:32vh;object-fit:contain;border-radius:16px;border:1px solid var(--border);box-shadow:0 12px 40px rgba(0,0,0,.6);cursor:zoom-in}
+.lightbox{position:fixed;inset:0;z-index:999;background:rgba(5,8,24,.95);display:none;align-items:center;justify-content:center}.lightbox.open{display:flex}
+.lightbox img{max-width:95vw;max-height:90vh;border-radius:12px;border:1px solid var(--accent)}
+.cards-grid{display:grid;gap:12px;width:100%;max-width:1000px}.cols-2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}.cols-3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.cols-4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.content-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;transition:.3s}.content-card:hover{border-color:rgba(255,183,0,.5)}
+.card-icon{width:40px;height:40px;border-radius:12px;background:var(--ci,linear-gradient(135deg,var(--accent),var(--accent2)));display:grid;place-items:center;font-size:16px;color:#050818;margin-bottom:9px}
+.content-card h3{font-size:14px;font-weight:700;margin-bottom:6px}.content-card p,.content-card li{font-size:12.3px;color:#b0b8cc;line-height:1.9}
+.content-card ul,.content-card ol{padding-right:18px}
+.code-box{background:#0b0f1d;border-radius:12px;padding:14px 16px;font-family:'Consolas','Courier New',monospace;font-size:11.6px;color:#d4d4d4;direction:ltr;text-align:left;overflow:auto;border:1px solid var(--border);line-height:1.6;white-space:pre;width:100%;max-width:960px;max-height:56vh;margin:0}
+.code-head{width:100%;max-width:960px;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.04);border:1px solid var(--border);border-bottom:none;border-radius:12px 12px 0 0;padding:6px 12px;font-size:11.5px;color:#8892a8;direction:ltr}
+.code-head+.code-box{border-radius:0 0 12px 12px}
+.copy-btn{background:rgba(255,183,0,.12);border:1px solid rgba(255,183,0,.35);color:var(--accent);border-radius:8px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit}
+.formula-box{width:100%;max-width:960px;background:rgba(255,183,0,.05);border:1px solid rgba(255,183,0,.22);border-radius:16px;padding:12px 20px;margin:8px 0;direction:ltr;text-align:center;overflow-x:auto}
+.f-label{direction:rtl;text-align:right;font-size:12px;color:var(--accent);font-weight:700;margin-bottom:4px}
+.note{max-width:960px;width:100%;border-radius:12px;padding:11px 16px;font-size:12.4px;color:#c0c8dc;line-height:1.9;margin-top:10px;background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.3)}
+.note.warn{background:rgba(255,183,0,.07);border-color:rgba(255,183,0,.3)}.note.bad{background:rgba(255,71,87,.07);border-color:rgba(255,71,87,.3)}
+.note b{color:#fff}
+.deriv{width:100%;max-width:1000px;display:grid;gap:10px}
+.dstep{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 14px}
+.dnum{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#050818;font-weight:800;display:grid;place-items:center;font-size:13px}
+.dbody h4{font-size:13px;color:var(--accent);margin-bottom:2px}.dbody p{font-size:12.2px;color:#b8c0d4;line-height:1.85}
+.dbody .eq{direction:ltr;text-align:center;overflow-x:auto;padding:2px 0}
+.split{display:grid;grid-template-columns:minmax(260px,.85fr) 1.6fr;gap:16px;width:100%;max-width:1040px;align-items:start}
+.diagram{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:16px;padding:10px}
+.diagram svg{width:100%;height:auto;display:block}
+.simulator{width:100%;max-width:1100px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:14px}
+.sim-layout{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;align-items:start}
+.sim-canvas-wrap{background:rgba(0,0,0,.4);border-radius:16px;overflow:hidden;border:1px solid var(--border)}.sim-canvas-wrap canvas{width:100%;display:block}
+.sim-controls{display:flex;flex-direction:column;gap:7px}
+.sim-control label{display:flex;justify-content:space-between;font-size:11.8px;color:#8892a8;margin-bottom:2px}.sim-control label strong{color:var(--accent);direction:ltr}
+.sim-control input{width:100%;accent-color:var(--accent)}
+.sim-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.btn{padding:6px 11px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:#d0d8e8;cursor:pointer;font-family:inherit;font-size:12px}
+.btn:hover,.btn.active{background:rgba(255,183,0,.18);border-color:var(--accent);color:var(--accent)}
+.stepbox{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.35);border-radius:12px;padding:9px 13px;font-size:12px;line-height:1.95;color:#d8d0ee;margin-bottom:8px;min-height:96px}
+.stepbox b{color:#c99bff}
+.readouts{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:9px}
+.ro{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;padding:5px;text-align:center;font-size:10.8px;color:#8892a8}.ro b{display:block;font-size:13px;color:var(--accent);direction:ltr}
+.ok{color:var(--success)!important}.no{color:var(--danger)!important}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:#a8b0c4;margin-top:6px}.legend span{display:inline-flex;align-items:center;gap:5px}.legend i{width:14px;height:4px;border-radius:2px;display:inline-block}
+.data-table{width:100%;max-width:1000px;border-collapse:collapse;background:var(--card);border-radius:14px;overflow:hidden;border:1px solid var(--border);font-size:12.2px}
+.data-table th{background:rgba(255,183,0,.12);color:var(--accent);padding:8px;font-weight:700}.data-table td{padding:8px 10px;border-bottom:1px solid var(--border);color:#c0c8dc;line-height:1.75;text-align:right}
+.data-table td:first-child{text-align:center;color:var(--accent);font-weight:700}
+.data-table code,.note code,.content-card code,.dbody code{direction:ltr;display:inline-block;background:rgba(255,255,255,.07);border-radius:5px;padding:0 5px;font-size:11.5px;color:#ffd27a}
+.flow{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;max-width:1000px;margin:6px 0 12px}
+.flow .fb{padding:7px 12px;border-radius:10px;background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.4);font-size:11.8px;color:#bdeff8}
+.flow .fa-arrow-left{color:#8892a8;font-size:11px}
+.exercise-wrap{width:100%;max-width:960px}
+.ex-section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 18px;margin-bottom:10px}.ex-section h4{font-size:13.5px;margin-bottom:6px;color:var(--accent)}
+.ex-item{display:flex;gap:10px;padding:5px 0;font-size:12.4px;color:#c0c8dc;line-height:1.9}.ex-num{width:22px;height:22px;flex-shrink:0;border-radius:50%;background:rgba(255,255,255,.08);display:grid;place-items:center;font-size:11px;color:var(--accent);margin-top:3px}
+.question-card{max-width:760px;width:100%;background:var(--card);border:2px solid rgba(255,183,0,.3);border-radius:20px;padding:22px}
+.question-card h3{font-size:14.5px;line-height:2;text-align:center}
+.qnav{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px;color:#8892a8}
+.quiz-option{display:block;width:100%;text-align:right;margin-top:9px;padding:11px 15px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;cursor:pointer;font-family:inherit;font-size:13px;color:#e8ecf5}
+.quiz-option:hover:not(:disabled){border-color:var(--accent)}
+.quiz-option.correct{background:rgba(0,212,170,.15);border-color:var(--success)}.quiz-option.wrong{background:rgba(255,71,87,.15);border-color:var(--danger)}
+.summary-item{display:flex;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:9px 14px;margin-bottom:7px;font-size:12.5px;line-height:1.9;color:#c0c8dc}.summary-item i{color:var(--success);margin-top:6px}
+.toc{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;width:100%;max-width:1040px}
+.toc a{display:block;text-decoration:none;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;color:#d0d8e8;font-size:12.3px;line-height:1.8;cursor:pointer;transition:.25s}
+.toc a:hover{border-color:var(--accent);transform:translateY(-3px)}
+.toc a b{display:block;color:var(--accent);font-size:20px;font-weight:900}
+@media(max-width:900px){.sim-layout,.split{grid-template-columns:1fr}.readouts{grid-template-columns:repeat(2,1fr)}.slide{padding:78px 18px 84px}}
+</style>
+</head>
+<body>
+<div class="bg-wrap"><div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div></div>
+<div class="progress-bar" id="progressBar"></div>
+<div class="sig"><b>MG</b><div><strong>دکتر مسعود گوهری‌منش</strong><span>دانشیار — دانشگاه تربت حیدریه</span></div></div>
+<header class="top-header"><div class="header-brand"><i class="fas fa-robot"></i><span>جلسه ۸ — دینامیک و کنترل آونگ معکوس و ربات ۲R</span></div><div class="header-sec" id="secName">مقدمه</div></header>
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('open')"><img src="" alt=""></div>
+
+<div class="slides-container">
+
+<!-- ═════════ ۱ کاور ═════════ -->
+<div class="slide" data-sec="مقدمه">
+  <div class="kicker"><i class="fas fa-graduation-cap"></i> جلسه ۸ از ۱۶ — فاز ۳: سینماتیک معکوس و دینامیک</div>
+  <div class="img-container"><img src="images/s08-cover.png" alt="آونگ معکوس و ربات دولینکی" onclick="lb(this.src)" onerror="this.src='images/industrial-robot.png';this.onerror=()=>this.parentElement.style.display='none'"></div>
+  <h1 class="slide-title">از لاگرانژ تا گشتاور:<br>مدل‌سازی سه‌مسیره و کنترل آونگ معکوس و ربات دولینکی</h1>
+  <p class="slide-sub">استخراج دستیِ قدم‌به‌قدم معادلات حرکت ← پیاده‌سازی نمادین و عددی در MATLAB ← ساخت مدل در Simscape Multibody (SimMechanics) ← انتقال مدل از SolidWorks ← مقایسه‌ی کمّی سه مدل ← طراحی و اعمال PID، PD+G و CTC روی مدل Simscape</p>
+</div>
+
+<!-- ═════════ ۲ نقشه راه ═════════ -->
+<div class="slide" data-sec="مقدمه">
+  <h2 class="slide-title">نقشه‌ی راه جلسه</h2>
+  <p class="slide-sub">جلسه ۷ به «کجا برویم؟» پاسخ داد ($q_d$ از IK). امروز می‌پرسیم «با چه گشتاوری؟». هر مدل را از سه مسیر مستقل می‌سازیم و فقط وقتی به کنترل می‌رسیم که هر سه با هم بخوانند.</p>
+  <div class="toc">
+    <a onclick="goSec('lagrange')"><b>۱</b>روش لاگرانژ:<br>دستورالعمل ۶ گامی</a>
+    <a onclick="goSec('pend')"><b>۲</b>آونگ معکوس:<br>استخراج، خطی‌سازی، شرط پایداری PID</a>
+    <a onclick="goSec('r2')"><b>۳</b>ربات ۲R:<br>انرژی‌ها، $M$، $C$ کریستوفل، $G$</a>
+    <a onclick="goSec('matlab')"><b>۴</b>MATLAB:<br>استخراج نمادین و شبیه‌سازی ode45</a>
+    <a onclick="goSec('sm')"><b>۵</b>Simscape دستی:<br>بلوک‌ها، قاب‌ها، جرم و اینرسی</a>
+    <a onclick="goSec('sw')"><b>۶</b>SolidWorks → Simscape:<br>Multibody Link و smimport</a>
+    <a onclick="goSec('cmp')"><b>۷</b>مقایسه‌ی سه مسیر:<br>پروتکل، معیارها، منابع اختلاف</a>
+    <a onclick="goSec('ctrl')"><b>۸</b>کنترل در Simscape:<br>PID آونگ؛ PD، PD+G و CTC برای ۲R</a>
+  </div>
+  <div class="note"><i class="fas fa-lightbulb" style="color:var(--success)"></i> <b>چرا سه مسیر؟</b> در مهندسی، مدل را با مدل مستقل دیگری «اعتبارسنجی» می‌کنیم. اگر معادلات دستی، Simscape دستی و مدل CAD با پارامترهای یکسان پاسخ یکسان بدهند، می‌توانیم به کنترل‌کننده‌ای که روی آن مدل طراحی می‌شود اعتماد کنیم.</div>
+</div>
+
+<!-- ═════════ ۳ لاگرانژ ═════════ -->
+<div class="slide" data-sec="روش لاگرانژ" data-id="lagrange">
+  <h2 class="slide-title">روش لاگرانژ — دستورالعمل ۶ گامی</h2>
+  <p class="slide-sub">همین ۶ گام را عیناً برای آونگ (۱ درجه آزادی) و ربات ۲R (۲ درجه آزادی) اجرا می‌کنیم و بعد همین ۶ گام را در MATLAB نمادین می‌نویسیم</p>
+  <div class="deriv">
+    <div class="dstep"><div class="dnum">۱</div><div class="dbody"><h4>مختصات تعمیم‌یافته</h4><p>بردار $q=[q_1,\dots,q_n]^T$ با $n$ برابر درجه‌ی آزادی. برای ربات سری: زوایای مفاصل (نسبی، همان چیزی که انکودر و Revolute Joint در Simscape می‌خوانند).</p></div></div>
+    <div class="dstep"><div class="dnum">۲</div><div class="dbody"><h4>موقعیت و سرعت مرکز جرم هر جسم</h4><p>از سینماتیک مستقیم: $p_{c_i}(q)$، سپس $v_{c_i}=J_{v_i}(q)\,\dot q$ با $J_{v_i}=\partial p_{c_i}/\partial q$، و سرعت زاویه‌ای $\omega_i$.</p></div></div>
+    <div class="dstep"><div class="dnum">۳</div><div class="dbody"><h4>انرژی جنبشی و پتانسیل</h4><div class="eq">$$T=\sum_i\Big(\tfrac12 m_i\,v_{c_i}^Tv_{c_i}+\tfrac12 I_{c_i}\,\omega_i^2\Big)=\tfrac12\,\dot q^TM(q)\,\dot q,\qquad V=\sum_i m_i\,g\,y_{c_i}$$</div><p>$I_{c_i}$ ممان اینرسی حول <b>مرکز جرم</b> و حول محور عمود بر صفحه حرکت است (همان $I_{zz}$ در Simscape).</p></div></div>
+    <div class="dstep"><div class="dnum">۴</div><div class="dbody"><h4>لاگرانژین و معادلات اویلر–لاگرانژ</h4><div class="eq">$$L=T-V,\qquad \frac{d}{dt}\Big(\frac{\partial L}{\partial \dot q_i}\Big)-\frac{\partial L}{\partial q_i}=\tau_i-b_i\dot q_i\quad(i=1..n)$$</div></div></div>
+    <div class="dstep"><div class="dnum">۵</div><div class="dbody"><h4>قالب ماتریسی استاندارد</h4><div class="eq">$$M(q)\ddot q+C(q,\dot q)\dot q+G(q)=\tau,\quad M=\frac{\partial^2T}{\partial\dot q^2},\quad G=\frac{\partial V}{\partial q},\quad C_{kj}=\sum_{i}\underbrace{\tfrac12\Big(\frac{\partial M_{kj}}{\partial q_i}+\frac{\partial M_{ki}}{\partial q_j}-\frac{\partial M_{ij}}{\partial q_k}\Big)}_{c_{ijk}\ \text{(Christoffel)}}\dot q_i$$</div></div></div>
+    <div class="dstep"><div class="dnum">۶</div><div class="dbody"><h4>راستی‌آزمایی</h4><p>(الف) $M$ متقارن و مثبت‌معین؛ (ب) $\dot M-2C$ پادمتقارن؛ (ج) بدون گشتاور و اصطکاک $E=T+V$ ثابت می‌ماند؛ (د) پاسخ با مدل مستقل (Simscape) یکی است.</p></div></div>
+  </div>
+</div>
+
+<!-- ═════════ ۴ آونگ: مدل و استخراج ═════════ -->
+<div class="slide" data-sec="آونگ معکوس" data-id="pend">
+  <h2 class="slide-title">آونگ معکوس — استخراج معادله‌ی حرکت</h2>
+  <p class="slide-sub">میله‌ی صلب با جرم $m$، فاصله‌ی مرکز جرم $l_c$ از مفصل، اینرسی $I_c$ حول مرکز جرم، اصطکاک لزج $b$، گشتاور موتور $\tau$ و اغتشاش $d$. زاویه‌ی $\theta$ از قائمِ رو به بالا و <b>پادساعتگرد مثبت</b> است (هم‌جهت با محور $+Z$ مفصل در Simscape).</p>
+  <div class="split">
+    <div class="diagram">
+      <svg viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+        <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#ff4757"/></marker>
+        <marker id="ap" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#a855f7"/></marker></defs>
+        <line x1="40" y1="232" x2="220" y2="232" stroke="#8892a8" stroke-width="2"/>
+        <path d="M60,232 l-10,12 M80,232 l-10,12 M100,232 l-10,12 M120,232 l-10,12 M140,232 l-10,12 M160,232 l-10,12 M180,232 l-10,12 M200,232 l-10,12" stroke="#55607a"/>
+        <line x1="130" y1="220" x2="130" y2="55" stroke="rgba(255,255,255,.35)" stroke-dasharray="5 5"/>
+        <line x1="130" y1="220" x2="78.7" y2="79" stroke="#ffb700" stroke-width="9" stroke-linecap="round"/>
+        <circle cx="104.4" cy="149.5" r="6" fill="#00d4aa"/>
+        <path d="M130,170 A50,50 0 0 0 112.9,173" fill="none" stroke="#fff" stroke-width="1.5"/>
+        <text x="108" y="160" fill="#fff" font-size="14" font-style="italic">θ</text>
+        <line x1="104.4" y1="149.5" x2="104.4" y2="196" stroke="#ff4757" stroke-width="2" marker-end="url(#ar)"/>
+        <text x="66" y="200" fill="#ff4757" font-size="12">mg</text>
+        <text x="114" y="146" fill="#00d4aa" font-size="12">C</text><text x="58" y="120" fill="#ffb700" font-size="11">l , lc</text>
+        <path d="M152,214 A24,24 0 0 0 130,196" fill="none" stroke="#a855f7" stroke-width="2.5" marker-end="url(#ap)"/>
+        <text x="156" y="200" fill="#a855f7" font-size="13" font-style="italic">τ</text>
+        <circle cx="130" cy="220" r="7" fill="#050818" stroke="#fff" stroke-width="2"/>
+        <line x1="190" y1="120" x2="230" y2="120" stroke="#8892a8" marker-end="url(#ar)"/><text x="232" y="124" fill="#8892a8" font-size="11">x</text>
+        <line x1="190" y1="120" x2="190" y2="80" stroke="#8892a8" marker-end="url(#ar)"/><text x="186" y="74" fill="#8892a8" font-size="11">y</text>
+      </svg>
+    </div>
+    <div class="deriv">
+      <div class="dstep"><div class="dnum">۱</div><div class="dbody"><h4>مختصات و سرعت مرکز جرم</h4><div class="eq">$$x_c=-l_c\sin\theta,\quad y_c=l_c\cos\theta\ \Rightarrow\ v_c^2=\dot x_c^2+\dot y_c^2=l_c^2\dot\theta^2$$</div></div></div>
+      <div class="dstep"><div class="dnum">۲</div><div class="dbody"><h4>انرژی‌ها</h4><div class="eq">$$T=\tfrac12 m l_c^2\dot\theta^2+\tfrac12 I_c\dot\theta^2=\tfrac12 J\dot\theta^2,\quad J\equiv I_c+ml_c^2\ \text{(اشتاینر)},\qquad V=mgl_c\cos\theta$$</div></div></div>
+      <div class="dstep"><div class="dnum">۳</div><div class="dbody"><h4>مشتقات لاگرانژین $L=\tfrac12J\dot\theta^2-mgl_c\cos\theta$</h4><div class="eq">$$\frac{\partial L}{\partial\dot\theta}=J\dot\theta,\quad \frac{d}{dt}\frac{\partial L}{\partial\dot\theta}=J\ddot\theta,\quad \frac{\partial L}{\partial\theta}=mgl_c\sin\theta$$</div></div></div>
+      <div class="dstep"><div class="dnum">۴</div><div class="dbody"><h4>معادله‌ی غیرخطی نهایی</h4><div class="eq">$$\boxed{J\ddot\theta=mgl_c\sin\theta-b\dot\theta+\tau+d}$$</div><p>علامت مثبتِ جمله‌ی گرانش یعنی گرانش آونگ را از قائم دور می‌کند. اگر $\theta$ را ساعتگرد مثبت بگیریم معادله تغییر نمی‌کند، چون $\sin$ فرد است. فقط علامت $\tau$ با جهت محور مفصل باید هم‌خوان باشد.</p></div></div>
+    </div>
+  </div>
+  <table class="data-table" style="margin-top:12px"><thead><tr><th>حالت خاص</th><th>$l_c$</th><th>$I_c$</th><th>$J$</th><th>$mgl_c$ (برای $m=1,\ l=1$)</th><th>قطب ناپایدار $\sqrt{mgl_c/J}$</th></tr></thead><tbody>
+    <tr><td>جرم نقطه‌ای سر میله‌ی بی‌جرم</td><td>$l$</td><td>$0$</td><td>$ml^2$</td><td>$9.81$ N·m</td><td>$3.13$ rad/s</td></tr>
+    <tr><td>میله‌ی یکنواخت باریک</td><td>$l/2$</td><td>$ml^2/12$</td><td>$ml^2/3$</td><td>$4.905$ N·m</td><td>$3.84$ rad/s</td></tr>
+    <tr><td>مکعب‌مستطیل $l\times w$ (Brick Solid)</td><td>$l/2$</td><td>$m(l^2+w^2)/12$</td><td>$m(4l^2+w^2)/12$</td><td>$4.905$ N·m</td><td>کمی کمتر از $3.84$</td></tr>
+  </tbody></table>
+</div>
+
+<!-- ═════════ ۵ آونگ: خطی‌سازی و PID ═════════ -->
+<div class="slide" data-sec="آونگ معکوس">
+  <h2 class="slide-title">آونگ معکوس — خطی‌سازی، تابع تبدیل و شرط پایداری PID</h2>
+  <p class="slide-sub">نقاط تعادل: $\theta=0$ (ناپایدار) و $\theta=\pi$ (پایدار). حول $\theta=0$ از $\sin\theta\approx\theta$ استفاده می‌کنیم.</p>
+  <div class="deriv">
+    <div class="dstep"><div class="dnum">۱</div><div class="dbody"><h4>مدل خطی و تابع تبدیل</h4><div class="eq">$$J\ddot\theta+b\dot\theta-mgl_c\,\theta=\tau+d\quad\Rightarrow\quad P(s)=\frac{\Theta(s)}{T(s)}=\frac{1}{Js^2+bs-mgl_c},\qquad s_{1,2}=\frac{-b\pm\sqrt{b^2+4Jmgl_c}}{2J}$$</div><p>همیشه یک قطب در نیم‌صفحه‌ی راست هست، پس بدون فیدبک آونگ می‌افتد. این را بعداً با <code>linearize</code> روی مدل Simscape هم می‌سنجیم.</p></div></div>
+    <div class="dstep"><div class="dnum">۲</div><div class="dbody"><h4>قانون PID برای تنظیم ($\theta_d=0$، $e=-\theta$)</h4><div class="eq">$$\tau=-K_p\theta-K_i\!\int_0^t\!\theta\,dt-K_d\dot\theta\ \Rightarrow\ \underbrace{Js^3+(b+K_d)s^2+(K_p-mgl_c)s+K_i}_{\Delta(s)}=0$$</div></div></div>
+    <div class="dstep"><div class="dnum">۳</div><div class="dbody"><h4>جدول راث</h4><div class="eq">$$\begin{array}{c|cc} s^3 & J & K_p-mgl_c\\ s^2 & b+K_d & K_i\\ s^1 & \dfrac{(b+K_d)(K_p-mgl_c)-JK_i}{b+K_d} & 0\\ s^0 & K_i & \end{array}\qquad\Longrightarrow\qquad \boxed{K_p>mgl_c,\quad K_d>-b,\quad 0<K_i<\frac{(b+K_d)(K_p-mgl_c)}{J}}$$</div></div></div>
+    <div class="dstep"><div class="dnum">۴</div><div class="dbody"><h4>طراحی PD با جایابی قطب ($K_i=0$) و خطای ماندگار</h4><div class="eq">$$\omega_n=\sqrt{\frac{K_p-mgl_c}{J}},\ \ \zeta=\frac{b+K_d}{2\sqrt{J(K_p-mgl_c)}}\ \Rightarrow\ K_p=mgl_c+J\omega_n^2,\ \ K_d=2\zeta\omega_nJ-b;\qquad \theta_{ss}\big|_{K_i=0}=\frac{d}{K_p-mgl_c},\ \ \theta_{ss}\big|_{K_i>0}=0$$</div><p><b>مثال عددی</b> (جرم نقطه‌ای، $J=1$، $mgl_c=9.81$، $b=0.05$): با $\omega_n=5.5$ و $\zeta=0.73$ به $K_p\approx40$ و $K_d\approx8$ می‌رسیم (همان ضرایب شبیه‌ساز ۱). حد مجاز: $K_i<(8.05)(30.19)\approx243$.</p></div></div>
+  </div>
+  <div class="note warn"><i class="fas fa-triangle-exclamation" style="color:var(--accent)"></i> <b>محدودیت غیرخطی:</b> با اشباع $|\tau|\le\tau_{max}$ شرط لازمِ برگرداندن آونگ از زاویه‌ی $\theta_0$ این است که $\tau_{max}>mgl_c\sin|\theta_0|$. این یک شرط لازم است و کافی نیست. تحلیل خطی فقط پایداری <b>محلی</b> را تضمین می‌کند.</div>
+</div>
+
+<!-- ═════════ ۶ ۲R هندسه و سینماتیک ═════════ -->
+<div class="slide" data-sec="دینامیک ربات ۲R" data-id="r2">
+  <h2 class="slide-title">ربات ۲R — هندسه، مراکز جرم و سرعت‌ها</h2>
+  <p class="slide-sub">ربات در صفحه‌ی قائم $xy$ با گرانش $-y$. $q_1$ از محور افقی $x$ و $q_2$ <b>نسبی</b> (زاویه‌ی لینک ۲ نسبت به امتداد لینک ۱) است. نمادها: $c_1=\cos q_1$، $s_{12}=\sin(q_1+q_2)$، و $\dot q_{12}\equiv\dot q_1+\dot q_2$.</p>
+  <div class="split">
+    <div class="diagram">
+      <svg viewBox="0 0 360 260" xmlns="http://www.w3.org/2000/svg">
+        <defs><marker id="ar2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#8892a8"/></marker>
+        <marker id="ar3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#ff4757"/></marker></defs>
+        <line x1="60" y1="220" x2="330" y2="220" stroke="#8892a8" marker-end="url(#ar2)"/><text x="334" y="224" fill="#8892a8" font-size="12">x</text>
+        <line x1="60" y1="220" x2="60" y2="12" stroke="#8892a8" marker-end="url(#ar2)"/><text x="54" y="10" fill="#8892a8" font-size="12">y</text>
+        <line x1="174.7" y1="139.7" x2="225" y2="104.5" stroke="rgba(255,255,255,.35)" stroke-dasharray="4 4"/>
+        <line x1="60" y1="220" x2="174.7" y2="139.7" stroke="#ffb700" stroke-width="9" stroke-linecap="round"/>
+        <line x1="174.7" y1="139.7" x2="185.2" y2="20.2" stroke="#00d4aa" stroke-width="7" stroke-linecap="round"/>
+        <circle cx="117.3" cy="179.9" r="5" fill="#fff"/><text x="122" y="196" fill="#fff" font-size="11">C₁</text>
+        <circle cx="180" cy="79.9" r="5" fill="#fff"/><text x="188" y="84" fill="#fff" font-size="11">C₂</text>
+        <path d="M100,220 A40,40 0 0 0 92.8,197.1" fill="none" stroke="#ffb700" stroke-width="1.6"/><text x="104" y="210" fill="#ffb700" font-size="13" font-style="italic">q₁</text>
+        <path d="M203.4,119.6 A35,35 0 0 0 177.75,104.8" fill="none" stroke="#00d4aa" stroke-width="1.6"/><text x="196" y="102" fill="#00d4aa" font-size="13" font-style="italic">q₂</text>
+        <text x="96" y="162" fill="#ffb700" font-size="11">l₁ , lc₁</text><text x="150" y="60" fill="#00d4aa" font-size="11">l₂ , lc₂</text>
+        <circle cx="60" cy="220" r="8" fill="#050818" stroke="#fff" stroke-width="2"/><circle cx="174.7" cy="139.7" r="6" fill="#050818" stroke="#fff" stroke-width="2"/>
+        <line x1="310" y1="50" x2="310" y2="105" stroke="#ff4757" stroke-width="2" marker-end="url(#ar3)"/><text x="316" y="84" fill="#ff4757" font-size="12">g</text>
+      </svg>
+    </div>
+    <div class="deriv">
+      <div class="dstep"><div class="dnum">۱</div><div class="dbody"><h4>موقعیت مراکز جرم</h4><div class="eq">$$p_{c_1}=\begin{bmatrix}l_{c1}c_1\\ l_{c1}s_1\end{bmatrix},\qquad p_{c_2}=\begin{bmatrix}l_1c_1+l_{c2}c_{12}\\ l_1s_1+l_{c2}s_{12}\end{bmatrix}$$</div></div></div>
+      <div class="dstep"><div class="dnum">۲</div><div class="dbody"><h4>سرعت‌های خطی و زاویه‌ای</h4><div class="eq">$$\dot p_{c_1}=l_{c1}\dot q_1\begin{bmatrix}-s_1\\ c_1\end{bmatrix},\qquad \dot p_{c_2}=\begin{bmatrix}-l_1s_1\dot q_1-l_{c2}s_{12}\dot q_{12}\\ \ \ l_1c_1\dot q_1+l_{c2}c_{12}\dot q_{12}\end{bmatrix},\qquad \omega_1=\dot q_1,\ \ \omega_2=\dot q_{12}$$</div></div></div>
+      <div class="dstep"><div class="dnum">۳</div><div class="dbody"><h4>مجذور سرعت مرکز جرم ۲ (کلید ظهور $\cos q_2$)</h4><div class="eq">$$v_{c2}^2=l_1^2\dot q_1^2+l_{c2}^2\dot q_{12}^2+2l_1l_{c2}\dot q_1\dot q_{12}\underbrace{(s_1s_{12}+c_1c_{12})}_{\cos(q_{12}-q_1)=\cos q_2}$$</div><p>به همین دلیل $M$ فقط تابع $q_2$ است. حرکت $q_1$ کل ربات را صلب می‌چرخاند و انرژی جنبشی را تغییر نمی‌دهد.</p></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════ ۷ ۲R انرژی و M ═════════ -->
+<div class="slide" data-sec="دینامیک ربات ۲R">
+  <h2 class="slide-title">ربات ۲R — انرژی جنبشی، ماتریس جرم و بردار گرانش</h2>
+  <div class="deriv">
+    <div class="dstep"><div class="dnum">۴</div><div class="dbody"><h4>انرژی جنبشی کل</h4><div class="eq">$$T=\tfrac12 m_1l_{c1}^2\dot q_1^2+\tfrac12 I_1\dot q_1^2+\tfrac12 m_2\big[l_1^2\dot q_1^2+l_{c2}^2\dot q_{12}^2+2l_1l_{c2}c_2\,\dot q_1\dot q_{12}\big]+\tfrac12 I_2\dot q_{12}^2$$</div></div></div>
+    <div class="dstep"><div class="dnum">۵</div><div class="dbody"><h4>ماتریس جرم $M=\partial^2T/\partial\dot q^2$ (متقارن)</h4><div class="eq">$$\begin{aligned}M_{11}&=m_1l_{c1}^2+m_2\big(l_1^2+l_{c2}^2+2l_1l_{c2}c_2\big)+I_1+I_2\\ M_{12}&=M_{21}=m_2\big(l_{c2}^2+l_1l_{c2}c_2\big)+I_2\\ M_{22}&=m_2l_{c2}^2+I_2\end{aligned}$$</div><p>برای $m_i=1$، $l_i=1$، $l_{ci}=0.5$ و $I_i=1/12$: در $q_2=0$ (بازوی کشیده) $M=\begin{bmatrix}2.667&0.833\\0.833&0.333\end{bmatrix}$ و در $q_2=\pi$ (تاخورده) $M=\begin{bmatrix}0.667&-0.167\\-0.167&0.333\end{bmatrix}$. اینرسی مؤثر مفصل ۱ تا <b>۴ برابر</b> تغییر می‌کند. به همین دلیل PID با بهره‌ی ثابت در همه‌ی پیکربندی‌ها یکسان عمل نمی‌کند.</p></div></div>
+    <div class="dstep"><div class="dnum">۶</div><div class="dbody"><h4>انرژی پتانسیل و بردار گرانش $G=\partial V/\partial q$</h4><div class="eq">$$V=m_1gl_{c1}s_1+m_2g\big(l_1s_1+l_{c2}s_{12}\big)\ \Rightarrow\ G_1=(m_1l_{c1}+m_2l_1)g\,c_1+m_2l_{c2}g\,c_{12},\qquad G_2=m_2l_{c2}g\,c_{12}$$</div><p>بیشترین بار گرانشی وقتی است که بازو افقی باشد ($q=0$): $G=[19.62,\ 4.905]^T$ N·m برای همان پارامترها.</p></div></div>
+    <div class="dstep"><div class="dnum">۷</div><div class="dbody"><h4>پارامترسازی خطی (پایه‌ی شناسایی و کنترل تطبیقی)</h4><div class="eq">$$\pi_1=m_1l_{c1}^2+m_2(l_1^2+l_{c2}^2)+I_1+I_2,\ \pi_2=m_2l_1l_{c2},\ \pi_3=m_2l_{c2}^2+I_2,\ \pi_4=(m_1l_{c1}+m_2l_1)g,\ \pi_5=m_2l_{c2}g$$
+    $$M=\begin{bmatrix}\pi_1+2\pi_2c_2&\pi_3+\pi_2c_2\\ \pi_3+\pi_2c_2&\pi_3\end{bmatrix},\quad G=\begin{bmatrix}\pi_4c_1+\pi_5c_{12}\\ \pi_5c_{12}\end{bmatrix}\ \Rightarrow\ \tau=Y(q,\dot q,\ddot q)\,\pi$$</div><p>کل دینامیک فقط با ۵ عدد مشخص می‌شود. پس برای مقایسه‌ی مدل‌ها کافی است همین ۵ عدد را بین MATLAB، Simscape و CAD مقایسه کنیم.</p></div></div>
+  </div>
+</div>
+
+<!-- ═════════ ۸ ۲R کریستوفل و معادلات نهایی ═════════ -->
+<div class="slide" data-sec="دینامیک ربات ۲R">
+  <h2 class="slide-title">ربات ۲R — ماتریس کوریولیس با نمادهای کریستوفل و معادلات نهایی</h2>
+  <p class="slide-sub">فقط $M_{11}$ و $M_{12}$ به $q_2$ وابسته‌اند: $\ \partial M_{11}/\partial q_2=-2h,\ \ \partial M_{12}/\partial q_2=-h,\ \ h\equiv m_2l_1l_{c2}\sin q_2$</p>
+  <div class="deriv">
+    <div class="dstep"><div class="dnum">۸</div><div class="dbody"><h4>نمادهای کریستوفل غیرصفر $c_{ijk}=\tfrac12(\partial_iM_{kj}+\partial_jM_{ki}-\partial_kM_{ij})$</h4><div class="eq">$$c_{121}=c_{211}=\tfrac12\partial_2M_{11}=-h,\qquad c_{221}=\partial_2M_{12}-\tfrac12\partial_1M_{22}=-h,\qquad c_{112}=-\tfrac12\partial_2M_{11}=h,\qquad c_{122}=c_{212}=c_{222}=c_{111}=0$$</div></div></div>
+    <div class="dstep"><div class="dnum">۹</div><div class="dbody"><h4>ماتریس $C$ و بردار $C\dot q$</h4><div class="eq">$$C=\begin{bmatrix}-h\dot q_2&-h(\dot q_1+\dot q_2)\\ h\dot q_1&0\end{bmatrix},\qquad C\dot q=\begin{bmatrix}-h\big(2\dot q_1\dot q_2+\dot q_2^2\big)\\ h\dot q_1^2\end{bmatrix}$$</div><p>جمله‌ی $-2h\dot q_1\dot q_2$ <b>کوریولیس</b> است و جمله‌های $-h\dot q_2^2$ و $h\dot q_1^2$ <b>گریز از مرکز</b>.</p></div></div>
+    <div class="dstep"><div class="dnum">۱۰</div><div class="dbody"><h4>کنترل متقابل: اویلر–لاگرانژ مستقیم برای مفصل ۲</h4><div class="eq">$$\frac{\partial L}{\partial \dot q_2}=M_{12}\dot q_1+M_{22}\dot q_2,\quad \frac{d}{dt}(\cdot)=M_{12}\ddot q_1+M_{22}\ddot q_2-h\dot q_1\dot q_2,\quad \frac{\partial L}{\partial q_2}=\tfrac12\dot q^T\frac{\partial M}{\partial q_2}\dot q-G_2=-h\dot q_1^2-h\dot q_1\dot q_2-G_2$$</div></div></div>
+    <div class="dstep"><div class="dnum">۱۱</div><div class="dbody"><h4>معادلات حرکت نهایی</h4><div class="eq">$$\boxed{\begin{aligned}\tau_1&=M_{11}\ddot q_1+M_{12}\ddot q_2-h\big(2\dot q_1\dot q_2+\dot q_2^2\big)+G_1+b_1\dot q_1\\ \tau_2&=M_{12}\ddot q_1+M_{22}\ddot q_2+h\dot q_1^2+G_2+b_2\dot q_2\end{aligned}}$$</div></div></div>
+    <div class="dstep"><div class="dnum">۱۲</div><div class="dbody"><h4>اثبات پادمتقارنی $N=\dot M-2C$</h4><div class="eq">$$\dot M=\begin{bmatrix}-2h\dot q_2&-h\dot q_2\\-h\dot q_2&0\end{bmatrix}\ \Rightarrow\ N=\begin{bmatrix}0&h(2\dot q_1+\dot q_2)\\-h(2\dot q_1+\dot q_2)&0\end{bmatrix}=-N^T\ \Rightarrow\ \dot q^TN\dot q=0\ \Rightarrow\ \dot E=\dot q^T(\tau-B\dot q)$$</div></div></div>
+  </div>
+  <div class="note"><i class="fas fa-circle-check" style="color:var(--success)"></i> این روابط برای این جلسه به‌صورت عددی هم راستی‌آزمایی شده‌اند. برای پارامترهای دلخواه، اختلاف $\tau$ حاصل از لاگرانژین خام (مشتق‌گیری عددی) با $M\ddot q+C\dot q+G$ از مرتبه‌ی $10^{-6}$ است (یعنی خطای عددی مشتق‌گیری)، و رانش انرژی در ۵ ثانیه سقوط آزاد کمتر از $10^{-7}$ ژول.</div>
+</div>
+
+<!-- ═════════ ۹ MATLAB نمادین ═════════ -->
+<div class="slide" data-sec="MATLAB" data-id="matlab">
+  <h2 class="slide-title">مسیر الف (۱): استخراج نمادین در MATLAB</h2>
+  <p class="slide-sub">همان ۶ گام لاگرانژ با Symbolic Math Toolbox. خروجی یک تابع عددی <code>dyn2R.m</code> است که در ode45، Simulink و بلوک کنترل CTC استفاده می‌شود.</p>
+  <div class="code-head"><span>derive_2R.m</span><button class="copy-btn" onclick="cp(this)">کپی</button></div>
+<pre class="code-box">%% derive_2R.m  -  Lagrangian derivation of the 2R planar arm (vertical plane, gravity = -y)
+clear; clc
+syms q1 q2 dq1 dq2 ddq1 ddq2 real
+syms m1 m2 l1 l2 lc1 lc2 I1 I2 g real
+q = [q1; q2];  dq = [dq1; dq2];  ddq = [ddq1; ddq2];
+
+% Step 2: COM positions and velocities
+pc1 = [lc1*cos(q1);                 lc1*sin(q1)];
+pc2 = [l1*cos(q1) + lc2*cos(q1+q2); l1*sin(q1) + lc2*sin(q1+q2)];
+vc1 = jacobian(pc1, q)*dq;    vc2 = jacobian(pc2, q)*dq;
+w1  = dq1;                    w2  = dq1 + dq2;
+
+% Step 3: energies
+T = 1/2*m1*(vc1.'*vc1) + 1/2*I1*w1^2 + 1/2*m2*(vc2.'*vc2) + 1/2*I2*w2^2;
+V = m1*g*pc1(2) + m2*g*pc2(2);
+
+% Step 5: matrix form
+M = simplify(hessian(T, dq));
+G = simplify(jacobian(V, q).');
+n = numel(q);  C = sym(zeros(n));
+for k = 1:n
+  for j = 1:n
+    for i = 1:n
+      C(k,j) = C(k,j) + 1/2*( diff(M(k,j),q(i)) + diff(M(k,i),q(j)) - diff(M(i,j),q(k)) )*dq(i);
+    end
+  end
+end
+C = simplify(C);
+
+% Step 6a: compare with direct Euler-Lagrange
+L    = T - V;
+dLdv = jacobian(L, dq).';
+tauEL = jacobian(dLdv, q)*dq + jacobian(dLdv, dq)*ddq - jacobian(L, q).';
+disp('EL - (M ddq + C dq + G) ='),  disp(simplify(tauEL - (M*ddq + C*dq + G)))   % -> [0;0]
+
+% Step 6b: skew-symmetry of Mdot - 2C
+Mdot = sym(zeros(n));  for i = 1:n, Mdot = Mdot + diff(M, q(i))*dq(i); end
+disp('N + N.'' ='),  disp(simplify((Mdot - 2*C) + (Mdot - 2*C).'))                 % -> zeros
+
+% Step 7: generate a numeric (codegen-compatible) function
+p = [m1 m2 l1 l2 lc1 lc2 I1 I2 g];
+matlabFunction(M, C*dq, G, 'File', 'dyn2R', 'Vars', {q, dq, p}, ...
+               'Outputs', {'M','Cdq','G'}, 'Optimize', true);
+pretty(M), pretty(C*dq), pretty(G)</pre>
+  <div class="code-head" style="margin-top:10px"><span>derive_pendulum.m</span><button class="copy-btn" onclick="cp(this)">کپی</button></div>
+<pre class="code-box" style="max-height:24vh">syms th dth ddth m lc Ic g b tau d real
+pc = [-lc*sin(th); lc*cos(th)];             % theta from upright, CCW positive
+vc = jacobian(pc, th)*dth;
+T  = 1/2*m*(vc.'*vc) + 1/2*Ic*dth^2;
+V  = m*g*pc(2);
+L  = T - V;
+EL = jacobian(jacobian(L,dth), th)*dth + jacobian(jacobian(L,dth), dth)*ddth - jacobian(L, th);
+eqn = simplify(EL == tau - b*dth + d)       % (Ic + m*lc^2)*ddth - g*lc*m*sin(th) == tau - b*dth + d
+ddth_sol = solve(eqn, ddth)</pre>
+</div>
+
+<!-- ═════════ ۱۰ MATLAB عددی ═════════ -->
+<div class="slide" data-sec="MATLAB">
+  <h2 class="slide-title">مسیر الف (۲): شبیه‌سازی عددی و آزمون پایستگی انرژی</h2>
+  <p class="slide-sub">آزمون مرجع: <b>سقوط آزاد</b> ($\tau=0$، $b=0$) از $q_0=[0,\ 30^\circ]$ به مدت ۵ ثانیه. خروجی را با نام <code>ref_matlab.mat</code> ذخیره می‌کنیم تا بعداً با Simscape مقایسه شود.</p>
+  <div class="code-head"><span>sim_2R_reference.m</span><button class="copy-btn" onclick="cp(this)">کپی</button></div>
+<pre class="code-box">%% sim_2R_reference.m  -  free fall of the 2R arm with the derived model
+%        m1 m2 l1 l2 lc1 lc2  I1    I2    g
+p  = [   1  1  1  1  0.5 0.5  1/12  1/12  9.81 ];
+b  = [0; 0];                           % joint viscous damping (same value goes into Simscape)
+x0 = [0; deg2rad(30); 0; 0];           % [q1 q2 dq1 dq2]
+tq = (0:1e-3:5).';                     % common time grid for all three routes
+opts = odeset('RelTol',1e-10,'AbsTol',1e-12);
+[t, x] = ode45(@(t,x) f2R(t, x, p, b, [0;0]), tq, x0, opts);
+
+E = zeros(size(t));
+for k = 1:numel(t), E(k) = energy2R(x(k,:).', p); end
+fprintf('max energy drift = %.2e J\n', max(abs(E - E(1))));   % expected ~1e-9 for b = 0
+
+subplot(2,1,1), plot(t, rad2deg(x(:,1:2))), grid on, legend('q_1','q_2'), ylabel('deg')
+subplot(2,1,2), plot(t, E - E(1)), grid on, ylabel('E - E_0  [J]'), xlabel('t [s]')
+save ref_matlab.mat t x p b
+
+function dx = f2R(~, x, p, b, tau)
+  q = x(1:2);  dq = x(3:4);
+  [M, Cdq, G] = dyn2R(q, dq, p);
+  dx = [dq;  M \ (tau - Cdq - G - b.*dq)];
+end
+
+function E = energy2R(x, p)
+  q = x(1:2);  dq = x(3:4);  [M,~,~] = dyn2R(q, dq, p);
+  m1=p(1); m2=p(2); l1=p(3); lc1=p(5); lc2=p(6); g=p(9);
+  V = m1*g*lc1*sin(q(1)) + m2*g*(l1*sin(q(1)) + lc2*sin(q(1)+q(2)));
+  E = 0.5*dq.'*M*dq + V;
+end</pre>
+  <div class="cards-grid cols-3" style="margin-top:10px">
+    <div class="content-card"><h3><i class="fas fa-ruler" style="color:var(--accent)"></i> چرا RelTol خیلی کوچک؟</h3><p>دو‌آونگی (۲R آزاد) <b>آشوبناک</b> است و خطاهای کوچک نمایی رشد می‌کنند. مرجع باید دقیق‌تر از مدلی باشد که با آن مقایسه می‌شود.</p></div>
+    <div class="content-card"><h3><i class="fas fa-bolt" style="color:var(--accent)"></i> رانش انرژی</h3><p>اگر $|E-E_0|$ با کاهش RelTol کم نشود، خطا در <b>معادلات</b> است، نه در حل‌کننده. این ساده‌ترین تست برای پیدا کردن اشتباه در $C$ یا $G$ است.</p></div>
+    <div class="content-card"><h3><i class="fas fa-clone" style="color:var(--accent)"></i> آونگ</h3><p>همین الگو با <code>f = @(t,x)[x(2); (m*g*lc*sin(x(1)) - b*x(2) + tau)/J]</code> و $\theta_0=15^\circ$ اجرا می‌شود.</p></div>
+  </div>
+</div>
+
+<!-- ═════════ ۱۱ Simscape دستی: پایه ═════════ -->
+<div class="slide" data-sec="Simscape دستی" data-id="sm">
+  <h2 class="slide-title">مسیر ب: ساخت دستی در Simscape Multibody — قواعد قاب‌ها</h2>
+  <p class="slide-sub">Simscape Multibody (نام قبلی: SimMechanics) معادلات را خودش می‌نویسد. کار ما این است که هندسه، قاب‌ها و جرم را <b>دقیقاً</b> هم‌ارز با فرضیات مدل لاگرانژ تعریف کنیم.</p>
+  <div class="img-container"><img src="images/s08-simscape-2R-diagram.png" alt="دیاگرام Simscape ربات ۲R" onclick="lb(this.src)" onerror="this.src='images/simulink-vs-simscape.png';this.onerror=()=>this.parentElement.style.display='none'" style="max-height:22vh"></div>
+  <div class="cards-grid cols-2">
+    <div class="content-card"><div class="card-icon"><i class="fas fa-compass"></i></div><h3>۱) قاب‌ها و محور چرخش</h3><ul><li>Revolute Joint همیشه حول محور $Z$ قاب <b>Base</b> می‌چرخد و مثبتِ آن پادساعتگرد است.</li><li>صفحه‌ی حرکت = $XY$ و گرانش در Mechanism Configuration برابر $[0\ -9.81\ 0]$.</li><li>لینک‌ها را در امتداد $+X$ قاب Follower بسازید تا $q=0$ همان «بازوی افقی» در معادلات باشد. برای آونگ لینک را در امتداد $+Y$ بسازید تا $\theta=0$ قائمِ رو به بالا شود.</li></ul></div>
+    <div class="content-card"><div class="card-icon" style="--ci:linear-gradient(135deg,var(--success),var(--cyan))"><i class="fas fa-weight-hanging"></i></div><h3>۲) جرم و اینرسی (منبع اصلی اختلاف)</h3><ul><li>Brick Solid با چگالی، اینرسی $m(l^2+w^2)/12$ می‌دهد، نه $ml^2/12$.</li><li>برای مقایسه‌ی دقیق: Inertia ← <b>Custom</b>، جرم $m$، Center of Mass $[0\ 0\ 0]$ و Moments $[I_{xx}\ I_{yy}\ I_{zz}]$ با $I_{zz}=I_c$.</li><li>Solid را با Rigid Transform به اندازه‌ی $l_c$ از مفصل جابه‌جا کنید (شکل بصری و جرم از یک قاب).</li></ul></div>
+    <div class="content-card"><div class="card-icon" style="--ci:linear-gradient(135deg,var(--purple),var(--pink))"><i class="fas fa-plug"></i></div><h3>۳) تحریک و حسگری مفصل</h3><ul><li>Actuation → Torque: <b>Provided by Input</b> و Motion: <b>Automatically Computed</b>.</li><li>Sensing → <b>Position</b> و <b>Velocity</b> (در صورت نیاز Actuator Torque).</li><li>Internal Mechanics → Damping Coefficient $=b$ (برای سقوط آزاد مرجع صفر).</li><li>State Targets → Position با Priority=High برای شرط اولیه.</li></ul></div>
+    <div class="content-card"><div class="card-icon" style="--ci:linear-gradient(135deg,var(--cyan),#3b82f6)"><i class="fas fa-gears"></i></div><h3>۴) سیگنال و حل‌کننده</h3><ul><li>Simulink-PS Converter (ورودی گشتاور، واحد N*m) و PS-Simulink Converter (خروجی‌ها با واحد rad و rad/s).</li><li>Solver Configuration الزامی است. حل‌کننده‌ی متغیرگام <code>ode23t</code> یا <code>daessc</code>، با RelTol=1e-8 برای مقایسه.</li><li>سیگنال‌های $q$ و $\dot q$ را با نام لاگ کنید (Signal Logging).</li></ul></div>
+  </div>
+</div>
+
+<!-- ═════════ ۱۲ Simscape دستی: بلوک‌به‌بلوک ═════════ -->
+<div class="slide" data-sec="Simscape دستی">
+  <h2 class="slide-title">مسیر ب: زنجیره‌ی بلوک‌ها برای آونگ و ربات ۲R</h2>
+  <div class="flow"><span class="fb">World Frame</span><i class="fas fa-arrow-left"></i><span class="fb">Revolute J1</span><i class="fas fa-arrow-left"></i><span class="fb">RT: $+l_{c1}\,\hat x$ → Solid 1</span><i class="fas fa-arrow-left"></i><span class="fb">RT: $+l_1\,\hat x$</span><i class="fas fa-arrow-left"></i><span class="fb">Revolute J2</span><i class="fas fa-arrow-left"></i><span class="fb">RT: $+l_{c2}\,\hat x$ → Solid 2</span></div>
+  <table class="data-table"><thead><tr><th>#</th><th>بلوک (کتابخانه)</th><th>آونگ معکوس</th><th>ربات ۲R</th></tr></thead><tbody>
+    <tr><td>۱</td><td>World Frame + Mechanism Configuration + Solver Configuration</td><td colspan="2">گرانش $[0\ -9.81\ 0]$. Solver Configuration فقط یک‌بار و به شبکه‌ی فیزیکی وصل شود</td></tr>
+    <tr><td>۲</td><td>Rigid Transform (پایه)</td><td>اختیاری (جابجایی پایه)</td><td>اختیاری. پایه در مبدأ</td></tr>
+    <tr><td>۳</td><td>Revolute Joint</td><td>$J$: Torque input، Sensing q و w، Damping $b$، Initial position $15^\circ$</td><td>J1 و J2 هر دو Torque input و Sensing q و w. شرط اولیه $[0,\ 30^\circ]$ (آزمون مرجع)</td></tr>
+    <tr><td>۴</td><td>Rigid Transform (لینک)</td><td>Translation: $[0\ l_c\ 0]$ (در امتداد $+Y$)</td><td>$[l_{c1}\ 0\ 0]$ تا مرکز جرم ۱، و شاخه‌ی دوم $[l_1\ 0\ 0]$ تا مفصل ۲</td></tr>
+    <tr><td>۵</td><td>Brick Solid (یا File Solid)</td><td>Dimensions $[w\ \ l\ \ t]$؛ Inertia: Custom</td><td>Dimensions $[l_i\ \ w\ \ t]$؛ Inertia: Custom با $m_i$ و $I_{zz}=I_i$</td></tr>
+    <tr><td>۶</td><td>Simulink-PS / PS-Simulink</td><td>$\tau$ ← ورودی؛ $\theta,\dot\theta$ → خروجی</td><td>$[\tau_1,\tau_2]$ ← ورودی؛ $q,\dot q$ → Mux → خروجی لاگ‌شده با نام <code>q</code> و <code>dq</code></td></tr>
+    <tr><td>۷</td><td>Constant (۰) → گشتاور</td><td colspan="2">برای آزمون سقوط آزاد گشتاور را صفر بگذارید. در بخش کنترل، کنترل‌کننده جای این بلوک می‌نشیند</td></tr>
+  </tbody></table>
+  <div class="code-head" style="margin-top:10px"><span>params_2R.m — یک فایل پارامتر مشترک برای هر سه مسیر</span><button class="copy-btn" onclick="cp(this)">کپی</button></div>
+<pre class="code-box" style="max-height:20vh">m1 = 1;  m2 = 1;  l1 = 1;  l2 = 1;  lc1 = l1/2;  lc2 = l2/2;
+w  = 0.04;  tk = 0.02;                        % visual width / thickness of the bricks
+I1 = m1*l1^2/12;  I2 = m2*l2^2/12;           % slender-rod Izz used in the derivation
+% Brick Solid -> Inertia: Custom, Moments [Ixx Iyy Izz] about the COM (link along +X)
+Imom1 = [m1*(w^2+tk^2)/12, m1*(l1^2+tk^2)/12, I1];
+Imom2 = [m2*(w^2+tk^2)/12, m2*(l2^2+tk^2)/12, I2];
+g  = 9.81;  b1 = 0;  b2 = 0;
+q0 = [0; 30];                                % initial joint angles [deg]
+p  = [m1 m2 l1 l2 lc1 lc2 I1 I2 g];          % same vector used by dyn2R</pre>
+</div>
+
+<!-- ═════════ ۱۳ SolidWorks → Simscape ═════════ -->
+<div class="slide" data-sec="SolidWorks → Simscape" data-id="sw">
+  <h2 class="slide-title">مسیر ج: انتقال مدل از SolidWorks به Simscape Multibody</h2>
+  <p class="slide-sub">ابزار: افزونه‌ی <b>Simscape Multibody Link</b>. نسخه‌ی افزونه باید با نسخه‌ی MATLAB یکی باشد. خروجی آن یک فایل XML همراه با فایل‌های هندسه (STEP) است.</p>
+  <div class="img-container"><img src="images/s08-solidworks-export.png" alt="منوی Export در SolidWorks" onclick="lb(this.src)" onerror="this.parentElement.style.display='none'" style="max-height:20vh"></div>
+  <div class="deriv">
+    <div class="dstep"><div class="dnum">۱</div><div class="dbody"><h4>نصب و اتصال</h4><p>فایل‌های نصب (zip افزونه + <code>install_addon.m</code>) را از سایت MathWorks برای نسخه‌ی خود بگیرید. MATLAB را <b>Run as administrator</b> اجرا کنید و این دستورها را بزنید: <code>install_addon('smlink.rXXXXx.win64.zip')</code>، سپس <code>smlink linksw</code> و <code>regmatlabserver</code>. در SolidWorks از مسیر Tools → Add-Ins تیک <b>Simscape Multibody Link</b> را بزنید.</p></div></div>
+    <div class="dstep"><div class="dnum">۲</div><div class="dbody"><h4>آماده‌سازی CAD</h4><p>هر لینک یک Part با <b>ماده‌ی تعریف‌شده</b> (یا Override Mass Properties) داشته باشد. پایه Fixed باشد. هر مفصل لولایی = <b>Concentric + Coincident</b>. Mate زائد، Part معلق و قید شکسته نداشته باشید. مونتاژ را در <b>پیکربندی صفر</b> (بازوی افقی، $q=0$) ذخیره کنید، چون زاویه‌ی صفرِ مفصل‌های واردشده همان حالت مونتاژ است.</p></div></div>
+    <div class="dstep"><div class="dnum">۳</div><div class="dbody"><h4>Export</h4><p>Tools → Simscape Multibody Link → Export → <b>Simscape Multibody</b>. خروجی <code>robot2R.xml</code> همراه با فایل‌های STEP قطعات است.</p></div></div>
+    <div class="dstep"><div class="dnum">۴</div><div class="dbody"><h4>Import در MATLAB</h4><p><code>smimport('robot2R.xml')</code> مدل <code>.slx</code> و فایل داده‌ی <code>robot2R_DataFile.m</code> (جرم، مرکز جرم و تانسور اینرسی هر بدنه) را می‌سازد. Mechanics Explorer را باز کنید و هندسه را بررسی کنید.</p></div></div>
+    <div class="dstep"><div class="dnum">۵</div><div class="dbody"><h4>پس‌پردازش اجباری</h4><p>(الف) جهت گرانش را در Mechanism Configuration با محور «بالا»ی CAD تطبیق دهید. در SolidWorks معمولاً $+Y$ بالاست. (ب) Revolute Joint‌ها را روی Torque: Provided by Input و Sensing: Position, Velocity بگذارید. (ج) Damping و State Targets را تنظیم کنید. (د) جهت محور $Z$ هر مفصل را چک کنید؛ اگر وارونه باشد علامت $q$ و $\tau$ عوض می‌شود.</p></div></div>
+    <div class="dstep"><div class="dnum">۶</div><div class="dbody"><h4>استخراج پارامترها برای مسیر الف</h4><p>از DataFile (یا Mass Properties در SolidWorks): $m_i$، فاصله‌ی مرکز جرم تا محور مفصل $l_{ci}$ و $I_{zz}$ <b>حول مرکز جرم</b> را بخوانید و در <code>p</code> بگذارید. اگر مرکز جرم روی خط مفصل‌ها نباشد (مثلاً به‌خاطر موتور یا سوراخ)، یک زاویه‌ی آفست $\delta_i$ وارد معادلات می‌شود: $c_{12}\to\cos(q_1+q_2+\delta_2)$.</p></div></div>
+  </div>
+</div>
+
+<!-- ═════════ ۱۴ مقایسه: پروتکل ═════════ -->
+<div class="slide" data-sec="مقایسه‌ی سه مسیر" data-id="cmp">
+  <h2 class="slide-title">مقایسه‌ی کمّی سه مسیر — پروتکل و اسکریپت</h2>
+  <p class="slide-sub">ورودی یکسان، پارامتر یکسان و شبکه‌ی زمانی یکسان. بعد سه معیار را می‌سنجیم: $\max|\Delta q|$، RMS خطا و رانش انرژی</p>
+  <div class="cards-grid cols-3">
+    <div class="content-card"><div class="card-icon"><i class="fas fa-1"></i></div><h3>الف ↔ ب (MATLAB ↔ Simscape دستی)</h3><p>با اینرسی Custom یکسان، اختلاف باید در حد تلرانس حل‌کننده باشد (حدود $10^{-6}$ rad در ۲ ثانیه‌ی اول). اگر این‌طور نشد، یکی از معادلات، قاب‌ها یا علامت‌ها اشکال دارد.</p></div>
+    <div class="content-card"><div class="card-icon" style="--ci:linear-gradient(135deg,var(--success),var(--cyan))"><i class="fas fa-2"></i></div><h3>ب ↔ ج (Simscape دستی ↔ CAD)</h3><p>اختلاف از <b>پارامترها</b> می‌آید (پهنا، سوراخ، مرکز جرم خارج از محور). با وارد کردن پارامترهای CAD در مدل دستی، اختلاف باید از بین برود.</p></div>
+    <div class="content-card"><div class="card-icon" style="--ci:linear-gradient(135deg,var(--purple),var(--pink))"><i class="fas fa-3"></i></div><h3>افق مقایسه</h3><p>سقوط آزاد ۲R آشوبناک است. اختلاف $10^{-9}$ پس از چند ثانیه ممکن است به چند درجه برسد. یا افق را ۲ ثانیه بگیرید، یا میرایی $b$ اضافه کنید، یا دامنه را کوچک بگیرید.</p></div>
+  </div>
+  <div class="code-head" style="margin-top:10px"><span>compare_routes.m</span><button class="copy-btn" onclick="cp(this)">کپی</button></div>
+<pre class="code-box" style="max-height:30vh">load ref_matlab.mat                               % route A: t, x (ode45)
+outB = sim('pend2R_manual', 'StopTime','5', 'RelTol','1e-8');   % route B: hand-built Simscape
+outC = sim('robot2R_cad',   'StopTime','5', 'RelTol','1e-8');   % route C: SolidWorks import
+qB = resample_q(outB, t);   qC = resample_q(outC, t);
+Th = t <= 2;                                      % comparison horizon (chaotic system!)
+rep = @(name,dq) fprintf('%-6s max|dq1|=%.2e  max|dq2|=%.2e  RMS=%.2e rad\n', name, ...
+                         max(abs(dq(Th,1))), max(abs(dq(Th,2))), rms(dq(Th,:),'all'));
+rep('A-B', qB - x(:,1:2));   rep('A-C', qC - x(:,1:2));   rep('B-C', qC - qB);
+plot(t, rad2deg([x(:,2) qB(:,2) qC(:,2)])), legend('A: MATLAB','B: Simscape','C: CAD'), grid on
+
+function q = resample_q(out, t)
+  s = out.logsout.get('q').Values;                % logged 2x1 signal named "q"
+  d = squeeze(s.Data);  if size(d,1) ~= numel(s.Time), d = d.'; end
+  q = interp1(s.Time, d, t, 'pchip');
+end</pre>
+  <table class="data-table" style="margin-top:10px"><thead><tr><th>منبع اختلاف</th><th>نشانه</th><th>رفع</th></tr></thead><tbody>
+    <tr><td>اینرسی Brick به‌جای میله‌ی باریک</td><td>اختلاف کوچک، رشدکننده با زمان</td><td>Inertia: Custom یا وارد کردن $w$ در $I_c$</td></tr>
+    <tr><td>صفر زاویه‌ی CAD ≠ صفر معادلات</td><td>آفست ثابت در $q$ یا گرانش «کج»</td><td>مونتاژ در $q=0$ یا افزودن آفست در State Target</td></tr>
+    <tr><td>جهت محور $Z$ مفصل وارونه</td><td>$q$ قرینه، گشتاور مثبت جهت عکس می‌دهد</td><td>Rigid Transform با چرخش ۱۸۰° یا Gain=-1</td></tr>
+    <tr><td>جهت گرانش اشتباه</td><td>سقوط به سمت غلط</td><td>Mechanism Configuration</td></tr>
+    <tr><td>تلرانس حل‌کننده</td><td>اختلاف با RelTol تغییر می‌کند</td><td>RelTol=1e-8 تا 1e-10 در هر دو مسیر</td></tr>
+  </tbody></table>
+</div>
+
+<!-- ═════════ ۱۵ شبیه‌ساز ۳: مقایسه مدل‌ها ═════════ -->
+<div class="slide" data-sec="مقایسه‌ی سه مسیر" data-sim="c">
+  <h2 class="slide-title">شبیه‌ساز ۳: چرا سه مدل از هم فاصله می‌گیرند؟</h2>
+  <p class="slide-sub">سه نسخه از ۲R با گشتاور صفر هم‌زمان رها می‌شوند. <b style="color:#ffb700">A</b> = مدل تحلیلی با میله‌ی باریک؛ <b style="color:#06b6d4">B</b> = Simscape با Brick به پهنای $w$؛ <b style="color:#ec4899">C</b> = CAD با جابجایی مرکز جرم لینک ۲ به اندازه‌ی $\delta$. اگر $w$ و $\delta$ را صفر کنید، هر سه یکی می‌شوند.</p>
+  <div class="simulator"><div class="sim-layout">
+    <div>
+      <div class="sim-canvas-wrap"><canvas id="cc" width="720" height="330"></canvas></div>
+      <div class="readouts"><div class="ro">max|q₂ᴬ−q₂ᴮ|<b id="cAB">0</b></div><div class="ro">max|q₂ᴬ−q₂ᶜ|<b id="cAC">0</b></div><div class="ro">رانش انرژی A<b id="cE">0</b></div><div class="ro">زمان<b id="cT">0</b></div></div>
+    </div>
+    <div>
+      <div class="sim-controls" id="cCtl"></div>
+      <div class="sim-actions"><button class="btn" onclick="cReset()"><i class="fas fa-rotate-left"></i> رهاسازی مجدد</button><button class="btn" onclick="cPreset(0)">هر سه یکسان</button><button class="btn" onclick="cPreset(1)">پهنای واقعی</button><button class="btn" onclick="cPreset(2)">CAD با موتور</button></div>
+      <div class="note warn" style="font-size:11.5px">با $b=0$، حتی $w=1$ cm بعد از چند ثانیه اختلاف چند‌درجه‌ای می‌دهد (اثر آشوب). با $b=0.3$ همان خطا محدود می‌ماند. نتیجه: برای اعتبارسنجی، افق کوتاه یا سیستم میرا انتخاب کنید.</div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ═════════ ۱۶ کنترل آونگ در Simscape ═════════ -->
+<div class="slide" data-sec="کنترل در Simscape" data-id="ctrl">
+  <h2 class="slide-title">کنترل آونگ معکوس روی مدل Simscape</h2>
+  <div class="flow"><span class="fb">$\theta_d=0$</span><i class="fas fa-arrow-left"></i><span class="fb">Sum (+ −) → $e$</span><i class="fas fa-arrow-left"></i><span class="fb">PID Controller (فیلتر $N$، اشباع، Anti-windup)</span><i class="fas fa-arrow-left"></i><span class="fb">+ اغتشاش $d$ (Step)</span><i class="fas fa-arrow-left"></i><span class="fb">Simulink-PS → Revolute Joint</span><i class="fas fa-arrow-left"></i><span class="fb">$\theta$ → PS-Simulink → فیدبک</span></div>
+  <div class="cards-grid cols-2">
+    <div class="content-card"><h3><i class="fas fa-sliders" style="color:var(--accent)"></i> تنظیمات بلوک PID Controller</h3><ul>
+      <li>Form: Parallel؛ $\ C(s)=K_p+\dfrac{K_i}{s}+K_d\dfrac{N}{1+N/s}$</li>
+      <li>$K_p=40,\ K_i=30,\ K_d=8,\ N=100$ (فیلتر مشتق باید خیلی سریع‌تر از $\omega_n$ باشد)</li>
+      <li>Output saturation: $\pm\tau_{max}$؛ Anti-windup: <b>clamping</b></li>
+      <li>چون $e=\theta_d-\theta=-\theta$، خروجی PID مستقیماً همان $\tau=-K_p\theta-\dots$ است.</li></ul></div>
+    <div class="content-card"><h3><i class="fas fa-magnifying-glass-chart" style="color:var(--accent)"></i> اعتبارسنجی چهارم: خطی‌سازی مدل Simscape</h3><p>Initial Position را صفر بگذارید و مدل را حول $\theta=0$ خطی کنید. نتیجه باید $1/(Js^2+bs-mgl_c)$ باشد. بعد می‌توانید PID را با PID Tuner روی همین مدل خطی (که ناپایدار است) تیون کنید.</p></div>
+  </div>
+  <div class="code-head" style="margin-top:10px"><span>linearize_pendulum.m (Simulink Control Design)</span><button class="copy-btn" onclick="cp(this)">کپی</button></div>
+<pre class="code-box" style="max-height:24vh">mdl = 'pend_simscape';
+io(1) = linio([mdl '/tau_in'],    1, 'input');        % torque signal entering Simulink-PS
+io(2) = linio([mdl '/theta_out'], 1, 'openoutput');   % theta after PS-Simulink
+sysS  = linearize(mdl, io);                           % operating point = model initial state (theta = 0)
+m = 1; lc = 0.5; Ic = m*1^2/12; J = Ic + m*lc^2; b = 0.05; g = 9.81;
+sysA  = tf(1, [J b -m*g*lc]);                          % analytic plant
+pole(minreal(tf(sysS))),  pole(sysA)                   % should match
+bode(sysS, sysA, '--'), legend('Simscape','Analytic')
+C = pidtune(sysA, 'PIDF', 6);                          % target crossover ~6 rad/s
+step(feedback(C*sysA, 1))</pre>
+</div>
+
+<!-- ═════════ ۱۷ شبیه‌ساز ۱: آونگ ═════════ -->
+<div class="slide" data-sec="کنترل در Simscape" data-sim="p">
+  <h2 class="slide-title">شبیه‌ساز ۱: PID آونگ معکوس — گام‌به‌گام</h2>
+  <p class="slide-sub">مدل: $J\ddot\theta=mgl_c\sin\theta-b\dot\theta+\mathrm{sat}(\tau)+d$ با جرم نقطه‌ای ($m=1,\ l=1\Rightarrow J=1,\ mgl_c=9.81,\ b=0.05$). کنترل‌کننده با فرکانس ۵۰۰ هرتز و anti-windup از نوع clamping.</p>
+  <div class="simulator"><div class="sim-layout">
+    <div>
+      <div class="sim-canvas-wrap"><canvas id="pc" width="720" height="300"></canvas></div>
+      <div class="readouts"><div class="ro">زاویه θ<b id="pTh">0</b></div><div class="ro">گشتاور τ<b id="pTau">0</b></div><div class="ro">ωn ، ζ (خطی)<b id="pWz">—</b></div><div class="ro">شرط راث<b id="pCond">—</b></div></div>
+    </div>
+    <div>
+      <div class="stepbox" id="pStep"></div>
+      <div class="sim-actions" id="pBtns"></div>
+      <div class="sim-controls" id="pCtl" style="margin-top:8px"></div>
+      <div class="sim-actions"><button class="btn" onclick="pReset()"><i class="fas fa-rotate-left"></i> شروع مجدد</button><button class="btn" onclick="pw+=2.5"><i class="fas fa-hand-point-right"></i> ضربه</button></div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ═════════ ۱۸ کنترل ۲R: قوانین ═════════ -->
+<div class="slide" data-sec="کنترل در Simscape">
+  <h2 class="slide-title">کنترل ربات ۲R: PD، PD+G و گشتاور محاسبه‌شده (CTC)</h2>
+  <p class="slide-sub">$e=q_d-q$. نماد کلاهی ($\hat M,\hat C,\hat G$) یعنی مدلی که کنترل‌کننده در اختیار دارد. این مدل همان <code>dyn2R</code> است که از مسیر الف تولید کردیم.</p>
+  <div class="deriv">
+    <div class="dstep"><div class="dnum">۱</div><div class="dbody"><h4>PD مستقل مفاصل</h4><div class="eq">$$\tau=K_pe+K_d\dot e\quad\Rightarrow\quad \text{در تعادل } (q_d\ \text{ثابت}):\ e_{ss}=K_p^{-1}G(q_{ss})\neq0$$</div></div></div>
+    <div class="dstep"><div class="dnum">۲</div><div class="dbody"><h4>PD + جبران گرانش (Takegaki–Arimoto)</h4><div class="eq">$$\tau=K_pe+K_d\dot e+\hat G(q)$$</div><p>برای $q_d$ ثابت و $\hat G=G$، با تابع لیاپانوف $\ V=\tfrac12\dot q^TM\dot q+\tfrac12e^TK_pe\ $ و خاصیت پادمتقارنی داریم $\dot V=-\dot q^TK_d\dot q\le0$. پس به کمک اصل لاسال، تنظیم <b>سراسری مجانبی پایدار</b> است. در ردیابی مسیر، جمله‌های $M\ddot q_d$ و $C\dot q$ جبران نمی‌شوند و خطا باقی می‌ماند.</p></div></div>
+    <div class="dstep"><div class="dnum">۳</div><div class="dbody"><h4>گشتاور محاسبه‌شده (خطی‌سازی با فیدبک)</h4><div class="eq">$$\tau=\hat M(q)\big(\ddot q_d+K_d\dot e+K_pe\big)+\hat C(q,\dot q)\dot q+\hat G(q)\ \xrightarrow{\ \hat{(\cdot)}=(\cdot)\ }\ \ddot e+K_d\dot e+K_pe=0,\qquad K_p=\omega_n^2I,\ K_d=2\zeta\omega_nI$$</div><p>با خطای مدل: $\ \ddot e+K_d\dot e+K_pe=\hat M^{-1}\big[(M-\hat M)\ddot q+(C-\hat C)\dot q+(G-\hat G)\big]\equiv\eta$. با افزایش $\omega_n$ اثر $\eta$ کم می‌شود ($e\sim\eta/\omega_n^2$)، اما محدودیت گشتاور و نویز اجازه‌ی افزایش بی‌حد را نمی‌دهند.</p></div></div>
+    <div class="dstep"><div class="dnum">۴</div><div class="dbody"><h4>مسیر مطلوب با مشتقات تحلیلی (نه تفاضل محدود)</h4><div class="eq">$$x_d=\begin{bmatrix}x_c+r\cos\omega t\\ y_c+r\sin\omega t\end{bmatrix},\quad q_d=\mathrm{IK}(x_d),\quad \dot q_d=J^{-1}\dot x_d,\quad \ddot q_d=J^{-1}\big(\ddot x_d-\dot J\dot q_d\big)$$
+    $$J=\begin{bmatrix}-l_1s_1-l_2s_{12}&-l_2s_{12}\\ l_1c_1+l_2c_{12}&l_2c_{12}\end{bmatrix},\quad \dot J\dot q=-\begin{bmatrix}l_1c_1\dot q_1^2+l_2c_{12}\dot q_{12}^2\\ l_1s_1\dot q_1^2+l_2s_{12}\dot q_{12}^2\end{bmatrix},\quad \det J=l_1l_2\sin q_2$$</div><p>دایره‌ی $x_c=1,\ y_c=0.8,\ r=0.4$ در تمام مسیر $\sin q_2\ge0.79$ دارد، پس از تکینگی دور است.</p></div></div>
+  </div>
+</div>
+
+<!-- ═════════ ۱۹ کنترل ۲R: پیاده‌سازی Simscape ═════════ -->
+<div class="slide" data-sec="کنترل در Simscape">
+  <h2 class="slide-title">پیاده‌سازی CTC روی مدل Simscape (دستی یا CAD)</h2>
+  <div class="flow"><span class="fb">Clock</span><i class="fas fa-arrow-left"></i><span class="fb">MATLAB Function: trajGen → $q_d,\dot q_d,\ddot q_d$</span><i class="fas fa-arrow-left"></i><span class="fb">MATLAB Function: ctcLaw</span><i class="fas fa-arrow-left"></i><span class="fb">Saturation $\pm\tau_{max}$</span><i class="fas fa-arrow-left"></i><span class="fb">Simulink-PS → J1, J2</span><i class="fas fa-arrow-left"></i><span class="fb">$q,\dot q$ از Sensing → فیدبک</span></div>
+  <div class="cards-grid cols-2" style="max-width:1040px">
+    <div><div class="code-head"><span>trajGen (MATLAB Function block)</span><button class="copy-btn" onclick="cp(this)">کپی</button></div>
+<pre class="code-box" style="max-height:44vh">function [qd, dqd, ddqd] = trajGen(t)
+% circle in task space -> joint space (IK of session 7, q2 > 0 branch)
+l1 = 1; l2 = 1; xc = 1; yc = 0.8; r = 0.4; w = 2;
+xd   = [xc + r*cos(w*t);  yc + r*sin(w*t)];
+dxd  = r*w   *[-sin(w*t);  cos(w*t)];
+ddxd = -r*w^2*[ cos(w*t);  sin(w*t)];
+c2 = (xd(1)^2 + xd(2)^2 - l1^2 - l2^2)/(2*l1*l2);
+s2 = sqrt(max(0, 1 - c2^2));
+q2 = atan2(s2, c2);
+q1 = atan2(xd(2), xd(1)) - atan2(l2*s2, l1 + l2*c2);
+qd = [q1; q2];
+s1 = sin(q1); c1 = cos(q1); s12 = sin(q1+q2); c12 = cos(q1+q2);
+J  = [-l1*s1 - l2*s12, -l2*s12;  l1*c1 + l2*c12, l2*c12];
+dqd = J \ dxd;
+w12 = dqd(1) + dqd(2);
+Jdq = -[l1*c1*dqd(1)^2 + l2*c12*w12^2;  l1*s1*dqd(1)^2 + l2*s12*w12^2];
+ddqd = J \ (ddxd - Jdq);
+end</pre></div>
+    <div><div class="code-head"><span>ctcLaw (MATLAB Function block)</span><button class="copy-btn" onclick="cp(this)">کپی</button></div>
+<pre class="code-box" style="max-height:44vh">function tau = ctcLaw(q, dq, qd, dqd, ddqd, mode, wn, p_hat)
+% mode: 1 = PD, 2 = PD+G, 3 = CTC
+% p_hat = model parameters used by the controller (may differ from plant)
+Kp = wn^2*eye(2);  Kd = 2*wn*eye(2);          % zeta = 1
+e  = qd - q;  de = dqd - dq;
+[M, Cdq, G] = dyn2R(q, dq, p_hat);            % generated in derive_2R.m
+Mn = diag([1.67 0.333]);                      % nominal inertia to scale PD gains
+switch mode
+  case 1,  tau = Mn*(Kp*e + Kd*de);
+  case 2,  tau = Mn*(Kp*e + Kd*de) + G;
+  otherwise
+           tau = M*(ddqd + Kd*de + Kp*e) + Cdq + G;
+end
+end</pre></div>
+  </div>
+  <div class="note warn"><i class="fas fa-triangle-exclamation" style="color:var(--accent)"></i> <b>نکته‌های پیاده‌سازی:</b> (۱) <code>dyn2R.m</code> باید در مسیر MATLAB باشد. چون با matlabFunction تولید شده، با codegen سازگار است. (۲) <code>p_hat</code> را پارامتر بلوک بگذارید تا آزمون «خطای مدل ۳۰٪» فقط با تغییر یک عدد انجام شود. (۳) شرط اولیه‌ی مفاصل را روی $q_d(0)$ بگذارید، وگرنه پیک گشتاور اولیه بزرگ می‌شود و اشباع رخ می‌دهد.</div>
+</div>
+
+<!-- ═════════ ۲۰ شبیه‌ساز ۲: ربات ═════════ -->
+<div class="slide" data-sec="کنترل در Simscape" data-sim="r">
+  <h2 class="slide-title">شبیه‌ساز ۲: ردیابی دایره با ربات ۲R — PD، PD+G و CTC</h2>
+  <p class="slide-sub">دینامیک کامل ۲R ($m_i=1$ kg، $l_i=1$ m، $I_i=m_il_i^2/12$) در صفحه‌ی قائم. کنترل‌کننده‌ی دیجیتال ۱ کیلوهرتز، $\zeta=1$، و مشتقات مسیر به‌صورت تحلیلی. خطای مدل فقط روی $\hat m_2$ اعمال می‌شود (اینرسی $\hat I_2$ هم به همان نسبت تغییر می‌کند).</p>
+  <div class="simulator"><div class="sim-layout">
+    <div>
+      <div class="sim-canvas-wrap"><canvas id="rc" width="720" height="330"></canvas></div>
+      <div class="readouts"><div class="ro">خطای لحظه‌ای<b id="rE">0</b></div><div class="ro">RMS خطا<b id="rR">0</b></div><div class="ro">|τ| بیشینه<b id="rT">0</b></div><div class="ro">کنترل‌کننده<b id="rM">CTC</b></div></div>
+    </div>
+    <div>
+      <div class="sim-actions" id="rBtns" style="margin:0 0 8px"></div>
+      <div class="sim-controls" id="rCtl"></div>
+      <div class="note" id="rNote" style="margin-top:8px;font-size:11.5px"></div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ═════════ ۲۱ تمرین ═════════ -->
+<div class="slide" data-sec="تمرین و ارزیابی">
+  <h2 class="slide-title">تمرین‌های جلسه هشتم (HW08)</h2>
+  <div class="exercise-wrap">
+    <div class="ex-section"><h4><i class="fas fa-pen-nib"></i> الف) تحلیلی</h4>
+      <div class="ex-item"><div class="ex-num">۱</div><div>معادله‌ی آونگ را برای میله‌ی یکنواخت با جرم نوک $m_t$ استخراج کنید ($J$ و $l_c$ معادل را بنویسید) و شرط راث را بازنویسی کنید.</div></div>
+      <div class="ex-item"><div class="ex-num">۲</div><div>همه‌ی ۸ نماد کریستوفل ۲R را محاسبه کنید و نشان دهید $C$ حاصل با معادلات اویلر–لاگرانژ مستقیم یکی است.</div></div>
+      <div class="ex-item"><div class="ex-num">۳</div><div>نشان دهید $\lambda_{min}(M)>0$ برای همه‌ی $q_2$ (راهنما: نشان دهید $\det M=\pi_3(\pi_1-\pi_3)-\pi_2^2c_2^2$ و سپس $\pi_3(\pi_1-\pi_3)>\pi_2^2$).</div></div>
+      <div class="ex-item"><div class="ex-num">۴</div><div>اگر مرکز جرم لینک ۲ با زاویه‌ی $\delta$ از خط مفصل‌ها فاصله داشته باشد، $M$ و $G$ را بازنویسی کنید.</div></div></div>
+    <div class="ex-section"><h4><i class="fas fa-laptop-code"></i> ب) سه مسیر مدل‌سازی (گزارش اصلی)</h4>
+      <div class="ex-item"><div class="ex-num">۱</div><div><code>derive_2R.m</code> را اجرا کنید و خروجی‌های راستی‌آزمایی (دو ماتریس صفر) را گزارش دهید.</div></div>
+      <div class="ex-item"><div class="ex-num">۲</div><div>آونگ و ۲R را دستی در Simscape بسازید و جدول $\max|\Delta q|$ مسیر الف ↔ ب را برای RelTol = 1e-4، 1e-6 و 1e-8 ارائه دهید.</div></div>
+      <div class="ex-item"><div class="ex-num">۳</div><div>۲R را در SolidWorks طراحی کنید (لینک با پهنا و سوراخ مفصل)، وارد Simscape کنید، پارامترهای $\pi_1..\pi_5$ را از DataFile استخراج کنید و نشان دهید با این پارامترها اختلاف الف ↔ ج به حد تلرانس می‌رسد.</div></div></div>
+    <div class="ex-section"><h4><i class="fas fa-sliders"></i> ج) کنترل</h4>
+      <div class="ex-item"><div class="ex-num">۱</div><div>PID آونگ را روی مدل Simscape با $d=3$ N·m پیاده کنید. نمودار $\theta(t)$ را با و بدون anti-windup برای $\tau_{max}=12$ مقایسه کنید.</div></div>
+      <div class="ex-item"><div class="ex-num">۲</div><div>روی مدل CAD، RMS خطای ردیابی را برای PD، PD+G و CTC با خطای مدل ۰، ±۳۰٪ و $\omega_n=5,10,20$ در یک جدول گزارش کنید.</div></div>
+      <div class="ex-item"><div class="ex-num">۳</div><div>معادل پایتون <code>sim_2R_reference.m</code> را با <code>scipy.integrate.solve_ivp</code> (روش DOP853) بنویسید و با ode45 مقایسه کنید.</div></div></div>
+    <div class="ex-section"><h4><i class="fas fa-star"></i> چالش ★</h4>
+      <div class="ex-item"><div class="ex-num">★</div><div>آونگ معکوس روی گاری (Cart-Pole) را با لاگرانژ مدل کنید، در Simscape (Prismatic + Revolute) بسازید و با LQR یا کنترل‌کننده‌ی دوحلقه‌ای پایدار کنید.</div></div></div>
+    <div class="note">ارسال: <code>[Robotics] HW08 - نام و نام خانوادگی - شماره دانشجویی</code> به <span style="direction:ltr;display:inline-block">m.goharimanesh@gmail.com</span>. فایل‌های <code>.m</code>، <code>.slx</code> و <code>.SLDASM</code> را همراه با گزارش PDF ارسال کنید.</div>
+  </div>
+</div>
+
+<!-- ═════════ ۲۲ کوئیز ═════════ -->
+<div class="slide" data-sec="تمرین و ارزیابی">
+  <h2 class="slide-title">پرسش‌های تعاملی جلسه ۸</h2>
+  <div class="question-card">
+    <h3 id="qQ"></h3>
+    <div id="qOpts"></div>
+    <div id="qr" style="margin-top:12px;font-size:13px;line-height:1.9;display:none"></div>
+    <div class="qnav"><button class="btn" onclick="qShow(qi-1)"><i class="fas fa-arrow-right"></i> قبلی</button><span id="qCnt"></span><button class="btn" onclick="qShow(qi+1)">بعدی <i class="fas fa-arrow-left"></i></button></div>
+  </div>
+</div>
+
+<!-- ═════════ ۲۳ جمع‌بندی ═════════ -->
+<div class="slide" data-sec="جمع‌بندی">
+  <h2 class="slide-title">جمع‌بندی جلسه ۸</h2>
+  <div style="width:100%;max-width:900px">
+    <div class="summary-item"><i class="fas fa-check"></i><div><b>لاگرانژ در ۶ گام:</b> $q$ ← $p_c,v_c$ ← $T,V$ ← اویلر–لاگرانژ ← $M\ddot q+C\dot q+G=\tau$ ← راستی‌آزمایی (پادمتقارنی، پایستگی انرژی).</div></div>
+    <div class="summary-item"><i class="fas fa-check"></i><div><b>آونگ معکوس:</b> $J\ddot\theta=mgl_c\sin\theta-b\dot\theta+\tau$ با $J=I_c+ml_c^2$. برای PID شرط راث این است: $K_p>mgl_c$ و $0<K_i<(b+K_d)(K_p-mgl_c)/J$.</div></div>
+    <div class="summary-item"><i class="fas fa-check"></i><div><b>ربات ۲R:</b> $M$ فقط تابع $q_2$ است و تا ۴ برابر تغییر می‌کند. $C$ از کریستوفل به‌دست می‌آید و $\dot M-2C$ پادمتقارن است. کل دینامیک با ۵ پارامتر $\pi_i$ مشخص می‌شود.</div></div>
+    <div class="summary-item"><i class="fas fa-check"></i><div><b>سه مسیر مدل‌سازی:</b> اختلاف MATLAB ↔ Simscape باید در حد تلرانس باشد. اختلاف با CAD از پارامترها می‌آید (اینرسی، مرکز جرم، صفر و جهت مفصل). سیستم آشوبناک افق مقایسه‌ی کوتاه لازم دارد.</div></div>
+    <div class="summary-item"><i class="fas fa-check"></i><div><b>کنترل:</b> PD خطای گرانشی دارد، PD+G تنظیم را سراسری پایدار می‌کند، و CTC با مدل دقیق دینامیک خطا را خطی و مستقل می‌کند. حساسیت CTC به خطای مدل با $\omega_n$ کم می‌شود ولی محدود به گشتاور است.</div></div>
+  </div>
+  <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+    <button class="btn" onclick="location.href='../session-07/index.html'"><i class="fas fa-arrow-right"></i> جلسه ۷</button>
+    <button class="btn" onclick="location.href='../../index.html'"><i class="fas fa-home"></i> صفحه اصلی</button>
+    <button class="btn" onclick="location.href='../session-09/index.html'">جلسه ۹ <i class="fas fa-arrow-left"></i></button>
+  </div>
+  <p style="margin-top:12px;font-size:12px;color:#8892a8">جلسه ۹: تیون PID (روش‌های کلاسیک و خودکار) روی مدل Simscape، کنترل فازی و مقدمه‌ای بر یادگیری تقویتی</p>
+</div>
+</div>
+
+<div class="nav-dots" id="navDots"></div><div class="slide-counter" id="cnt"></div>
+<div class="controls"><button class="ctrl-btn" id="pv" title="قبلی"><i class="fas fa-chevron-right"></i></button><button class="ctrl-btn" id="nx" title="بعدی"><i class="fas fa-chevron-left"></i></button><button class="ctrl-btn" id="fs" title="تمام‌صفحه"><i class="fas fa-expand"></i></button></div>
+
+<script>
+/* ===================== ناوبری ===================== */
+const S=[...document.querySelectorAll('.slide')],N=S.length,fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);let cur=0;
+const $=id=>document.getElementById(id);
+S.forEach((s,i)=>{const d=document.createElement('div');d.className='nav-dot';d.title=s.dataset.sec||'';d.onclick=()=>go(i);$('navDots').appendChild(d)});
+function typeset(el){if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise(el?[el]:undefined).catch(()=>{})}
+function go(i){if(i<0||i>=N)return;S[cur].classList.remove('active');cur=i;S[cur].classList.add('active');
+ document.querySelectorAll('.nav-dot').forEach((d,k)=>d.classList.toggle('active',k==cur));
+ $('progressBar').style.width=(cur+1)/N*100+'%';$('cnt').textContent=fa(cur+1)+' / '+fa(N);$('pv').disabled=!cur;$('nx').disabled=cur==N-1;
+ $('secName').textContent=S[cur].dataset.sec||'';S[cur].scrollTop=0;
+ const sim=S[cur].dataset.sim;if(sim=='p')pReset();if(sim=='r')rReset();if(sim=='c')cReset()}
+function goSec(id){const k=S.findIndex(s=>s.dataset.id==id);if(k>=0)go(k)}
+$('nx').onclick=()=>go(cur+1);$('pv').onclick=()=>go(cur-1);
+$('fs').onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+document.addEventListener('keydown',e=>{if(e.target.tagName=='INPUT')return;if(e.key==='ArrowLeft'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(cur+1)}if(e.key==='ArrowRight'||e.key==='PageUp'){e.preventDefault();go(cur-1)}if(e.key==='Escape')$('lightbox').classList.remove('open')});
+function lb(s){$('lightbox').querySelector('img').src=s;$('lightbox').classList.add('open')}
+function cp(b){const t=b.parentElement.nextElementSibling.innerText;navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>{b.textContent='کپی شد ✓';setTimeout(()=>b.textContent='کپی',1500)})}
+
+/* ===================== ابزار مشترک ===================== */
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),G0=9.81,D2R=Math.PI/180;
+function mk(box,defs,P,onch){defs.forEach(([k,lab,mn,mx,v,st])=>{const w=document.createElement('div');w.className='sim-control';
+ w.innerHTML=`<label><span>${lab}</span><strong id="v_${box.id}_${k}">${v}</strong></label><input type="range" min="${mn}" max="${mx}" step="${st}" value="${v}" id="i_${box.id}_${k}">`;box.appendChild(w);P[k]=v;
+ w.querySelector('input').oninput=e=>{P[k]=+e.target.value;w.querySelector('strong').textContent=P[k];onch&&onch(k)}})}
+function setv(box,P,k,v){P[k]=v;$('i_'+box.id+'_'+k).value=v;$('v_'+box.id+'_'+k).textContent=v}
+function grid(c,W,H,step){c.strokeStyle='rgba(255,183,0,.08)';c.lineWidth=1;for(let i=0;i<W;i+=step){c.beginPath();c.moveTo(i,0);c.lineTo(i,H);c.stroke()}for(let j=0;j<H;j+=step){c.beginPath();c.moveTo(0,j);c.lineTo(W,j);c.stroke()}}
+function plotBox(c,x0,y0,w,h,title,yl){c.fillStyle='rgba(0,0,0,.25)';c.fillRect(x0,y0,w,h);c.strokeStyle='rgba(255,255,255,.25)';c.strokeRect(x0,y0,w,h);
+ c.beginPath();c.moveTo(x0,y0+h/2);c.lineTo(x0+w,y0+h/2);c.setLineDash([3,4]);c.stroke();c.setLineDash([]);
+ c.fillStyle='#8892a8';c.font='11px Vazirmatn';c.textAlign='left';c.fillText(title,x0+4,y0-6);c.textAlign='right';c.fillText('+'+yl,x0-4,y0+10);c.fillText('−'+yl,x0-4,y0+h-2);c.textAlign='left'}
+/* دینامیک ۲R (همان روابط اسلایدها) */
+function dynP(q,dq,P){const c2=Math.cos(q[1]),s2=Math.sin(q[1]),h=P.m2*P.l1*P.lc2*s2,c1=Math.cos(q[0]),c12=Math.cos(q[0]+q[1]);
+ return{M:[P.m1*P.lc1*P.lc1+P.m2*(P.l1*P.l1+P.lc2*P.lc2+2*P.l1*P.lc2*c2)+P.I1+P.I2, P.m2*(P.lc2*P.lc2+P.l1*P.lc2*c2)+P.I2, P.m2*P.lc2*P.lc2+P.I2],
+  Cdq:[-h*dq[1]*(2*dq[0]+dq[1]), h*dq[0]*dq[0]],
+  G:[(P.m1*P.lc1+P.m2*P.l1)*G0*c1+P.m2*P.lc2*G0*c12, P.m2*P.lc2*G0*c12]}}
+function fwd(q,dq,tau,P,b){const d=dynP(q,dq,P),r0=tau[0]-d.Cdq[0]-d.G[0]-b*dq[0],r1=tau[1]-d.Cdq[1]-d.G[1]-b*dq[1],det=d.M[0]*d.M[2]-d.M[1]*d.M[1];
+ return[(d.M[2]*r0-d.M[1]*r1)/det,(d.M[0]*r1-d.M[1]*r0)/det]}
+function energy(s,P){const d=dynP([s[0],s[1]],[s[2],s[3]],P);return .5*(d.M[0]*s[2]*s[2]+2*d.M[1]*s[2]*s[3]+d.M[2]*s[3]*s[3])+P.m1*G0*P.lc1*Math.sin(s[0])+P.m2*G0*(P.l1*Math.sin(s[0])+P.lc2*Math.sin(s[0]+s[1]))}
+function rk4(s,dt,acc){const F=x=>{const a=acc([x[0],x[1]],[x[2],x[3]]);return[x[2],x[3],a[0],a[1]]},ad=(x,k,h)=>x.map((v,i)=>v+h*k[i]);
+ const k1=F(s),k2=F(ad(s,k1,dt/2)),k3=F(ad(s,k2,dt/2)),k4=F(ad(s,k3,dt));return s.map((v,i)=>v+dt/6*(k1[i]+2*k2[i]+2*k3[i]+k4[i]))}
+const fk=(q,l1=1,l2=1)=>[[l1*Math.cos(q[0]),l1*Math.sin(q[0])],[l1*Math.cos(q[0])+l2*Math.cos(q[0]+q[1]),l1*Math.sin(q[0])+l2*Math.sin(q[0]+q[1])]];
+function drawArm(c,X,Y,q,col1,col2,alpha,w){c.globalAlpha=alpha;const p=fk(q);c.lineCap='round';
+ c.strokeStyle=col1;c.lineWidth=w;c.beginPath();c.moveTo(X([0,0]),Y([0,0]));c.lineTo(X(p[0]),Y(p[0]));c.stroke();
+ c.strokeStyle=col2;c.lineWidth=w*.78;c.beginPath();c.moveTo(X(p[0]),Y(p[0]));c.lineTo(X(p[1]),Y(p[1]));c.stroke();
+ c.fillStyle='#050818';c.strokeStyle='#fff';c.lineWidth=2;[[0,0],p[0],p[1]].forEach((a,i)=>{c.beginPath();c.arc(X(a),Y(a),[9,7,5][i],0,7);c.fill();c.stroke()});c.globalAlpha=1;return p}
+
+/* ===================== شبیه‌ساز ۱: آونگ معکوس ===================== */
+const pcx=$('pc').getContext('2d'),PP={},PJ=1,PMGL=G0,PB=.05;let pth=0,pw=0,pI=0,pt=0,pH=[],pTau=0;
+mk($('pCtl'),[['kp','Kp',0,80,40,.5],['kd','Kd',0,20,8,.2],['ki','Ki',0,300,0,1],['d','اغتشاش ثابت d (N·m)',0,5,0,.5],['tmax','اشباع τmax (N·m)',2,40,20,1],['th0','زاویه اولیه θ₀ (°)',-40,40,15,1]],PP,k=>{if(k=='th0')pReset()});
+const PS=[
+ ['<b>گام ۱ — بدون کنترل:</b> $K_p=K_d=0$. قطب ناپایدار $s=+\\sqrt{mgl_c/J}\\approx3.13$ rad/s است و حتی از $5^\\circ$ هم آونگ به‌صورت نمایی می‌افتد.',{kp:0,kd:0,ki:0,d:0,tmax:20,th0:5}],
+ ['<b>گام ۲ — تناسبی ناکافی:</b> $K_p=5<mgl_c=9.81$. ضریب مؤثر $K_p-mgl_c$ منفی است و آونگ باز هم می‌افتد، فقط آهسته‌تر.',{kp:5,kd:0,ki:0,d:0,tmax:20,th0:5}],
+ ['<b>گام ۳ — شرط پایداری:</b> $K_p=25$، پس $\\omega_n=\\sqrt{15.2}\\approx3.9$. میرایی فقط $b=0.05$ است ($\\zeta\\approx0.006$)، پس آونگ نوسان تقریباً پایدار دارد.',{kp:25,kd:0,ki:0,d:0,tmax:20,th0:15}],
+ ['<b>گام ۴ — افزودن $K_d$:</b> $K_p=40$ و $K_d=8$ می‌دهد $\\omega_n=5.5$ و $\\zeta=0.73$. پاسخ سریع و بدون نوسان محسوس است.',{kp:40,kd:8,ki:0,d:0,tmax:20,th0:15}],
+ ['<b>گام ۵ — اغتشاش ثابت:</b> با $d=3$ و $K_i=0$ خطای ماندگار $\\theta_{ss}=d/(K_p-mgl_c)\\approx0.099$ rad $\\approx5.7^\\circ$ باقی می‌ماند.',{kp:40,kd:8,ki:0,d:3,tmax:20,th0:0}],
+ ['<b>گام ۶ — اثر $K_i$:</b> با $K_i=30$ خطای ماندگار صفر می‌شود. حد راث $K_i<(b+K_d)(K_p-mgl_c)/J\\approx243$ است. $K_i$ را از ۲۴۳ بیشتر کنید تا ناپایداری را ببینید.',{kp:40,kd:8,ki:30,d:3,tmax:20,th0:0}],
+ ['<b>گام ۷ — اشباع عملگر:</b> با $\\tau_{max}=4<mgl_c\\sin30^\\circ=4.9$ هیچ کنترل‌کننده‌ای آونگ را از $30^\\circ$ برنمی‌گرداند. $\\tau_{max}$ را به ۸ برسانید و دوباره امتحان کنید.',{kp:40,kd:8,ki:0,d:0,tmax:4,th0:30}]];
+PS.forEach((s,i)=>{const b=document.createElement('button');b.className='btn';b.textContent='گام '+fa(i+1);b.onclick=()=>{$('pBtns').querySelectorAll('.btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');
+ $('pStep').innerHTML=s[0];for(const k in s[1])setv($('pCtl'),PP,k,s[1][k]);pReset();typeset($('pStep'))};$('pBtns').appendChild(b)});
+function pReset(){pth=PP.th0*D2R;pw=0;pI=0;pt=0;pH=[]}
+function pStepSim(dt){const raw=-(PP.kp*pth+PP.ki*pI+PP.kd*pw),u=clamp(raw,-PP.tmax,PP.tmax);pTau=u;
+ if(raw===u||Math.sign(raw)!==Math.sign(-pth))pI+=pth*dt;               /* clamping anti-windup */
+ const f=(a,w)=>[w,(PMGL*Math.sin(a)-PB*w+u+PP.d)/PJ];
+ const k1=f(pth,pw),k2=f(pth+dt/2*k1[0],pw+dt/2*k1[1]),k3=f(pth+dt/2*k2[0],pw+dt/2*k2[1]),k4=f(pth+dt*k3[0],pw+dt*k3[1]);
+ pth+=dt/6*(k1[0]+2*k2[0]+2*k3[0]+k4[0]);pw+=dt/6*(k1[1]+2*k2[1]+2*k3[1]+k4[1]);
+ if(Math.abs(pth)>=Math.PI/2){pth=Math.sign(pth)*Math.PI/2;pw=0}   /* برخورد با زمین */
+ pt+=dt}
+function pDraw(){const c=pcx;c.clearRect(0,0,720,300);grid(c,720,300,40);const px=150,py=250,L=150;
+ c.strokeStyle='#55607a';c.lineWidth=2;c.beginPath();c.moveTo(20,py+12);c.lineTo(290,py+12);c.stroke();
+ c.strokeStyle='rgba(255,255,255,.25)';c.setLineDash([5,5]);c.beginPath();c.moveTo(px,py);c.lineTo(px,py-L-25);c.stroke();c.setLineDash([]);
+ const tx=px-L*Math.sin(pth),ty=py-L*Math.cos(pth),fell=Math.abs(pth)>1.2;
+ c.lineCap='round';c.strokeStyle=fell?'#ff4757':'#ffb700';c.lineWidth=8;c.shadowColor=c.strokeStyle;c.shadowBlur=12;c.beginPath();c.moveTo(px,py);c.lineTo(tx,ty);c.stroke();c.shadowBlur=0;
+ c.fillStyle='#00d4aa';c.beginPath();c.arc(tx,ty,13,0,7);c.fill();c.fillStyle='#050818';c.strokeStyle='#fff';c.lineWidth=2;c.beginPath();c.arc(px,py,9,0,7);c.fill();c.stroke();
+ const a=clamp(pTau/PP.tmax,-1,1)*1.5;c.strokeStyle=Math.abs(pTau)>=PP.tmax-1e-9?'#ff4757':'#a855f7';c.lineWidth=3;c.beginPath();c.arc(px,py,34,-Math.PI/2,-Math.PI/2-a,a>0);c.stroke();
+ const X0=360,W=340,Y0=40,H=220;plotBox(c,X0,Y0,W,H,'θ(t) [deg] — 8 s','30°');
+ c.strokeStyle='#ffb700';c.lineWidth=2;c.beginPath();pH.forEach((v,i)=>{const x=X0+i/500*W,y=Y0+H/2-clamp(v/D2R,-30,30)*(H/60);i?c.lineTo(x,y):c.moveTo(x,y)});c.stroke();
+ $('pTh').textContent=(pth/D2R).toFixed(1)+'°';$('pTh').className=fell?'no':'';$('pTau').textContent=pTau.toFixed(1)+' N·m';
+ const k=PP.kp-PMGL;if(k>0){const wn=Math.sqrt(k/PJ),z=(PB+PP.kd)/(2*Math.sqrt(PJ*k));$('pWz').textContent=wn.toFixed(2)+' , '+z.toFixed(2)}else $('pWz').textContent='ناپایدار';
+ const lim=(PB+PP.kd)*k/PJ,ok=k>0&&PP.ki<lim;$('pCond').textContent=ok?('✓ Ki<'+lim.toFixed(0)):(k<=0?'✗ Kp≤mgl':'✗ Ki>'+lim.toFixed(0));$('pCond').className=ok?'ok':'no'}
+
+/* ===================== شبیه‌ساز ۲: ربات ۲R ===================== */
+const rcx=$('rc').getContext('2d'),RP={},PL={m1:1,m2:1,l1:1,lc1:.5,lc2:.5,I1:1/12,I2:1/12};let rq,rdq,rt,rtr=[],rms=0,rmode='ctc',rEh=[],rTmax=0;
+mk($('rCtl'),[['wn','ωn کنترل‌کننده (rad/s)',3,25,10,.5],['w','سرعت زاویه‌ای مسیر ω (rad/s)',.5,4,2,.1],['em','خطای مدل m̂₂ (٪)',-50,50,0,5],['b','اصطکاک مفاصل b (N·m·s)',0,1,0,.05]],RP,k=>{if(k=='w'||k=='wn')rReset()});
+[['pd','PD'],['pdg','PD+G'],['ctc','CTC']].forEach(([m,l])=>{const b=document.createElement('button');b.className='btn'+(m=='ctc'?' active':'');b.textContent=l;b.onclick=()=>{rmode=m;$('rBtns').querySelectorAll('.btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');$('rM').textContent=l;rReset()};$('rBtns').appendChild(b)});
+function rNoteSet(){$('rNote').innerHTML={pd:'<b>PD:</b> τ = M̄(Kp e + Kd ė) با M̄ = diag(1.67, 0.333) ثابت. گرانش، کوپلینگ و q̈d جبران نمی‌شوند و خطای بزرگ و پیوسته باقی می‌ماند.',
+ pdg:'<b>PD+G:</b> τ = M̄(Kp e + Kd ė) + Ĝ(q). افتادگیِ ناشی از گرانش حذف می‌شود، اما در ردیابی، M q̈d و C q̇ هنوز اغتشاش‌اند. ω مسیر را زیاد کنید تا اثرشان را ببینید.',
+ ctc:'<b>CTC:</b> τ = M̂(q̈d + Kd ė + Kp e) + Ĉq̇ + Ĝ با Kp = ωn² و Kd = 2ωn. با مدل دقیق خطا تقریباً صفر است. خطای مدل یا اصطکاکِ مدل‌نشده را زیاد کنید و دوباره ωn را بالا ببرید.'}[rmode]}
+function des(t){const w=RP.w,r=.4,xc=1,yc=.8,co=Math.cos(w*t),si=Math.sin(w*t),xd=[xc+r*co,yc+r*si],dx=[-r*w*si,r*w*co],ddx=[-r*w*w*co,-r*w*w*si];
+ const c2=clamp((xd[0]*xd[0]+xd[1]*xd[1]-2)/2,-1,1),s2=Math.sqrt(1-c2*c2),q2=Math.atan2(s2,c2),q1=Math.atan2(xd[1],xd[0])-Math.atan2(s2,1+c2);
+ const s1=Math.sin(q1),c1=Math.cos(q1),s12=Math.sin(q1+q2),c12=Math.cos(q1+q2),J=[[-s1-s12,-s12],[c1+c12,c12]],dt=J[0][0]*J[1][1]-J[0][1]*J[1][0];
+ const inv=v=>[(J[1][1]*v[0]-J[0][1]*v[1])/dt,(-J[1][0]*v[0]+J[0][0]*v[1])/dt],dq=inv(dx),w12=dq[0]+dq[1];
+ const Jdq=[-(c1*dq[0]*dq[0]+c12*w12*w12),-(s1*dq[0]*dq[0]+s12*w12*w12)],ddq=inv([ddx[0]-Jdq[0],ddx[1]-Jdq[1]]);return{q:[q1,q2],dq,ddq,x:xd}}
+function rReset(){rt=0;rtr=[];rms=0;rEh=[];rTmax=0;const d=des(0);rq=[...d.q];rdq=[...d.dq];rNoteSet()}
+function rCtrl(t,q,dq){const d=des(t),wn=RP.wn,Kp=wn*wn,Kd=2*wn,e=[d.q[0]-q[0],d.q[1]-q[1]],de=[d.dq[0]-dq[0],d.dq[1]-dq[1]],fb=[Kp*e[0]+Kd*de[0],Kp*e[1]+Kd*de[1]];
+ const m2h=1+RP.em/100,est=dynP(q,dq,{...PL,m2:m2h,I2:m2h/12});
+ if(rmode=='pd')return[1.67*fb[0],.333*fb[1]];if(rmode=='pdg')return[1.67*fb[0]+est.G[0],.333*fb[1]+est.G[1]];
+ const a=[d.ddq[0]+fb[0],d.ddq[1]+fb[1]];return[est.M[0]*a[0]+est.M[1]*a[1]+est.Cdq[0]+est.G[0],est.M[1]*a[0]+est.M[2]*a[1]+est.Cdq[1]+est.G[1]]}
+function rStep(dt){const tau=rCtrl(rt,rq,rdq);rTmax=Math.max(rTmax*.9995,Math.abs(tau[0]),Math.abs(tau[1]));const n=rk4([...rq,...rdq],dt,(q,v)=>fwd(q,v,tau,PL,RP.b));rq=[n[0],n[1]];rdq=[n[2],n[3]];rt+=dt}
+function rDraw(){const c=rcx,ox=95,oy=300,sc=118,X=p=>ox+p[0]*sc,Y=p=>oy-p[1]*sc;c.clearRect(0,0,720,330);grid(c,720,330,40);
+ c.strokeStyle='#55607a';c.lineWidth=2;c.beginPath();c.moveTo(20,oy+12);c.lineTo(360,oy+12);c.stroke();
+ c.strokeStyle='rgba(255,71,87,.55)';c.lineWidth=1.5;c.setLineDash([6,5]);c.beginPath();c.arc(X([1,.8]),Y([1,.8]),.4*sc,0,7);c.stroke();c.setLineDash([]);
+ const d=des(rt),p=fk(rq);
+ rtr.push(p[1]);if(rtr.length>300)rtr.shift();c.strokeStyle='#06b6d4';c.lineWidth=2;c.beginPath();rtr.forEach((v,i)=>i?c.lineTo(X(v),Y(v)):c.moveTo(X(v),Y(v)));c.stroke();
+ drawArm(c,X,Y,rq,'#ffb700','#00d4aa',1,9);
+ c.fillStyle='#ff4757';c.beginPath();c.arc(X(d.x),Y(d.x),5,0,7);c.fill();
+ const e=Math.hypot(d.x[0]-p[1][0],d.x[1]-p[1][1]);rms=rms*.997+e*e*.003;rEh.push(e*1000);if(rEh.length>500)rEh.shift();
+ const X0=420,W=280,Y0=40,H=240,emax=Math.max(5,...rEh);plotBox(c,X0,Y0,W,H,'|e| [mm] — 8 s','');
+ c.fillStyle='#8892a8';c.textAlign='right';c.fillText(emax.toFixed(0),X0-4,Y0+10);c.fillText('0',X0-4,Y0+H);c.textAlign='left';
+ c.strokeStyle='#ec4899';c.lineWidth=2;c.beginPath();rEh.forEach((v,i)=>{const x=X0+i/500*W,y=Y0+H-v/emax*H;i?c.lineTo(x,y):c.moveTo(x,y)});c.stroke();
+ $('rE').textContent=(e*1000).toFixed(1)+' mm';$('rR').textContent=(Math.sqrt(rms)*1000).toFixed(1)+' mm';$('rT').textContent=rTmax.toFixed(0)+' N·m'}
+
+/* ===================== شبیه‌ساز ۳: مقایسه‌ی مدل‌ها ===================== */
+const ccx=$('cc').getContext('2d'),CP={};let cs={},ct=0,cH=[],cE0=0,cdE=0,cAB=0,cAC=0;
+mk($('cCtl'),[['w','پهنای Brick در مدل B: w (cm)',0,20,4,1],['dl','جابجایی مرکز جرم لینک ۲ در مدل C: δ (cm)',-8,8,3,.5],['q20','زاویه‌ی اولیه q₂(0) (°)',0,120,30,5],['b','میرایی مفاصل b',0,.5,0,.05]],CP,()=>cReset());
+const cParams=()=>{const w=CP.w/100,Ib=(1+w*w)/12;return{A:{...PL},B:{...PL,I1:Ib,I2:Ib},C:{...PL,lc2:.5+CP.dl/100}}};
+function cReset(){const q0=[0,CP.q20*D2R,0,0];cs={A:[...q0],B:[...q0],C:[...q0]};ct=0;cH=[];cAB=0;cAC=0;cdE=0;cE0=energy(cs.A,PL)}
+function cPreset(k){const v=[[0,0,30,0],[4,0,30,0],[4,3,30,0]][k];['w','dl','q20','b'].forEach((n,i)=>setv($('cCtl'),CP,n,v[i]));cReset()}
+function cStep(dt){const P=cParams();for(const m of['A','B','C'])cs[m]=rk4(cs[m],dt,(q,v)=>fwd(q,v,[0,0],P[m],CP.b));ct+=dt}
+function cDraw(){const c=ccx,ox=180,oy=170,sc=72,X=p=>ox+p[0]*sc,Y=p=>oy-p[1]*sc;c.clearRect(0,0,720,330);grid(c,720,330,40);
+ drawArm(c,X,Y,[cs.C[0],cs.C[1]],'#ec4899','#ec4899',.55,7);drawArm(c,X,Y,[cs.B[0],cs.B[1]],'#06b6d4','#06b6d4',.6,8);drawArm(c,X,Y,[cs.A[0],cs.A[1]],'#ffb700','#ffd76b',.95,6);
+ const wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
+ cH.push([wrap(cs.A[1]),wrap(cs.B[1]),wrap(cs.C[1])]);if(cH.length>600)cH.shift();
+ cAB=Math.max(cAB,Math.abs(wrap(cs.A[1]-cs.B[1])));cAC=Math.max(cAC,Math.abs(wrap(cs.A[1]-cs.C[1])));
+ if(CP.b==0)cdE=Math.max(cdE,Math.abs(energy(cs.A,PL)-cE0));
+ const X0=380,W=320,Y0=40,H=250;plotBox(c,X0,Y0,W,H,'q₂(t) [deg] — 10 s','180°');
+ [['#ffb700',0],['#06b6d4',1],['#ec4899',2]].forEach(([col,j])=>{c.strokeStyle=col;c.lineWidth=j?1.6:2.2;c.beginPath();let prev=null;
+  cH.forEach((v,i)=>{const x=X0+i/600*W,y=Y0+H/2-v[j]/Math.PI*(H/2);(i&&Math.abs(v[j]-prev)<Math.PI)?c.lineTo(x,y):c.moveTo(x,y);prev=v[j]});c.stroke()});
+ c.font='11px Vazirmatn';[['A',  '#ffb700'],['B','#06b6d4'],['C','#ec4899']].forEach(([n,col],i)=>{c.fillStyle=col;c.fillText(n,X0+8+i*22,Y0+H-8)});
+ $('cAB').textContent=(cAB/D2R).toFixed(cAB/D2R<1?3:1)+'°';$('cAC').textContent=(cAC/D2R).toFixed(cAC/D2R<1?3:1)+'°';
+ $('cE').textContent=CP.b==0?cdE.toExponential(1)+' J':'(b>0)';$('cT').textContent=ct.toFixed(1)+' s'}
+
+/* ===================== کوئیز ===================== */
+const QZ=[
+ {q:'آونگ معکوس با جرم نقطه‌ای ($m=1$ kg، $l=1$ m) فقط با $\\tau=-K_p\\theta$ و $K_p=5$ کنترل می‌شود. نتیجه چیست؟',o:['پایدار می‌شود، چون $K_p>0$','می‌افتد، چون $K_p<mgl\\approx9.81$','نوسان دائمی می‌کند، چون میرایی صفر است'],a:1,x:'ضریب مؤثر $K_p-mgl$ منفی است، پس قطب مثبت باقی می‌ماند. شرط لازم $K_p>mgl_c$ است.'},
+ {q:'در ربات ۲R، ماتریس جرم $M$ به کدام متغیر وابسته است؟',o:['$q_1$ و $q_2$','فقط $q_2$','فقط $q_1$','به هیچ‌کدام (ثابت است)'],a:1,x:'در $v_{c2}^2$ فقط ترکیب $s_1s_{12}+c_1c_{12}=\\cos q_2$ ظاهر می‌شود. چرخش صلب کل بازو ($q_1$) انرژی جنبشی را تغییر نمی‌دهد.'},
+ {q:'کدام ماتریس برای هر انتخاب $C$ مبتنی بر کریستوفل پادمتقارن است؟',o:['$C$','$\\dot M-2C$','$M-C$','$\\dot M+C$'],a:1,x:'$N=\\dot M-2C$ پادمتقارن است، پس $\\dot q^TN\\dot q=0$ و توان ورودی برابر $\\dot E=\\dot q^T\\tau$ می‌شود. این پایه‌ی اثبات‌های لیاپانوف است.'},
+ {q:'مدلی را از SolidWorks با smimport وارد کرده‌اید. زاویه‌ی صفرِ Revolute Joint‌ها متناظر با کدام وضعیت است؟',o:['همیشه بازوی افقی','وضعیت مونتاژ CAD در لحظه‌ی Export','وضعیتی که گرانش صفر است','میانه‌ی محدوده‌ی حرکت مفصل'],a:1,x:'پیکربندی ذخیره‌شده‌ی مونتاژ، صفرِ مفاصل است. اگر با صفر معادلات (q=0 افقی) فرق کند، باید آفست اعمال کنید یا مونتاژ را در q=0 ذخیره کنید.'},
+ {q:'در CTC با مدل دقیق، $K_p=100\\,I$ و $K_d=20\\,I$ است. دینامیک خطای هر مفصل چیست؟',o:['زیرمیرا با $\\zeta=0.5$','میرایی بحرانی با $\\omega_n=10$ rad/s','فرامیرا با $\\omega_n=100$','وابسته به پیکربندی $q$'],a:1,x:'$\\ddot e+20\\dot e+100e=0$ یعنی $\\omega_n=10$ و $\\zeta=20/(2\\cdot10)=1$. این پاسخ مستقل از $q$ و برای دو مفصل جداگانه است.'},
+ {q:'سقوط آزاد ۲R را در MATLAB و Simscape دستی با پارامترهای یکسان مقایسه می‌کنید. در ۲ ثانیه‌ی اول اختلاف $10^{-7}$ rad است، اما در ثانیه‌ی ۱۵ به $20^\\circ$ می‌رسد. محتمل‌ترین علت؟',o:['اشتباه در ماتریس $C$','رفتار آشوبناک سیستم که خطای تلرانس را نمایی بزرگ می‌کند','جهت گرانش اشتباه است','اینرسی Brick'],a:1,x:'اشتباه در معادلات یا پارامترها از همان ابتدا اختلاف بزرگ ایجاد می‌کرد. رشد نمایی از اختلاف بسیار کوچک امضای آشوب است. افق کوتاه یا میرایی انتخاب کنید.'}];
+let qi=0;
+function qShow(i){qi=(i+QZ.length)%QZ.length;const Q=QZ[qi];$('qQ').innerHTML=Q.q;$('qr').style.display='none';$('qCnt').textContent=fa(qi+1)+' از '+fa(QZ.length);
+ $('qOpts').innerHTML='';Q.o.forEach((t,k)=>{const b=document.createElement('button');b.className='quiz-option';b.innerHTML=['الف','ب','ج','د'][k]+') '+t;
+  b.onclick=()=>{$('qOpts').querySelectorAll('.quiz-option').forEach((x,j)=>{x.disabled=true;if(j==Q.a)x.classList.add('correct')});if(k!=Q.a)b.classList.add('wrong');
+   const r=$('qr');r.style.display='block';r.style.color=k==Q.a?'#00d4aa':'#ff9aa5';r.innerHTML=(k==Q.a?'✓ درست! ':'✗ نادرست. ')+Q.x;typeset(r)};$('qOpts').appendChild(b)});typeset($('qOpts').parentElement)}
+
+/* ===================== حلقه‌ی اصلی ===================== */
+function loop(){const sim=S[cur].dataset.sim;
+ if(sim=='p'){for(let i=0;i<8;i++)pStepSim(.002);pH.push(pth);if(pH.length>500)pH.shift();pDraw()}
+ if(sim=='r'){for(let i=0;i<16;i++)rStep(.001);rDraw()}
+ if(sim=='c'){for(let i=0;i<16;i++)cStep(.001);cDraw()}
+ requestAnimationFrame(loop)}
+go(0);qShow(0);$('pBtns').children[3].click();rReset();cReset();requestAnimationFrame(loop);
+</script>
+</body>
+</html>
