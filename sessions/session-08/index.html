@@ -69,7 +69,7 @@ html,body{height:100%;overflow:hidden;font-family:'Vazirmatn',sans-serif;backgro
 .sim-canvas-wrap{background:rgba(0,0,0,.4);border-radius:16px;overflow:hidden;border:1px solid var(--border)}.sim-canvas-wrap canvas{width:100%;display:block}
 .sim-controls{display:flex;flex-direction:column;gap:7px}
 .sim-control label{display:flex;justify-content:space-between;font-size:11.8px;color:#8892a8;margin-bottom:2px}.sim-control label strong{color:var(--accent);direction:ltr}
-.sim-control input{width:100%;accent-color:var(--accent)}
+.sim-control input{width:100%;accent-color:var(--accent);direction:ltr}
 .sim-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .btn{padding:6px 11px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:#d0d8e8;cursor:pointer;font-family:inherit;font-size:12px}
 .btn:hover,.btn.active{background:rgba(255,183,0,.18);border-color:var(--accent);color:var(--accent)}
@@ -198,10 +198,10 @@ html,body{height:100%;overflow:hidden;font-family:'Vazirmatn',sans-serif;backgro
   <div class="deriv">
     <div class="dstep"><div class="dnum">۱</div><div class="dbody"><h4>مدل خطی و تابع تبدیل</h4><div class="eq">$$J\ddot\theta+b\dot\theta-mgl_c\,\theta=\tau+d\quad\Rightarrow\quad P(s)=\frac{\Theta(s)}{T(s)}=\frac{1}{Js^2+bs-mgl_c},\qquad s_{1,2}=\frac{-b\pm\sqrt{b^2+4Jmgl_c}}{2J}$$</div><p>همیشه یک قطب در نیم‌صفحه‌ی راست هست، پس بدون فیدبک آونگ می‌افتد. این را بعداً با <code>linearize</code> روی مدل Simscape هم می‌سنجیم.</p></div></div>
     <div class="dstep"><div class="dnum">۲</div><div class="dbody"><h4>قانون PID برای تنظیم ($\theta_d=0$، $e=-\theta$)</h4><div class="eq">$$\tau=-K_p\theta-K_i\!\int_0^t\!\theta\,dt-K_d\dot\theta\ \Rightarrow\ \underbrace{Js^3+(b+K_d)s^2+(K_p-mgl_c)s+K_i}_{\Delta(s)}=0$$</div></div></div>
-    <div class="dstep"><div class="dnum">۳</div><div class="dbody"><h4>جدول راث</h4><div class="eq">$$\begin{array}{c|cc} s^3 & J & K_p-mgl_c\\ s^2 & b+K_d & K_i\\ s^1 & \dfrac{(b+K_d)(K_p-mgl_c)-JK_i}{b+K_d} & 0\\ s^0 & K_i & \end{array}\qquad\Longrightarrow\qquad \boxed{K_p>mgl_c,\quad K_d>-b,\quad 0<K_i<\frac{(b+K_d)(K_p-mgl_c)}{J}}$$</div></div></div>
-    <div class="dstep"><div class="dnum">۴</div><div class="dbody"><h4>طراحی PD با جایابی قطب ($K_i=0$) و خطای ماندگار</h4><div class="eq">$$\omega_n=\sqrt{\frac{K_p-mgl_c}{J}},\ \ \zeta=\frac{b+K_d}{2\sqrt{J(K_p-mgl_c)}}\ \Rightarrow\ K_p=mgl_c+J\omega_n^2,\ \ K_d=2\zeta\omega_nJ-b;\qquad \theta_{ss}\big|_{K_i=0}=\frac{d}{K_p-mgl_c},\ \ \theta_{ss}\big|_{K_i>0}=0$$</div><p><b>مثال عددی</b> (جرم نقطه‌ای، $J=1$، $mgl_c=9.81$، $b=0.05$): با $\omega_n=5.5$ و $\zeta=0.73$ به $K_p\approx40$ و $K_d\approx8$ می‌رسیم (همان ضرایب شبیه‌ساز ۱). حد مجاز: $K_i<(8.05)(30.19)\approx243$.</p></div></div>
+    <div class="dstep"><div class="dnum">۳</div><div class="dbody"><h4>جدول راث</h4><div class="eq">$$\begin{array}{c|cc} s^3 & J & K_p-mgl_c\\ s^2 & b+K_d & K_i\\ s^1 & \dfrac{(b+K_d)(K_p-mgl_c)-JK_i}{b+K_d} & 0\\ s^0 & K_i & \end{array}\qquad\Longrightarrow\qquad \boxed{K_p\gt mgl_c,\quad K_d\gt -b,\quad 0\lt K_i\lt \frac{(b+K_d)(K_p-mgl_c)}{J}}$$</div></div></div>
+    <div class="dstep"><div class="dnum">۴</div><div class="dbody"><h4>طراحی PD با جایابی قطب ($K_i=0$) و خطای ماندگار</h4><div class="eq">$$\omega_n=\sqrt{\frac{K_p-mgl_c}{J}},\ \ \zeta=\frac{b+K_d}{2\sqrt{J(K_p-mgl_c)}}\ \Rightarrow\ K_p=mgl_c+J\omega_n^2,\ \ K_d=2\zeta\omega_nJ-b;\qquad \theta_{ss}\big|_{K_i=0}=\frac{d}{K_p-mgl_c},\ \ \theta_{ss}\big|_{K_i\gt 0}=0$$</div><p><b>مثال عددی</b> (جرم نقطه‌ای، $J=1$، $mgl_c=9.81$، $b=0.05$): با $\omega_n=5.5$ و $\zeta=0.73$ به $K_p\approx40$ و $K_d\approx8$ می‌رسیم (همان ضرایب شبیه‌ساز ۱). حد مجاز: $K_i\lt (8.05)(30.19)\approx243$.</p></div></div>
   </div>
-  <div class="note warn"><i class="fas fa-triangle-exclamation" style="color:var(--accent)"></i> <b>محدودیت غیرخطی:</b> با اشباع $|\tau|\le\tau_{max}$ شرط لازمِ برگرداندن آونگ از زاویه‌ی $\theta_0$ این است که $\tau_{max}>mgl_c\sin|\theta_0|$. این یک شرط لازم است و کافی نیست. تحلیل خطی فقط پایداری <b>محلی</b> را تضمین می‌کند.</div>
+  <div class="note warn"><i class="fas fa-triangle-exclamation" style="color:var(--accent)"></i> <b>محدودیت غیرخطی:</b> با اشباع $|\tau|\le\tau_{max}$ شرط لازمِ برگرداندن آونگ از زاویه‌ی $\theta_0$ این است که $\tau_{max}\gt mgl_c\sin|\theta_0|$. این یک شرط لازم است و کافی نیست. تحلیل خطی فقط پایداری <b>محلی</b> را تضمین می‌کند.</div>
 </div>
 
 <!-- ═════════ ۶ ۲R هندسه و سینماتیک ═════════ -->
@@ -590,7 +590,7 @@ end</pre></div>
     <div class="ex-section"><h4><i class="fas fa-pen-nib"></i> الف) تحلیلی</h4>
       <div class="ex-item"><div class="ex-num">۱</div><div>معادله‌ی آونگ را برای میله‌ی یکنواخت با جرم نوک $m_t$ استخراج کنید ($J$ و $l_c$ معادل را بنویسید) و شرط راث را بازنویسی کنید.</div></div>
       <div class="ex-item"><div class="ex-num">۲</div><div>همه‌ی ۸ نماد کریستوفل ۲R را محاسبه کنید و نشان دهید $C$ حاصل با معادلات اویلر–لاگرانژ مستقیم یکی است.</div></div>
-      <div class="ex-item"><div class="ex-num">۳</div><div>نشان دهید $\lambda_{min}(M)>0$ برای همه‌ی $q_2$ (راهنما: نشان دهید $\det M=\pi_3(\pi_1-\pi_3)-\pi_2^2c_2^2$ و سپس $\pi_3(\pi_1-\pi_3)>\pi_2^2$).</div></div>
+      <div class="ex-item"><div class="ex-num">۳</div><div>نشان دهید $\lambda_{min}(M)\gt 0$ برای همه‌ی $q_2$ (راهنما: نشان دهید $\det M=\pi_3(\pi_1-\pi_3)-\pi_2^2c_2^2$ و سپس $\pi_3(\pi_1-\pi_3)\gt \pi_2^2$).</div></div>
       <div class="ex-item"><div class="ex-num">۴</div><div>اگر مرکز جرم لینک ۲ با زاویه‌ی $\delta$ از خط مفصل‌ها فاصله داشته باشد، $M$ و $G$ را بازنویسی کنید.</div></div></div>
     <div class="ex-section"><h4><i class="fas fa-laptop-code"></i> ب) سه مسیر مدل‌سازی (گزارش اصلی)</h4>
       <div class="ex-item"><div class="ex-num">۱</div><div><code>derive_2R.m</code> را اجرا کنید و خروجی‌های راستی‌آزمایی (دو ماتریس صفر) را گزارش دهید.</div></div>
@@ -622,7 +622,7 @@ end</pre></div>
   <h2 class="slide-title">جمع‌بندی جلسه ۸</h2>
   <div style="width:100%;max-width:900px">
     <div class="summary-item"><i class="fas fa-check"></i><div><b>لاگرانژ در ۶ گام:</b> $q$ ← $p_c,v_c$ ← $T,V$ ← اویلر–لاگرانژ ← $M\ddot q+C\dot q+G=\tau$ ← راستی‌آزمایی (پادمتقارنی، پایستگی انرژی).</div></div>
-    <div class="summary-item"><i class="fas fa-check"></i><div><b>آونگ معکوس:</b> $J\ddot\theta=mgl_c\sin\theta-b\dot\theta+\tau$ با $J=I_c+ml_c^2$. برای PID شرط راث این است: $K_p>mgl_c$ و $0<K_i<(b+K_d)(K_p-mgl_c)/J$.</div></div>
+    <div class="summary-item"><i class="fas fa-check"></i><div><b>آونگ معکوس:</b> $J\ddot\theta=mgl_c\sin\theta-b\dot\theta+\tau$ با $J=I_c+ml_c^2$. برای PID شرط راث این است: $K_p\gt mgl_c$ و $0\lt K_i\lt (b+K_d)(K_p-mgl_c)/J$.</div></div>
     <div class="summary-item"><i class="fas fa-check"></i><div><b>ربات ۲R:</b> $M$ فقط تابع $q_2$ است و تا ۴ برابر تغییر می‌کند. $C$ از کریستوفل به‌دست می‌آید و $\dot M-2C$ پادمتقارن است. کل دینامیک با ۵ پارامتر $\pi_i$ مشخص می‌شود.</div></div>
     <div class="summary-item"><i class="fas fa-check"></i><div><b>سه مسیر مدل‌سازی:</b> اختلاف MATLAB ↔ Simscape باید در حد تلرانس باشد. اختلاف با CAD از پارامترها می‌آید (اینرسی، مرکز جرم، صفر و جهت مفصل). سیستم آشوبناک افق مقایسه‌ی کوتاه لازم دارد.</div></div>
     <div class="summary-item"><i class="fas fa-check"></i><div><b>کنترل:</b> PD خطای گرانشی دارد، PD+G تنظیم را سراسری پایدار می‌کند، و CTC با مدل دقیق دینامیک خطا را خطی و مستقل می‌کند. حساسیت CTC به خطای مدل با $\omega_n$ کم می‌شود ولی محدود به گشتاور است.</div></div>
@@ -688,12 +688,12 @@ const pcx=$('pc').getContext('2d'),PP={},PJ=1,PMGL=G0,PB=.05;let pth=0,pw=0,pI=0
 mk($('pCtl'),[['kp','Kp',0,80,40,.5],['kd','Kd',0,20,8,.2],['ki','Ki',0,300,0,1],['d','اغتشاش ثابت d (N·m)',0,5,0,.5],['tmax','اشباع τmax (N·m)',2,40,20,1],['th0','زاویه اولیه θ₀ (°)',-40,40,15,1]],PP,k=>{if(k=='th0')pReset()});
 const PS=[
  ['<b>گام ۱ — بدون کنترل:</b> $K_p=K_d=0$. قطب ناپایدار $s=+\\sqrt{mgl_c/J}\\approx3.13$ rad/s است و حتی از $5^\\circ$ هم آونگ به‌صورت نمایی می‌افتد.',{kp:0,kd:0,ki:0,d:0,tmax:20,th0:5}],
- ['<b>گام ۲ — تناسبی ناکافی:</b> $K_p=5<mgl_c=9.81$. ضریب مؤثر $K_p-mgl_c$ منفی است و آونگ باز هم می‌افتد، فقط آهسته‌تر.',{kp:5,kd:0,ki:0,d:0,tmax:20,th0:5}],
+ ['<b>گام ۲ — تناسبی ناکافی:</b> $K_p=5\\lt mgl_c=9.81$. ضریب مؤثر $K_p-mgl_c$ منفی است و آونگ باز هم می‌افتد، فقط آهسته‌تر.',{kp:5,kd:0,ki:0,d:0,tmax:20,th0:5}],
  ['<b>گام ۳ — شرط پایداری:</b> $K_p=25$، پس $\\omega_n=\\sqrt{15.2}\\approx3.9$. میرایی فقط $b=0.05$ است ($\\zeta\\approx0.006$)، پس آونگ نوسان تقریباً پایدار دارد.',{kp:25,kd:0,ki:0,d:0,tmax:20,th0:15}],
  ['<b>گام ۴ — افزودن $K_d$:</b> $K_p=40$ و $K_d=8$ می‌دهد $\\omega_n=5.5$ و $\\zeta=0.73$. پاسخ سریع و بدون نوسان محسوس است.',{kp:40,kd:8,ki:0,d:0,tmax:20,th0:15}],
  ['<b>گام ۵ — اغتشاش ثابت:</b> با $d=3$ و $K_i=0$ خطای ماندگار $\\theta_{ss}=d/(K_p-mgl_c)\\approx0.099$ rad $\\approx5.7^\\circ$ باقی می‌ماند.',{kp:40,kd:8,ki:0,d:3,tmax:20,th0:0}],
- ['<b>گام ۶ — اثر $K_i$:</b> با $K_i=30$ خطای ماندگار صفر می‌شود. حد راث $K_i<(b+K_d)(K_p-mgl_c)/J\\approx243$ است. $K_i$ را از ۲۴۳ بیشتر کنید تا ناپایداری را ببینید.',{kp:40,kd:8,ki:30,d:3,tmax:20,th0:0}],
- ['<b>گام ۷ — اشباع عملگر:</b> با $\\tau_{max}=4<mgl_c\\sin30^\\circ=4.9$ هیچ کنترل‌کننده‌ای آونگ را از $30^\\circ$ برنمی‌گرداند. $\\tau_{max}$ را به ۸ برسانید و دوباره امتحان کنید.',{kp:40,kd:8,ki:0,d:0,tmax:4,th0:30}]];
+ ['<b>گام ۶ — اثر $K_i$:</b> با $K_i=30$ خطای ماندگار صفر می‌شود. حد راث $K_i\\lt (b+K_d)(K_p-mgl_c)/J\\approx243$ است. $K_i$ را از ۲۴۳ بیشتر کنید تا ناپایداری را ببینید.',{kp:40,kd:8,ki:30,d:3,tmax:20,th0:0}],
+ ['<b>گام ۷ — اشباع عملگر:</b> با $\\tau_{max}=4\\lt mgl_c\\sin30^\\circ=4.9$ هیچ کنترل‌کننده‌ای آونگ را از $30^\\circ$ برنمی‌گرداند. $\\tau_{max}$ را به ۸ برسانید و دوباره امتحان کنید.',{kp:40,kd:8,ki:0,d:0,tmax:4,th0:30}]];
 PS.forEach((s,i)=>{const b=document.createElement('button');b.className='btn';b.textContent='گام '+fa(i+1);b.onclick=()=>{$('pBtns').querySelectorAll('.btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');
  $('pStep').innerHTML=s[0];for(const k in s[1])setv($('pCtl'),PP,k,s[1][k]);pReset();typeset($('pStep'))};$('pBtns').appendChild(b)});
 function pReset(){pth=PP.th0*D2R;pw=0;pI=0;pt=0;pH=[]}
@@ -770,7 +770,7 @@ function cDraw(){const c=ccx,ox=180,oy=170,sc=72,X=p=>ox+p[0]*sc,Y=p=>oy-p[1]*sc
 
 /* ===================== کوئیز ===================== */
 const QZ=[
- {q:'آونگ معکوس با جرم نقطه‌ای ($m=1$ kg، $l=1$ m) فقط با $\\tau=-K_p\\theta$ و $K_p=5$ کنترل می‌شود. نتیجه چیست؟',o:['پایدار می‌شود، چون $K_p>0$','می‌افتد، چون $K_p<mgl\\approx9.81$','نوسان دائمی می‌کند، چون میرایی صفر است'],a:1,x:'ضریب مؤثر $K_p-mgl$ منفی است، پس قطب مثبت باقی می‌ماند. شرط لازم $K_p>mgl_c$ است.'},
+ {q:'آونگ معکوس با جرم نقطه‌ای ($m=1$ kg، $l=1$ m) فقط با $\\tau=-K_p\\theta$ و $K_p=5$ کنترل می‌شود. نتیجه چیست؟',o:['پایدار می‌شود، چون $K_p\\gt 0$','می‌افتد، چون $K_p\\lt mgl\\approx9.81$','نوسان دائمی می‌کند، چون میرایی صفر است'],a:1,x:'ضریب مؤثر $K_p-mgl$ منفی است، پس قطب مثبت باقی می‌ماند. شرط لازم $K_p\\gt mgl_c$ است.'},
  {q:'در ربات ۲R، ماتریس جرم $M$ به کدام متغیر وابسته است؟',o:['$q_1$ و $q_2$','فقط $q_2$','فقط $q_1$','به هیچ‌کدام (ثابت است)'],a:1,x:'در $v_{c2}^2$ فقط ترکیب $s_1s_{12}+c_1c_{12}=\\cos q_2$ ظاهر می‌شود. چرخش صلب کل بازو ($q_1$) انرژی جنبشی را تغییر نمی‌دهد.'},
  {q:'کدام ماتریس برای هر انتخاب $C$ مبتنی بر کریستوفل پادمتقارن است؟',o:['$C$','$\\dot M-2C$','$M-C$','$\\dot M+C$'],a:1,x:'$N=\\dot M-2C$ پادمتقارن است، پس $\\dot q^TN\\dot q=0$ و توان ورودی برابر $\\dot E=\\dot q^T\\tau$ می‌شود. این پایه‌ی اثبات‌های لیاپانوف است.'},
  {q:'مدلی را از SolidWorks با smimport وارد کرده‌اید. زاویه‌ی صفرِ Revolute Joint‌ها متناظر با کدام وضعیت است؟',o:['همیشه بازوی افقی','وضعیت مونتاژ CAD در لحظه‌ی Export','وضعیتی که گرانش صفر است','میانه‌ی محدوده‌ی حرکت مفصل'],a:1,x:'پیکربندی ذخیره‌شده‌ی مونتاژ، صفرِ مفاصل است. اگر با صفر معادلات (q=0 افقی) فرق کند، باید آفست اعمال کنید یا مونتاژ را در q=0 ذخیره کنید.'},
